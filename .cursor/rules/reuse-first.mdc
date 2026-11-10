@@ -1,0 +1,22 @@
+---
+description: Search existing code before creating a new class or widget
+alwaysApply: true
+---
+
+# Reuse first
+
+Before creating any class or widget:
+
+1. Search `core/ui`, `core/engine`, `core/tools`, `data/models`, and `data/repositories` by name and by purpose.
+2. If something similar exists, extend, compose, or parameterize it. Do not copy.
+3. If a second feature needs a feature-private widget, move it to `core/ui/widgets/` instead of duplicating.
+
+State in the response which existing classes were reused.
+
+```dart
+// BAD — second copy of a palette already in features/drawing/widgets
+class HomeColorPalette extends StatelessWidget { ... }
+
+// GOOD — the drawing palette moves to core/ui/widgets and both screens use it
+class ColorPalette extends StatelessWidget { ... }
+```

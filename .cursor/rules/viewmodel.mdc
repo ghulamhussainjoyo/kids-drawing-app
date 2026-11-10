@@ -1,0 +1,29 @@
+---
+description: ViewModel contract for ChangeNotifier session state
+globs: lib/state/**
+alwaysApply: false
+---
+
+# ViewModel
+
+One ViewModel class per file under `state/<feature>/`. Extends `ChangeNotifier`. Never import `material.dart`, `cupertino.dart`, or widgets.
+
+- State fields are private. Expose read-only getters and intent methods (`selectColor`, `undo`).
+- Constructor takes repository interfaces and engines, not concrete API or storage types.
+- Pointer-move updates go through a separate `ValueNotifier` (see `activeStrokeTicks`). Do not `notifyListeners()` on every sample.
+- Dispose everything this class creates.
+- Do not construct repositories, `Dio`, or stores here.
+
+```dart
+// BAD
+void extendStroke(Offset point) {
+  _active.points.add(point);
+  notifyListeners(); // rebuilds the whole screen
+}
+
+// GOOD
+void extendStroke(Offset point) {
+  _active.points.add(point);
+  activeStrokeTicks.value++;
+}
+```

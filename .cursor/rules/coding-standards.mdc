@@ -1,0 +1,37 @@
+---
+description: One class per file, classes over functions, SOLID, naming
+alwaysApply: true
+---
+
+# Coding standards
+
+## One unit per file
+
+Each file has exactly one public class, widget, or enum. Soft limit ~200 lines; split by responsibility above that. No `utils` files of top-level functions.
+
+## Classes over functions
+
+Behavior lives in a class. Top-level functions only for `main()` and trivial private one-liners. Widgets are `StatelessWidget` / `StatefulWidget` classes, not `Widget buildX()` helpers.
+
+```dart
+// BAD — loose helpers and a god file
+Widget buildToolbar() { ... }
+void clipStroke() { ... }
+
+// GOOD
+class DrawingToolbar extends StatelessWidget { ... }
+class RegionEngine { bool contains(Offset point) { ... } }
+```
+
+## SOLID here
+
+- One reason to change per class (`StrokeRenderer` renders; `RegionEngine` hit-tests).
+- New tool = new class in `core/tools/` that implements `DrawingTool`. No new `switch` in the engine or ViewModel.
+- Repository interfaces must be swappable (fake in tests, real in app).
+- Small interfaces (`ArtworkReader`, `ArtworkWriter`), not one god type.
+- Constructors receive abstractions. Only `app/app.dependencies.dart` constructs `Dio`, repos, and ViewModels.
+
+## Naming
+
+Files: `<name>.<role>.dart` — `drawing.screen.dart`, `drawing.viewmodel.dart`, `pencil.tool.dart`, `artwork.api.dart`.
+Classes: `DrawingScreen`, `DrawingViewModel`, `PencilTool`, `ArtworkRepository` + `ArtworkRepositoryImpl`.

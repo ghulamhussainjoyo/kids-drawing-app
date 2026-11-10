@@ -1,0 +1,27 @@
+---
+description: Write simple, readable Dart a teammate can follow top to bottom
+alwaysApply: true
+---
+
+# Simple code
+
+Highest-priority rule. Dense or clever `core/` / engine code is a bug. Architecture folders do not excuse it.
+
+Do: use domain words (stroke, region, layer, dab, tool); one method, one step; early `return`; named locals; `List<DrawingStroke>` not `List<T>`; comment only the why.
+
+Do not: mini-frameworks, pipelines, registries; mixins, `typedef`, `dynamic`, operator overloads, codegen for drawing; hide flow in callbacks when a method call would do; split a 20-line method into five 3-line helpers.
+
+If two plain classes are clearer than one abstract one, write two.
+
+```dart
+// BAD — the chain hides the work
+final ids = strokes.where((s) => s.regionId == id).map((s) => s.id).toList();
+
+// GOOD — a reader sees the filter
+final ids = <int>[];
+for (final stroke in strokes) {
+  if (stroke.regionId == id) {
+    ids.add(stroke.id);
+  }
+}
+```

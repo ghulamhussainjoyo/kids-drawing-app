@@ -1,0 +1,38 @@
+---
+description: MVVM folder map, import rules, and legacy layout
+alwaysApply: true
+---
+
+# Architecture
+
+Create a folder only when the first file needs it. Do not move existing `lib/features/**` files without approval. Forbidden names: `utils`, `helpers`, `common`, `misc`, `shared`.
+
+```text
+lib/
+  main.dart                 # runApp only
+  app/                      # only folder that may import every layer
+    app.dart                # CupertinoApp, theme, home: SplashScreen
+    app.router.dart, app.dependencies.dart
+  core/                     # no imports from app, state, data, features
+    ui/theme, ui/widgets    # theme; widgets used by two+ features
+    engine/                 # shared drawing logic (sample, clip, bake, export)
+    tools/                  # one DrawingTool class per tool; no extra subfolders
+    storage/                # abstract stores; no concrete DB yet
+  state/<feature>/          # ViewModels (ChangeNotifier)
+  data/                     # never imports state, features, material.dart, or cupertino.dart
+    models/, api/, local/, repositories/
+  features/<feature>/
+    screen/                 # route widget only
+    widgets/                # canvas, toolbar, palette — one widget per file
+```
+
+## Imports
+
+- Screen: `state/<its feature>/`, own `widgets/`, `core/ui/`, `data/models`. Never `data/api`, `data/local`, `core/storage`, or repository impls. Route widgets use `CupertinoPageScaffold` and `CupertinoPageRoute`, not Material `Scaffold`.
+- ViewModel: Flutter `foundation.dart` / `dart:ui` only. Constructor takes repository interfaces, not impls.
+- `core/tools` may import `core/engine`. Engine never imports a concrete tool.
+- Wire `Dio`, stores, repos, and ViewModels only in `app/app.dependencies.dart`.
+
+## Legacy (leave in place)
+
+`features/models` → `data/models`; `features/engine` → `core/engine`; `features/state` → `state/<feature>`; `drawing.page.dart` → `features/drawing/screen`; other drawing widgets → `features/drawing/widgets`.

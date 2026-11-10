@@ -1,0 +1,31 @@
+---
+description: Engine is shared drawing logic; each tool is its own DrawingTool class
+globs: lib/core/engine/**,lib/core/tools/**
+alwaysApply: false
+---
+
+# Engine and tools
+
+`core/engine` is the shared kernel: sample, clip, bake, composite, export. Method names are those steps. Keep bodies linear. The engine does not know which tool is selected.
+
+`core/tools` is one class per tool that implements `DrawingTool`. Pencil is first. Add other tool files only when that tool is built (brush, crayon, marker, watercolor, spray paint, glitter, pattern, paint bucket, sticker). No empty stubs. No `extensions/` or `logging/` folders.
+
+A new tool is a new class. Do not add `switch (brushType)` in the engine, screen, or ViewModel. `core/engine` never imports a concrete tool.
+
+```dart
+// BAD
+void paint(Canvas canvas, BrushType type) {
+  switch (type) {
+    case BrushType.pencil: _drawPencil(canvas);
+    case BrushType.marker: _drawMarker(canvas);
+  }
+}
+
+// GOOD
+abstract class DrawingTool {
+  void paint(Canvas canvas);
+}
+class PencilTool implements DrawingTool {
+  void paint(Canvas canvas) { /* dabs via the engine */ }
+}
+```

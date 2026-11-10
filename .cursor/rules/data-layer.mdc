@@ -1,0 +1,33 @@
+---
+description: One API client per URL group, shared Dio, offline repositories
+globs: lib/data/**,lib/core/storage/**
+alwaysApply: false
+---
+
+# Data layer
+
+`ApiClient` owns the one `Dio` (host, timeouts, interceptors). It has no `/auth` or `/drawing` methods. Map `DioException` to `ApiException` before leaving this layer.
+
+One client class and one instance per URL group, created in `app.dependencies.dart`. `/auth` and `/drawing` are examples — do not add empty clients.
+
+```dart
+// BAD — god client and a second Dio
+class ApiClient {
+  Future<void> login() { ... }
+  Future<void> saveDrawing() { ... }
+}
+
+// GOOD — group client uses the shared ApiClient
+class AuthApi {
+  AuthApi(this._client);
+  final ApiClient _client;
+  static const prefix = '/auth';
+  Future<AuthDto> login(LoginDto body) { ... } // POST /auth/login
+}
+```
+
+- `AuthRepository` receives only `AuthApi`. `DrawingRepository` receives only `DrawingApi`.
+- Repositories and ViewModels never import `dio`, `Response`, or `DioException`.
+- DTOs stay in `data/api/<group>/`. Map to `data/models/` in the repository.
+- Offline-first: read local first, then sync. `core/storage` is interfaces only; pick a DB later.
+- Do not create a second `Dio` or a second HTTP package.

@@ -1,0 +1,27 @@
+---
+description: Screen is layout only; one widget per file; no drawing logic in UI
+globs: lib/features/**,lib/core/ui/**
+alwaysApply: false
+---
+
+# Screens and widgets
+
+`features/<feature>/screen/` holds the route widget only: layout and wiring. Canvas, toolbar, palette, and dialogs go in `features/<feature>/widgets/`, one widget per file.
+
+A widget used by a second feature moves to `core/ui/widgets/`. Do not copy it.
+
+Screens import `state/<its feature>/`, own `widgets/`, `core/ui/`, and `data/models`. They never import `data/api`, `data/local`, `core/storage`, or repository impls.
+
+No brush geometry, clipping, or hit-testing in a widget. The widget paints; `core/engine` computes.
+
+```dart
+// BAD — clipping inside the canvas widget
+class DrawingCanvas extends StatelessWidget {
+  Widget build(context) { /* region path math here */ }
+}
+
+// GOOD — widget paints, engine clips
+class DrawingCanvas extends StatelessWidget {
+  Widget build(context) => CustomPaint(painter: LayerPainter(engine));
+}
+```
