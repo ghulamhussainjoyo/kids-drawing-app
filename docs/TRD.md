@@ -4,7 +4,7 @@
 **Order:** Flutter prototype, then React Native + Skia parity prototype.
 
 ## 1. Technology constraints
-**Flutter:** SDK installed and app launch confirmed. Current Dart constraint is `^3.13.7`. Start with SDK primitives (`Canvas`, `CustomPainter`, paths, clipping and pointer events); no third-party drawing package is needed for the first milestone.  
+**Flutter:** SDK installed and app launch confirmed. Current Dart constraint is `^3.13.7`. Drawing still uses Flutter Canvas / CustomPainter (no third-party drawing engine). Allowed supporting packages in the current app: `provider` (ViewModel wiring), `native_device_orientation` (notch-aware landscape), `flutter_svg`, and `cupertino_icons`. Justify any new package before adding it.  
 **React Native:** use Skia for the rendering surface. Match behavior, artwork, test scenarios and acceptance criteria. Production framework selection remains open pending benchmarks.
 
 ## 2. Input

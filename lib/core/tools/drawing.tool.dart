@@ -11,6 +11,8 @@ abstract class DrawingTool {
 
   void paint(Canvas canvas, StrokeDabber dabber);
 
+  void dispose() {}
+
   StrokeDabber replay(DrawingStroke stroke) {
     final dabber = createDabber(stroke);
     for (final point in stroke.points) {

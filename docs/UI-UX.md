@@ -17,9 +17,9 @@ The supplied Figma reference shows a landscape workspace: central canvas, left n
 ## 4. Primary controls
 **Brush picker:** active brush is obvious and labeled; selection affects new strokes only.  
 **Palette:** current color is visible; preset colors are easy to tap; selection is indicated by outline/checkmark/shape, not color alone.  
-**Brush size:** slider or discrete sizes with a preview; affects new strokes only.  
+**Brush size:** the left density slider drives stroke width for new strokes (`12 + density * 44` via `DrawingViewModel.setDensity`). Affects subsequent strokes only.  
 **Undo/redo:** undo is easy to reach; redo is disabled when unavailable; ordinary undo needs no confirmation.  
-**Eraser:** distinct tool, undoable, affects paint only.  
+**Eraser control (current):** opens a full-screen confirm. YES clears all paint on the page (`clearAll`); NO dismisses. Not a stroke eraser brush yet. A dedicated paint-only eraser tool remains later.  
 **Region coloring:** no mode selector and no selection step. The part under the first touch clips the whole stroke. The finger-lift burst is the feedback that a stroke landed.
 
 ## 5. Canvas gestures

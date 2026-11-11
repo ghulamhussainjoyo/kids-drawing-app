@@ -6,7 +6,7 @@ import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kids_drawing_flutter/core/engine/stroke.dabber.dart';
 import 'package:kids_drawing_flutter/core/engine/stroke.renderer.dart';
-import 'package:kids_drawing_flutter/core/tools/pencil.tool.dart';
+import 'package:kids_drawing_flutter/core/tools/pencil.drawing.tool.dart';
 import 'package:kids_drawing_flutter/data/models/brush.config.dart';
 import 'package:kids_drawing_flutter/data/models/brush.type.dart';
 import 'package:kids_drawing_flutter/data/models/drawing.stroke.dart';
@@ -15,6 +15,7 @@ import 'package:kids_drawing_flutter/data/models/paint.color.dart';
 void main() {
   final tool = PencilTool();
   final renderer = StrokeRenderer();
+  tearDownAll(tool.dispose);
   const orange = PaintColor(id: 'orange', color: Color(0xFFFF8A1F));
 
   DrawingStroke stroke(List<Offset> points) => DrawingStroke(

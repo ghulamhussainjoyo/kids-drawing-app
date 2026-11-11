@@ -70,7 +70,7 @@ Preview drawing → choose export settings → export → receive truthful succe
 - Offline: core workflow requires neither login nor network.
 
 ## 9. Prototype scope
-First build (confirmed): the apple-and-books page; textured pencil with stroke-start clipping; color choice; undo/redo; outline overlay; pinch zoom and pan with accurate painting while zoomed; the finger-lift burst. The size slider is shown at its default value. Sounds, brush size, the other tools (bucket, crayon, brush, wand, marker, eraser), palette, locked colors, done and settings come later. Brush size and the other tools will be specified after the pencil works. Reproduce identical scope and tests in both frameworks.
+First build (Flutter prototype): the apple-and-books page; textured pencil with stroke-start clipping; stick color choice; density/brush size via the left slider; undo/redo; outline overlay; pinch zoom and pan with accurate painting while zoomed; the finger-lift burst; clear-all erase confirm (not a stroke eraser yet). Sounds, dedicated marker/brush/bucket/crayon/wand/eraser paint tools, locked colors, done and settings come later. Reproduce identical scope and tests in both frameworks.
 
 ## 10. Success metrics
 Measure region selection accuracy, clipping defects, median/p95/p99 frame time, missed frames, input-to-visible latency, memory growth over a 10-minute session, export time, crash-free sessions and qualitative drawing feel. These are not assumed to be achieved.

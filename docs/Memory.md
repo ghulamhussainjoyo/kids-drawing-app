@@ -12,46 +12,56 @@ Build a commercial children's drawing and coloring app for iOS and Android. The 
 - Do not choose React Native just because the product owner has RN experience.
 - Flutter SDK is installed and the app launches.
 - User works in Cursor and wants complete, practical file-level implementation guidance.
-- Initial Dart files were created but are empty because implementation code had not yet been provided.
-- Current pubspec uses Dart constraint `^3.13.7`, Flutter SDK, `cupertino_icons`, `flutter_test` and `flutter_lints`. The first drawing milestone needs no third-party package.
+- Current pubspec uses Dart constraint `^3.13.7`, Flutter SDK, `cupertino_icons`, `provider`, `native_device_orientation`, `flutter_svg`, `flutter_test` and `flutter_lints`. Drawing still uses Flutter Canvas / CustomPainter (no third-party drawing engine).
 - UI kit is `CupertinoApp` + `CupertinoThemeData` so Android and iOS share the same iOS-style chrome. Route widgets use `CupertinoPageScaffold` and `CupertinoPageRoute`. Do not mix Material `Scaffold` / `AppBar` / `ElevatedButton` under `CupertinoApp`.
-- Splash is the home route. The drawing session (`LayerManager`, `DrawingViewModel`) is created when opening a drawing page, not at app launch.
+- Splash is the home route. Navigation: Splash → Category → Gallery → Drawing.
+- Drawing session: `MultiProvider` / `ChangeNotifierProvider` in `lib/main.dart` creates one `DrawingViewModel` at app launch. Gallery calls `selectArtwork(title)` then pushes the drawing screen with no artwork argument. Stick rail calls `selectTool` / `selectCategory`. Density slider calls `setDensity`. The drawing screen is View-only (`Provider.of` listen: false + `ListenableBuilder` inside `NativeDeviceOrientationReader`).
+- Live app shell is `AppWidget` in `lib/main.dart`. `lib/app/app.dart` exists but is unused.
+- Active drawing UI is `features/drawing/screen/drawing.screen.new.dart.dart` with `workspace.canvas.dart` / `workspace.painter.dart`. Legacy `drawing.screen.dart` and its widgets remain in the tree until a delete pass.
+- Paint tool class: `core/tools/pencil.drawing.tool.dart` (`PencilTool`). Stick catalog: `core/tools/pencil.tool.dart` (`PencilTools`). Marker catalog exists; dedicated marker/brush `DrawingTool` paint engines are not built yet (pencil dabs still used).
+- Brush size: left density slider → `DrawingViewModel.setDensity` → size `12 + density * 44` for subsequent strokes.
+- Eraser button: full-screen clear-all confirm (NO dismisses, YES calls `clearAll`). Not a stroke eraser brush yet.
+- ViewModel owns `artworkRepository`, `selectedArtworkId`, `selectedTool`, `selectedCategory`, `density`, `drawingTool`, `RegionEngine`, and `LayerManager`. Until gallery has real pages, `selectArtwork` still loads apple-and-books via the repository.
 
 ### Coloring behavior (confirmed 2026-11-07 from the reference image and screen recording)
 - No explicit region selection. The closed part under a stroke's first touch clips that whole stroke. Forgiving part pick: a first touch inside a part always picks it, even next to its outline. A first touch on an outline, or on paper beside the art, picks the nearest part within a fingertip radius (22 screen points, converted with the current zoom). Only a touch farther than that from every part paints nothing. Inner detail lines (leaf vein, book page lines, apple shine) are not outlines: a touch on one colors the part it sits in.
-- Layout follows the reference app edge to edge. The notch side comes from the interface orientation on iOS or the cutout display feature on Android, and the reference app is matched on each side. Notch on the right: the whole tool column moves inward by the safe-area inset, with lavender still behind the notch. Notch on the left: the corner buttons stay put above and below the notch, and only the badge and slider in the middle band keep clear of it. Buttons and tool tiles are at least 48 px. Tool and color lists have 24 px end padding to clear rounded corners. The color rail sits on the page cream. The active-tool badge and size slider are centered on the back/palette pair. The page keeps a margin clear of the left controls and sits beside the done/settings buttons, reserving only the room those buttons need.
+- New drawing layout is landscape flex columns (controller / canvas / tools). Notch on the right widens the tools column via `NativeDeviceOrientationReader`. Do not `setState` the State that owns that reader (rebuilds restart orientation waiting and jerk the flex).
 - Later strokes can cover earlier paint in the same part. Outlines stay above paint.
 - On every finger lift, a burst of shapes (butterflies, stars, hearts, flowers, dots, snowflakes) appears near the stroke and fades in about 1.5 s. It is not saved and not an undo step. The Figma wand tool is a separate tool, not this burst.
 - Two fingers zoom and pan only the page; painting stays accurate while zoomed; pinching out animates back to fit.
-- Undo and the done check appear after the first completed stroke; redo is grey until an undo.
+- Undo appears after the first completed stroke; redo is grey until an undo.
 - Full-screen landscape with system edge gestures deferred.
-- First build: pencil coloring on the apple-and-books page, color choice, undo/redo, zoom, finger-lift burst, and the screen states above. The size slider is shown at its default value.
-- Later: sounds (soft drawing sound and tap sound, no music), then brush size and the bucket, crayon, brush, wand, marker and eraser tools. The product owner will specify brush size and those tools after the pencil works. Padlocked colors are out of the first build.
+- Flutter prototype first build: pencil coloring on apple-and-books, stick color choice, density brush size, undo/redo, pinch zoom/pan, finger-lift burst, Provider MVVM wiring, clear-all erase confirm.
+- Later: sounds (soft drawing sound and tap sound, no music), marker/brush/bucket/crayon/wand paint engines, stroke eraser, save/export, padlocked colors, done/settings. Padlocked colors are out of the first build.
 
 ## 3. Existing Flutter paths
 ```text
 lib/
-  main.dart                         # WidgetsFlutterBinding + runApp
+  main.dart                         # WidgetsFlutterBinding, MultiProvider, AppWidget (CupertinoApp)
   app/
-    app.dart                        # CupertinoApp, theme, home: SplashScreen
+    app.dart                        # unused duplicate shell
   core/
-    ui/theme/                       # AppColors, AppTheme (CupertinoThemeData)
-    engine/                         # sample, clip, bake, composite, burst, view transform
-    tools/                          # DrawingTool, PencilTool
-  state/drawing/drawing.viewmodel.dart
+    ui/theme/, ui/widgets/          # AppColors, AppTheme, RoundedButton, CircleButton
+    engine/                         # region, layer, dab, burst, view transform
+    tools/                          # DrawingTool, pencil.drawing.tool, PencilTools catalog, StationaryTools
+  state/drawing/drawing.view-model.dart
   data/
-    models/                         # one type per file
+    models/
     local/artwork/apple.and.books.local.dart
     repositories/artwork/
   features/splash/splash.screen.dart
-  features/category/category.screen.dart
+  features/category/
+  features/gallery/
   features/drawing/
-    screen/drawing.screen.dart
-    widgets/                        # canvas, toolbar, palette — one widget per file
+    screen/drawing.screen.new.dart.dart   # active route
+    screen/erase.confirm.screen.dart
+    screen/drawing.screen.dart            # legacy
+    widgets/workspace.canvas.dart
+    widgets/workspace.painter.dart
+    widgets/tools/                        # ControllerTools, DrawingTools, CategoryRail
 ```
-Legacy `lib/features/{models,state,engine,data,drawing/presentation}` was removed in the architecture rewrite.
 
-`core/engine` and `core/tools` may import `data/models` only (not api, local, or repositories). The engine clips and bakes `DrawingStroke` / `DrawingRegion` / `ColoringArtwork`; a primitive-only engine would change every paint signature. The engine never imports `pencil.tool.dart`.
+`core/engine` and `core/tools` may import `data/models` only (not api, local, or repositories) except the ViewModel may use repository interfaces/impls for artwork load. The engine never imports a concrete tool. Stick catalog `pencil.tool.dart` is not the paint engine.
 
 ## 4. Requested capabilities
 Pencil, marker, crayon, paintbrush, watercolor, airbrush/spray and eraser; smooth finger/stylus input; pressure/tilt where available; region selection and clipping; separate paint and outline layers; undo/redo; zoom/pan; stickers/backgrounds; high-resolution PNG export; offline-first operation.
@@ -77,11 +87,11 @@ At least 60 FPS on agreed baseline devices, 120 FPS where supported, aim under 2
 
 ## 9. Current status
 - Flutter setup and app launch: complete.
-- Documentation: initial baseline being added.
-- First-build pencil coloring: implemented on the apple-and-books page, which is authored as vector paths in `lib/data/local/artwork/apple.and.books.local.dart`. There is no image asset yet. Not yet measured on devices.
-- Code layout follows `docs/Architecture.md` MVVM folders (`app/`, `core/`, `state/`, `data/`, `features/`). Empty stubs (`export.engine`, `drawing.layer`) were not recreated.
-- App shell is `CupertinoApp` in `lib/app/app.dart`.
-- Brush size, other tools, sounds, save and export: not implemented.
+- App shell: `CupertinoApp` via `AppWidget` in `lib/main.dart` with `MultiProvider` → `DrawingViewModel`.
+- Navigation: Splash → Category → Gallery → `DrawingScreenNew`.
+- Pencil coloring on apple-and-books (vector paths in `lib/data/local/artwork/apple.and.books.local.dart`): implemented. Density brush size, stick colors, undo/redo, pinch/burst, clear-all erase confirm: implemented. Not yet measured on devices.
+- Code layout follows MVVM folders (`core/`, `state/`, `data/`, `features/`). Live composition is `main.dart` MultiProvider (not `app.dependencies.dart`).
+- Marker/brush paint engines, sounds, save and export: not implemented.
 - Framework benchmark: not started.
 
 ## 10. AI/developer working rules

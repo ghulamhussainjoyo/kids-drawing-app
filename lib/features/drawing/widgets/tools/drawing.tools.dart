@@ -7,6 +7,7 @@ import 'package:kids_drawing_flutter/features/drawing/widgets/tools/category.rai
 class DrawingTools extends StatefulWidget {
   final double notchInset;
   final String selectedCategory;
+  final String? selectedToolId;
   final StationaryTools stationaryTools;
   final ValueChanged<String> onCategoryTap;
   final ValueChanged<StationaryModel> onToolSelect;
@@ -17,6 +18,7 @@ class DrawingTools extends StatefulWidget {
     required this.onToolSelect,
     required this.onCategoryTap,
     required this.selectedCategory,
+    required this.selectedToolId,
     required this.stationaryTools,
   });
 
@@ -25,7 +27,6 @@ class DrawingTools extends StatefulWidget {
 }
 
 class _DrawingToolsState extends State<DrawingTools> {
-  String? selectedId;
   late final List<CategoryModel> categories;
 
   @override
@@ -38,9 +39,6 @@ class _DrawingToolsState extends State<DrawingTools> {
       widget.stationaryTools.getToolsByCategory(widget.selectedCategory);
 
   void onPencilTap(StationaryModel pencil) {
-    setState(() {
-      selectedId = pencil.id;
-    });
     widget.onToolSelect(pencil);
   }
 
@@ -48,29 +46,7 @@ class _DrawingToolsState extends State<DrawingTools> {
     if (name == widget.selectedCategory) {
       return;
     }
-    final nextPencils = widget.stationaryTools.getToolsByCategory(name);
-    final sameTools = _samePencilIds(pencils, nextPencils);
-    setState(() {
-      if (!sameTools) {
-        selectedId = null;
-      }
-    });
     widget.onCategoryTap(name);
-  }
-
-  bool _samePencilIds(
-    List<StationaryModel> previous,
-    List<StationaryModel> next,
-  ) {
-    if (previous.length != next.length) {
-      return false;
-    }
-    for (var index = 0; index < previous.length; index++) {
-      if (previous[index].id != next[index].id) {
-        return false;
-      }
-    }
-    return true;
   }
 
   @override
@@ -99,7 +75,7 @@ class _DrawingToolsState extends State<DrawingTools> {
                 itemExtent: stickHeight + stickGap,
                 itemBuilder: (context, index) {
                   final pencil = pencils[index];
-                  final selected = pencil.id == selectedId;
+                  final selected = pencil.id == widget.selectedToolId;
                   return GestureDetector(
                     key: ValueKey(pencil.id),
                     behavior: HitTestBehavior.opaque,

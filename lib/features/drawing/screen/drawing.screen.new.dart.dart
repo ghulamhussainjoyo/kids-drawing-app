@@ -1,39 +1,30 @@
+import 'dart:math' as math;
+
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
-import 'package:kids_drawing_flutter/core/tools/stationary.tools.dart';
-import 'package:kids_drawing_flutter/data/models/tools/stationary.model.dart';
+import 'package:kids_drawing_flutter/core/ui/theme/app.colors.dart';
+import 'package:kids_drawing_flutter/features/drawing/screen/erase.confirm.screen.dart';
 import 'package:kids_drawing_flutter/features/drawing/widgets/tools/controller.tools.dart';
 import 'package:kids_drawing_flutter/features/drawing/widgets/tools/drawing.tools.dart';
+import 'package:kids_drawing_flutter/features/drawing/widgets/workspace.canvas.dart';
+import 'package:kids_drawing_flutter/state/drawing/drawing.view-model.dart';
 import 'package:native_device_orientation/native_device_orientation.dart';
+import 'package:provider/provider.dart';
 
 class DrawingScreenNew extends StatefulWidget {
   const DrawingScreenNew({super.key});
+
   @override
   State<DrawingScreenNew> createState() => _DrawingScreenNew();
 }
 
 class _DrawingScreenNew extends State<DrawingScreenNew> {
-  double density = 0.45;
-  StationaryModel? selectedTool;
-  final StationaryTools stationaryTools = StationaryTools();
-  final ValueNotifier<String> selectedCategory = ValueNotifier('pencil');
-
-  @override
-  void dispose() {
-    selectedCategory.dispose();
-    super.dispose();
-  }
-
-  void onToolSelect(StationaryModel tool) {
-    selectedTool = tool;
-  }
-
-  void onCategoryTap(String name) {
-    selectedCategory.value = name;
-  }
-
-  void onDensityChanged(double value) {
-    density = value;
+  void openEraseConfirm(DrawingViewModel viewModel) {
+    Navigator.of(context).push(
+      CupertinoPageRoute<void>(
+        fullscreenDialog: true,
+        builder: (context) => EraseConfirmScreen(viewModel: viewModel),
+      ),
+    );
   }
 
   List<double> getInsets(BuildContext context) {
@@ -48,51 +39,70 @@ class _DrawingScreenNew extends State<DrawingScreenNew> {
 
   @override
   Widget build(BuildContext context) {
+    final viewModel = Provider.of<DrawingViewModel>(context, listen: false);
     return NativeDeviceOrientationReader(
       builder: (context) {
         final [toolsFlex, notchInset] = getInsets(context);
         return CupertinoPageScaffold(
-          child: Row(
-            children: [
-              Flexible(
-                flex: 2,
-                fit: FlexFit.tight,
-                child: ValueListenableBuilder<String>(
-                  valueListenable: selectedCategory,
-                  builder: (context, name, child) {
-                    return ControllerTools(
-                      density: density,
-                      onDensityChanged: onDensityChanged,
-                      selectedCategoryImage: stationaryTools.getCategoryImage(
-                        name,
-                      ),
+          backgroundColor: AppColors.pageBackground,
+          child: ListenableBuilder(
+            listenable: viewModel,
+            builder: (context, child) {
+              return Row(
+                children: [
+                  Flexible(
+                    flex: 2,
+                    fit: FlexFit.tight,
+                    child: ControllerTools(
+                      density: viewModel.density,
+                      onDensityChanged: viewModel.setDensity,
+                      selectedCategoryImage: viewModel.categoryImage,
                       onBack: () => Navigator.of(context).maybePop(),
-                    );
-                  },
-                ),
-              ),
-              Flexible(
-                flex: 5,
-                fit: FlexFit.tight,
-                child: Container(color: Colors.blue),
-              ),
-              Flexible(
-                fit: FlexFit.tight,
-                flex: toolsFlex.toInt(),
-                child: ValueListenableBuilder<String>(
-                  valueListenable: selectedCategory,
-                  builder: (context, name, child) {
-                    return DrawingTools(
+                      onEraser: () => openEraseConfirm(viewModel),
+                      onUndo: viewModel.canUndo ? viewModel.undo : null,
+                      onRedo: viewModel.canRedo ? viewModel.redo : null,
+                    ),
+                  ),
+                  Flexible(
+                    flex: 5,
+                    fit: FlexFit.tight,
+                    child: ColoredBox(
+                      color: AppColors.pageBackground,
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          final side = math.min(
+                            constraints.maxWidth,
+                            constraints.maxHeight,
+                          );
+                          final pageRect = Rect.fromLTWH(
+                            (constraints.maxWidth - side) / 2,
+                            (constraints.maxHeight - side) / 2,
+                            side,
+                            side,
+                          );
+                          return WorkspaceCanvas(
+                            viewModel: viewModel,
+                            pageRect: pageRect,
+                          );
+                        },
+                      ),
+                    ),
+                  ),
+                  Flexible(
+                    fit: FlexFit.tight,
+                    flex: toolsFlex.toInt(),
+                    child: DrawingTools(
                       notchInset: notchInset,
-                      onToolSelect: onToolSelect,
-                      onCategoryTap: onCategoryTap,
-                      selectedCategory: name,
-                      stationaryTools: stationaryTools,
-                    );
-                  },
-                ),
-              ),
-            ],
+                      onToolSelect: viewModel.selectTool,
+                      onCategoryTap: viewModel.selectCategory,
+                      selectedCategory: viewModel.selectedCategory,
+                      selectedToolId: viewModel.selectedTool?.id,
+                      stationaryTools: viewModel.stationaryTools,
+                    ),
+                  ),
+                ],
+              );
+            },
           ),
         );
       },

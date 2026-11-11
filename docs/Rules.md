@@ -31,7 +31,7 @@ These rules apply to developers and AI coding assistants.
 ## 4. Code quality
 Simple, readable Dart comes first. A teammate must follow `core/engine` top to bottom without a walkthrough. Dense or clever code is a bug. Use domain words (stroke, region, layer, dab, tool). Prefer early returns, `for` loops, named locals, and obvious types (`List<DrawingStroke>`, not `List<T>`). Comment only the why. Do not build mini-frameworks, registries, mixins, `typedef`, or `dynamic` drawing pipelines. If two plain classes are clearer than one abstract one, write two.
 
-Each file contains one public class, widget, or enum. Behavior lives in classes, not loose function files. Widgets are classes, not `buildX()` helpers. Soft file size ~200 lines. Follow SOLID: one reason to change per class; a new drawing tool is a new `DrawingTool` class, not a new `switch` branch; constructors receive abstractions; wire dependencies only in `lib/app/app.dependencies.dart`.
+Each file contains one public class, widget, or enum. Behavior lives in classes, not loose function files. Widgets are classes, not `buildX()` helpers. Soft file size ~200 lines. Follow SOLID: one reason to change per class; a new drawing tool is a new `DrawingTool` class, not a new `switch` branch; constructors receive abstractions. Wire ViewModels for the current app via `MultiProvider` in `lib/main.dart`. Prefer `lib/app/app.dependencies.dart` when that composition root is adopted; do not invent a second live wire-up.
 
 Before creating a class or widget, search `core/ui`, `core/engine`, `core/tools`, `data/models`, and `data/repositories` and reuse what exists.
 

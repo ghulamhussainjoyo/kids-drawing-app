@@ -10,6 +10,11 @@ class PencilTextures {
   final ui.Image tips;
   final ui.Image paper;
 
+  void dispose() {
+    tips.dispose();
+    paper.dispose();
+  }
+
   static const int tipVariants = 4;
   static const double tipPixels = 96;
   static const double paperTile = 128;

@@ -6,8 +6,9 @@ version: 1.0.0+1
 environment:
   sdk: ^3.13.7
 dependencies:
-  native_device_orientation: ^2.0.3
   flutter_svg: ^2.2.3
+  provider: ^6.1.2
+  native_device_orientation: ^2.0.3
   flutter:
     sdk: flutter
     

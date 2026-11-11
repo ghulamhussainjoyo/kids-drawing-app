@@ -27,92 +27,80 @@ Create a folder only when the first file needs it. Forbidden names: `utils`, `he
 
 ```text
 lib/
-  main.dart                         # bootstrap only: WidgetsFlutterBinding, runApp
-  app/                              # the only folder allowed to import every layer
-    app.dart                        # CupertinoApp, theme, home: SplashScreen
-    app.router.dart                 # route table, one class
-    app.dependencies.dart           # composition root: Dio, stores, repos, viewmodels
-  core/                             # imports nothing from app, state, data, features
+  main.dart                         # WidgetsFlutterBinding, MultiProvider, AppWidget (live CupertinoApp)
+  app/                              # may import every layer; app.dart exists but is unused
+    app.dart                        # unused duplicate shell (future target)
+    app.dependencies.dart           # optional future composition root; not live yet
+  core/                             # imports nothing from app, state, features
     ui/
       theme/                        # colors, spacing, text styles, theme
       widgets/                      # widgets used by two or more features
     engine/                         # shared drawing logic used by every tool
-    tools/                          # one class per drawing tool (DrawingTool)
+    tools/                          # one DrawingTool class per paint engine + stick catalogs
       drawing.tool.dart
-      pencil.tool.dart              # first tool; add others when built
+      pencil.drawing.tool.dart      # PencilTool paint engine
+      pencil.tool.dart              # PencilTools stick catalog (colors)
+      marker.tool.dart              # MarkerTools stick catalog
+      stationary.tool.dart          # StationaryTools categories
     storage/                        # abstract interfaces only; no concrete DB yet
   state/                            # ViewModels (ChangeNotifier); mirrors feature names
-    <feature>/
-      <feature>.viewmodel.dart
+    drawing/
+      drawing.view-model.dart       # DrawingViewModel (session owner)
   data/                             # never imports state, features, or Flutter widgets
     models/
-    api/
-      api.client.dart               # shared Dio (base URL, timeouts, interceptors)
-      api.exception.dart
-      auth/                         # example: AuthApi instance for /auth
-      drawing/                      # example: DrawingApi instance for /drawing
+    api/                            # future Dio clients
     local/
-      <resource>/
-        <resource>.local.dart
+      artwork/
     repositories/
-      <resource>/
-        <resource>.repository.dart
-        <resource>.repository.impl.dart
-        <resource>.mapper.dart      # only when mapping is real work
+      artwork/
   features/
-    <feature>/
+    splash/
+    category/
+    gallery/
+    drawing/
       screen/
-        <feature>.screen.dart       # route View: CupertinoPageScaffold, layout and wiring only
-      widgets/                      # canvas, toolbar, palette — one widget per file
+        drawing.screen.new.dart.dart  # active DrawingScreenNew
+        erase.confirm.screen.dart
+        drawing.screen.dart           # legacy
+      widgets/
+        workspace.canvas.dart
+        workspace.painter.dart
+        tools/
 assets/
-  artwork/
-  brushes/
-  stickers/
-  backgrounds/
-test/
-integration_test/
 docs/
 ```
 
-Placement: `screen/` is the route widget only. Route widgets use `CupertinoPageScaffold` and navigate with `CupertinoPageRoute`. Do not use `Scaffold`, `AppBar`, or `ElevatedButton` under `CupertinoApp`. Shared drawing logic lives in `core/engine`. Each tool is one class in `core/tools` (pencil, brush, crayon, marker, watercolor, spray paint, glitter, pattern, paint bucket, sticker). Do not add empty tool or API files. Wire `Dio`, stores, repositories, and ViewModels only in `app/app.dependencies.dart`.
+Placement: `screen/` is the route widget only. Route widgets use `CupertinoPageScaffold` and navigate with `CupertinoPageRoute`. Do not use `Scaffold`, `AppBar`, or `ElevatedButton` under `CupertinoApp`. Shared drawing logic lives in `core/engine`. Each paint engine is one `DrawingTool` class in `core/tools`. Stick catalogs (`PencilTools`, `MarkerTools`) are separate from paint engines. Do not add empty tool or API files.
+
+**Live composition root:** `lib/main.dart` creates `DrawingViewModel` inside `MultiProvider` / `ChangeNotifierProvider` and hosts `AppWidget`. Gallery calls `selectArtwork`; stick rail calls `selectTool` / `selectCategory`; density slider calls `setDensity`. `app/app.dependencies.dart` may become the wire-up later; do not claim it is live today.
 
 ### MVVM mapping
 
 ```mermaid
 flowchart TD
-    App["app composition root"] --> View
-    App --> ViewModel
-    App --> Repository
-    App --> AuthApi
-    App --> DrawingApi
-    App --> ApiClient
-    View["features/feature/screen"] -->|"listens, calls intents"| ViewModel["state/feature"]
-    View --> Widgets["features/feature/widgets"]
+    Main["main.dart MultiProvider"] --> AppWidget
+    Main --> ViewModel
+    AppWidget --> View
+    View["features/drawing/screen"] -->|"Provider.of + ListenableBuilder"| ViewModel["state/drawing DrawingViewModel"]
+    View --> Widgets["features/drawing/widgets"]
     View --> CoreUi["core/ui"]
-    ViewModel --> Repository["data/repositories"]
-    ViewModel --> Engine["core/engine"]
-    ViewModel --> Tools["core/tools"]
+    ViewModel --> Repository["ArtworkRepository"]
+    ViewModel --> Engine["RegionEngine LayerManager"]
+    ViewModel --> Tools["DrawingTool / PencilTool"]
     Tools --> Engine
     ViewModel --> Models["data/models"]
-    Repository --> AuthApi["AuthApi /auth"]
-    Repository --> DrawingApi["DrawingApi /drawing"]
     Repository --> Local["data/local"]
     Repository --> Models
-    AuthApi --> ApiClient["ApiClient shared Dio"]
-    DrawingApi --> ApiClient
-    Local --> Storage["core/storage"]
 ```
 
-- `app/` is the only folder that may import every layer. `main.dart` only calls `runApp`.
+- Live shell and composition: `main.dart` (`MultiProvider` + `AppWidget`). `app/` may import every layer; `app.dart` is unused.
+- `DrawingViewModel` owns session state: `artworkRepository`, `selectedArtworkId`, `selectedTool`, `selectedCategory`, `density`, active `DrawingTool`, `RegionEngine`, and `LayerManager`. The drawing screen does not construct engines or pass artwork/tool into the route.
 - A screen may import `state/<its feature>/`, its own `widgets/`, `core/ui/`, and `data/models`. It never imports `data/api`, `data/local`, repository implementations, or `core/storage`.
-- A ViewModel imports `foundation.dart` and `dart:ui` only from Flutter. It receives a repository interface through its constructor.
+- A ViewModel imports `foundation.dart` and `dart:ui` only from Flutter for UI types. Prefer repository interfaces; the current app constructs `ArtworkRepositoryImpl` inside `DrawingViewModel` until a fuller composition root exists.
 - `data/` never imports `state/`, `features/`, `material.dart`, or `cupertino.dart`.
-- `core/` never imports `app/`, `state/`, `data/`, or `features/`.
-- `core/tools` may import `core/engine`. The engine never imports a concrete tool.
-- Offline-first: the repository reads local first and syncs with the API. The ViewModel does not know which source answered.
-- One API client instance per URL group (`AuthApi` → `/auth`, `DrawingApi` → `/drawing`; examples until those APIs exist). Shared `Dio` lives in `ApiClient`.
-
-Legacy mapping when a refactor is approved: `features/models` → `data/models`; `features/data` → `data/repositories/<resource>/`; `features/state/drawing.controller.dart` → `state/drawing/drawing.viewmodel.dart`; `features/engine` → `core/engine`; `drawing.page.dart` → `features/drawing/screen`; other drawing widgets → `features/drawing/widgets`.
+- `core/` never imports `app/`, `state/`, or `features/`. Engine may use `data/models` only.
+- `core/tools` may import `core/engine`. The engine never imports a concrete tool. New paint tool = new `DrawingTool` class; no new `switch` in the engine or ViewModel for tool behavior.
+- Offline-first: the repository reads local first and syncs with the API when APIs exist. The ViewModel does not know which source answered.
 
 ## 4. Core domain objects
 - **DrawingDocument:** stable ID, schema version, artwork ID, logical canvas dimensions, ordered layers and metadata.

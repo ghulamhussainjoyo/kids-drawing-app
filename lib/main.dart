@@ -1,11 +1,20 @@
 import 'package:flutter/cupertino.dart';
+import 'package:provider/provider.dart';
 
-import '../core/ui/theme/app.theme.dart';
-import '../features/splash/splash.screen.dart';
+import 'core/ui/theme/app.theme.dart';
+import 'features/splash/splash.screen.dart';
+import 'state/drawing/drawing.view-model.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  runApp(const AppWidget());
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (_) => DrawingViewModel()),
+      ],
+      child: const AppWidget(),
+    ),
+  );
 }
 
 class AppWidget extends StatelessWidget {

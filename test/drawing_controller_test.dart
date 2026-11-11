@@ -1,7 +1,6 @@
 import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:kids_drawing_flutter/core/engine/region.engine.dart';
-import 'package:kids_drawing_flutter/core/tools/pencil.tool.dart';
+import 'package:kids_drawing_flutter/core/tools/pencil.drawing.tool.dart';
 import 'package:kids_drawing_flutter/data/models/brush.config.dart';
 import 'package:kids_drawing_flutter/data/models/brush.type.dart';
 import 'package:kids_drawing_flutter/data/models/paint.color.dart';
@@ -15,10 +14,8 @@ void main() {
   late DrawingViewModel viewModel;
 
   setUp(() {
-    final repository = const ArtworkRepositoryImpl();
     viewModel = DrawingViewModel(
-      artworkRepository: repository,
-      regionEngine: RegionEngine(repository.appleAndBooks()),
+      artwork: const ArtworkRepositoryImpl().appleAndBooks(),
       tool: PencilTool(),
       initialBrush: const BrushConfig(
         type: BrushType.pencil,
@@ -26,6 +23,7 @@ void main() {
         size: 34,
       ),
     );
+    addTearDown(viewModel.dispose);
   });
 
   void drawFrom(Offset start, List<Offset> moves) {
@@ -115,5 +113,24 @@ void main() {
   test('unspecified tools are not selectable yet', () {
     viewModel.selectTool(BrushType.eraser);
     expect(viewModel.brush.type, BrushType.pencil);
+  });
+
+  test('setBrushSize does not rewrite a committed stroke', () {
+    drawFrom(const Offset(500, 320), const []);
+    viewModel.setBrushSize(50);
+    expect(viewModel.strokes.single.brush.size, 34);
+    expect(viewModel.brush.size, 50);
+  });
+
+  test('clearAll empties strokes and redo', () {
+    drawFrom(const Offset(500, 320), const [Offset(520, 330)]);
+    viewModel.undo();
+    expect(viewModel.canRedo, isTrue);
+
+    viewModel.clearAll();
+    expect(viewModel.strokes, isEmpty);
+    expect(viewModel.canUndo, isFalse);
+    expect(viewModel.canRedo, isFalse);
+    expect(viewModel.hasCompletedStroke, isFalse);
   });
 }

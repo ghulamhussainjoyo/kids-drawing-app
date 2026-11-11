@@ -1,9 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:kids_drawing_flutter/core/engine/layer.manager.dart';
-import 'package:kids_drawing_flutter/core/engine/region.engine.dart';
-import 'package:kids_drawing_flutter/core/engine/stroke.renderer.dart';
-import 'package:kids_drawing_flutter/core/tools/pencil.tool.dart';
+import 'package:kids_drawing_flutter/core/tools/pencil.drawing.tool.dart';
 import 'package:kids_drawing_flutter/data/models/brush.config.dart';
 import 'package:kids_drawing_flutter/data/repositories/artwork/artwork.repository.impl.dart';
 import 'package:kids_drawing_flutter/features/drawing/screen/drawing.screen.dart';
@@ -30,16 +27,9 @@ Future<void> _pump(
   tester.view.physicalSize = size;
   tester.view.devicePixelRatio = 1;
   addTearDown(tester.view.reset);
-  final repository = const ArtworkRepositoryImpl();
-  final regionEngine = RegionEngine(repository.appleAndBooks());
   final pencil = PencilTool();
-  final layerManager = LayerManager(
-    regionEngine: regionEngine,
-    strokeRenderer: StrokeRenderer(),
-  );
   final viewModel = DrawingViewModel(
-    artworkRepository: repository,
-    regionEngine: regionEngine,
+    artwork: const ArtworkRepositoryImpl().appleAndBooks(),
     tool: pencil,
     initialBrush: BrushConfig(
       type: pencil.type,
@@ -48,7 +38,6 @@ Future<void> _pump(
     ),
   );
   addTearDown(viewModel.dispose);
-  addTearDown(layerManager.dispose);
   await tester.pumpWidget(
     CupertinoApp(
       builder: (context, child) => MediaQuery(
@@ -60,7 +49,7 @@ Future<void> _pump(
       ),
       home: DrawingScreen(
         viewModel: viewModel,
-        layerManager: layerManager,
+        layerManager: viewModel.layerManager,
         notchSide: side,
       ),
     ),

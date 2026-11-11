@@ -13,7 +13,8 @@ import 'stroke.renderer.dart';
 /// however many strokes came before. A committed stroke is drawn onto that
 /// image once; undo and redo rebuild it from the stroke list once.
 class LayerManager {
-  LayerManager({required this.regionEngine, required this.strokeRenderer});
+  LayerManager({required this.regionEngine})
+      : strokeRenderer = StrokeRenderer();
 
   final RegionEngine regionEngine;
   final StrokeRenderer strokeRenderer;

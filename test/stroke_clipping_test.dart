@@ -4,8 +4,7 @@ import 'package:flutter/painting.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:kids_drawing_flutter/core/engine/layer.manager.dart';
 import 'package:kids_drawing_flutter/core/engine/region.engine.dart';
-import 'package:kids_drawing_flutter/core/engine/stroke.renderer.dart';
-import 'package:kids_drawing_flutter/core/tools/pencil.tool.dart';
+import 'package:kids_drawing_flutter/core/tools/pencil.drawing.tool.dart';
 import 'package:kids_drawing_flutter/data/models/brush.config.dart';
 import 'package:kids_drawing_flutter/data/models/brush.type.dart';
 import 'package:kids_drawing_flutter/data/models/drawing.stroke.dart';
@@ -15,11 +14,10 @@ import 'package:kids_drawing_flutter/data/repositories/artwork/artwork.repositor
 void main() {
   test('paint never leaves the region where the stroke started', () async {
     final regionEngine = RegionEngine(const ArtworkRepositoryImpl().appleAndBooks());
-    final layers = LayerManager(
-      regionEngine: regionEngine,
-      strokeRenderer: StrokeRenderer(),
-    );
+    final layers = LayerManager(regionEngine: regionEngine);
     final tool = PencilTool();
+    addTearDown(layers.dispose);
+    addTearDown(tool.dispose);
 
     const red = PaintColor(id: 'red', color: Color(0xFFFF0000));
     final strokes = [
