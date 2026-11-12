@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:kids_drawing_flutter/features/drawing/screen/drawing.screen.new.dart.dart';
+import 'package:kids_drawing_flutter/features/drawing/screen/drawing.screen.dart.dart';
 import 'package:kids_drawing_flutter/state/drawing/drawing.view-model.dart';
 import 'package:provider/provider.dart';
 
@@ -12,7 +12,7 @@ class GalleryGrid extends StatelessWidget {
   void onItemPressed(BuildContext context, String title) {
     Provider.of<DrawingViewModel>(context, listen: false).selectArtwork(title);
     final route = CupertinoPageRoute(
-      builder: (context) => const DrawingScreenNew(),
+      builder: (context) => const DrawingScreen(),
     );
     Navigator.push(context, route);
   }

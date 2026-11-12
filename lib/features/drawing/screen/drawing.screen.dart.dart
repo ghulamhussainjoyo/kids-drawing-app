@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
+import 'package:provider/provider.dart';
 import 'package:kids_drawing_flutter/core/ui/theme/app.colors.dart';
 import 'package:kids_drawing_flutter/features/drawing/screen/erase.confirm.screen.dart';
 import 'package:kids_drawing_flutter/features/drawing/widgets/tools/controller.tools.dart';
@@ -8,16 +9,15 @@ import 'package:kids_drawing_flutter/features/drawing/widgets/tools/drawing.tool
 import 'package:kids_drawing_flutter/features/drawing/widgets/workspace.canvas.dart';
 import 'package:kids_drawing_flutter/state/drawing/drawing.view-model.dart';
 import 'package:native_device_orientation/native_device_orientation.dart';
-import 'package:provider/provider.dart';
 
-class DrawingScreenNew extends StatefulWidget {
-  const DrawingScreenNew({super.key});
+class DrawingScreen extends StatefulWidget {
+  const DrawingScreen({super.key});
 
   @override
-  State<DrawingScreenNew> createState() => _DrawingScreenNew();
+  State<DrawingScreen> createState() => _DrawingScreen();
 }
 
-class _DrawingScreenNew extends State<DrawingScreenNew> {
+class _DrawingScreen extends State<DrawingScreen> {
   void openEraseConfirm(DrawingViewModel viewModel) {
     Navigator.of(context).push(
       CupertinoPageRoute<void>(
@@ -39,7 +39,7 @@ class _DrawingScreenNew extends State<DrawingScreenNew> {
 
   @override
   Widget build(BuildContext context) {
-    final viewModel = Provider.of<DrawingViewModel>(context, listen: false);
+    final viewModel = Provider.of<DrawingViewModel>(context);
     return NativeDeviceOrientationReader(
       builder: (context) {
         final [toolsFlex, notchInset] = getInsets(context);

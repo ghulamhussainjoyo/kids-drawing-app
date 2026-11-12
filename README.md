@@ -8,7 +8,7 @@ This repository is the Flutter prototype. An equivalent React Native + Skia buil
 
 The app launches into a landscape coloring session:
 
-Splash → Category → Gallery → [`DrawingScreenNew`](lib/features/drawing/screen/drawing.screen.new.dart.dart)
+Splash → Category → Gallery → [`DrawingScreen`](lib/features/drawing/screen/drawing.screen.dart.dart)
 
 In this tree:
 
@@ -19,7 +19,7 @@ In this tree:
 - Clear-all erase confirm
 - One `DrawingViewModel` for the process, created in `MultiProvider` at launch
 
-Still later: marker, brush, bucket, crayon, and wand paint engines; a stroke eraser; sounds; save and export; padlocked colors. [`drawing.screen.dart`](lib/features/drawing/screen/drawing.screen.dart) is the previous screen and stays until a delete pass. [`lib/app/app.dart`](lib/app/app.dart) is an unused shell. The live shell is `AppWidget` in [`lib/main.dart`](lib/main.dart).
+Still later: marker, brush, bucket, crayon, and wand paint engines; a stroke eraser; sounds; save and export; padlocked colors. The live shell is `AppWidget` in [`lib/main.dart`](lib/main.dart).
 
 Frame-rate and latency targets are written in [docs/Memory.md](docs/Memory.md). They are goals, not measured results.
 
@@ -54,7 +54,7 @@ Paint behavior lives in [`pencil.drawing.tool.dart`](lib/core/tools/pencil.drawi
 flowchart TD
     mainDart["main.dart MultiProvider"] --> viewModel["DrawingViewModel"]
     mainDart --> appWidget["AppWidget"]
-    appWidget --> screen["DrawingScreenNew"]
+    appWidget --> screen["DrawingScreen"]
     screen -->|"Provider.of + ListenableBuilder"| viewModel
     viewModel --> repository["ArtworkRepository"]
     viewModel --> engine["RegionEngine and LayerManager"]
@@ -92,10 +92,11 @@ lib/
   features/category/
   features/gallery/
   features/drawing/
-    screen/drawing.screen.new.dart.dart  # active route
+    screen/drawing.screen.dart.dart      # active route
     screen/erase.confirm.screen.dart
     widgets/workspace.canvas.dart
     widgets/workspace.painter.dart
+    widgets/tools/
 ```
 
 `core/` does not import `app/`, `state/`, or `features/`. A screen may use its view model, its own widgets, `core/ui`, and `data/models`. It does not import `data/local`, repository implementations, or `core/storage`.

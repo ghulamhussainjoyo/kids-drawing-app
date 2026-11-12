@@ -4,24 +4,24 @@ import 'package:kids_drawing_flutter/core/ui/widgets/circle.button.dart';
 import 'package:kids_drawing_flutter/features/drawing/widgets/tools/size.slider.display.dart';
 
 class ControllerTools extends StatefulWidget {
+  final double density;
+  final VoidCallback? onBack;
+  final VoidCallback? onUndo;
+  final VoidCallback? onRedo;
+  final VoidCallback? onEraser;
+  final String selectedCategoryImage;
+  final ValueChanged<double> onDensityChanged;
+
   const ControllerTools({
     super.key,
+    this.onBack,
+    this.onUndo,
+    this.onRedo,
+    this.onEraser,
     required this.density,
     required this.selectedCategoryImage,
     required this.onDensityChanged,
-    this.onBack,
-    this.onEraser,
-    this.onUndo,
-    this.onRedo,
   });
-
-  final double density;
-  final String selectedCategoryImage;
-  final ValueChanged<double> onDensityChanged;
-  final VoidCallback? onBack;
-  final VoidCallback? onEraser;
-  final VoidCallback? onUndo;
-  final VoidCallback? onRedo;
 
   @override
   State<ControllerTools> createState() => _ControllerToolsState();
@@ -43,18 +43,28 @@ class _ControllerToolsState extends State<ControllerTools> {
     widget.onDensityChanged(value);
   }
 
+  Color getUndoColor(VoidCallback? onUndo) {
+    if (onUndo == null) {
+      return AppColors.disabled;
+    }
+    return AppColors.purple;
+  }
+
+  Color getRedoColor(VoidCallback? onRedo) {
+    if (onRedo == null) {
+      return AppColors.disabled;
+    }
+    return AppColors.purple;
+  }
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final buttonSize = (constraints.maxWidth * 0.38).clamp(36.0, 48.0);
         final badgeSize = (constraints.maxWidth * 0.38).clamp(40.0, 56.0);
-        final undoColor = widget.onUndo == null
-            ? AppColors.disabled
-            : AppColors.purple;
-        final redoColor = widget.onRedo == null
-            ? AppColors.disabled
-            : AppColors.purple;
+        final undoColor = getUndoColor(widget.onUndo);
+        final redoColor = getRedoColor(widget.onRedo);
 
         return Padding(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),

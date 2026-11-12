@@ -16,8 +16,8 @@ Build a commercial children's drawing and coloring app for iOS and Android. The 
 - UI kit is `CupertinoApp` + `CupertinoThemeData` so Android and iOS share the same iOS-style chrome. Route widgets use `CupertinoPageScaffold` and `CupertinoPageRoute`. Do not mix Material `Scaffold` / `AppBar` / `ElevatedButton` under `CupertinoApp`.
 - Splash is the home route. Navigation: Splash → Category → Gallery → Drawing.
 - Drawing session: `MultiProvider` / `ChangeNotifierProvider` in `lib/main.dart` creates one `DrawingViewModel` at app launch. Gallery calls `selectArtwork(title)` then pushes the drawing screen with no artwork argument. Stick rail calls `selectTool` / `selectCategory`. Density slider calls `setDensity`. The drawing screen is View-only (`Provider.of` listen: false + `ListenableBuilder` inside `NativeDeviceOrientationReader`).
-- Live app shell is `AppWidget` in `lib/main.dart`. `lib/app/app.dart` exists but is unused.
-- Active drawing UI is `features/drawing/screen/drawing.screen.new.dart.dart` with `workspace.canvas.dart` / `workspace.painter.dart`. Legacy `drawing.screen.dart` and its widgets remain in the tree until a delete pass.
+- Live app shell is `AppWidget` in `lib/main.dart`.
+- Active drawing UI is `features/drawing/screen/drawing.screen.dart.dart` with `workspace.canvas.dart` / `workspace.painter.dart`.
 - Paint tool class: `core/tools/pencil.drawing.tool.dart` (`PencilTool`). Stick catalog: `core/tools/pencil.tool.dart` (`PencilTools`). Marker catalog exists; dedicated marker/brush `DrawingTool` paint engines are not built yet (pencil dabs still used).
 - Brush size: left density slider → `DrawingViewModel.setDensity` → size `12 + density * 44` for subsequent strokes.
 - Eraser button: full-screen clear-all confirm (NO dismisses, YES calls `clearAll`). Not a stroke eraser brush yet.
@@ -38,12 +38,11 @@ Build a commercial children's drawing and coloring app for iOS and Android. The 
 ```text
 lib/
   main.dart                         # WidgetsFlutterBinding, MultiProvider, AppWidget (CupertinoApp)
-  app/
-    app.dart                        # unused duplicate shell
   core/
     ui/theme/, ui/widgets/          # AppColors, AppTheme, RoundedButton, CircleButton
     engine/                         # region, layer, dab, burst, view transform
     tools/                          # DrawingTool, pencil.drawing.tool, PencilTools catalog, StationaryTools
+    type/category.model.dart
   state/drawing/drawing.view-model.dart
   data/
     models/
@@ -53,9 +52,8 @@ lib/
   features/category/
   features/gallery/
   features/drawing/
-    screen/drawing.screen.new.dart.dart   # active route
+    screen/drawing.screen.dart.dart       # active route
     screen/erase.confirm.screen.dart
-    screen/drawing.screen.dart            # legacy
     widgets/workspace.canvas.dart
     widgets/workspace.painter.dart
     widgets/tools/                        # ControllerTools, DrawingTools, CategoryRail
@@ -88,7 +86,7 @@ At least 60 FPS on agreed baseline devices, 120 FPS where supported, aim under 2
 ## 9. Current status
 - Flutter setup and app launch: complete.
 - App shell: `CupertinoApp` via `AppWidget` in `lib/main.dart` with `MultiProvider` → `DrawingViewModel`.
-- Navigation: Splash → Category → Gallery → `DrawingScreenNew`.
+- Navigation: Splash → Category → Gallery → `DrawingScreen`.
 - Pencil coloring on apple-and-books (vector paths in `lib/data/local/artwork/apple.and.books.local.dart`): implemented. Density brush size, stick colors, undo/redo, pinch/burst, clear-all erase confirm: implemented. Not yet measured on devices.
 - Code layout follows MVVM folders (`core/`, `state/`, `data/`, `features/`). Live composition is `main.dart` MultiProvider (not `app.dependencies.dart`).
 - Marker/brush paint engines, sounds, save and export: not implemented.

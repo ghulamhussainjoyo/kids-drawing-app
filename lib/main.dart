@@ -9,9 +9,7 @@ Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(
     MultiProvider(
-      providers: [
-        ChangeNotifierProvider(create: (_) => DrawingViewModel()),
-      ],
+      providers: [ChangeNotifierProvider(create: (_) => DrawingViewModel())],
       child: const AppWidget(),
     ),
   );

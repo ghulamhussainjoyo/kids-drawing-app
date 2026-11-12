@@ -28,9 +28,6 @@ Create a folder only when the first file needs it. Forbidden names: `utils`, `he
 ```text
 lib/
   main.dart                         # WidgetsFlutterBinding, MultiProvider, AppWidget (live CupertinoApp)
-  app/                              # may import every layer; app.dart exists but is unused
-    app.dart                        # unused duplicate shell (future target)
-    app.dependencies.dart           # optional future composition root; not live yet
   core/                             # imports nothing from app, state, features
     ui/
       theme/                        # colors, spacing, text styles, theme
@@ -41,7 +38,9 @@ lib/
       pencil.drawing.tool.dart      # PencilTool paint engine
       pencil.tool.dart              # PencilTools stick catalog (colors)
       marker.tool.dart              # MarkerTools stick catalog
-      stationary.tool.dart          # StationaryTools categories
+      stationary.tools.dart         # StationaryTools categories
+    type/
+      category.model.dart
     storage/                        # abstract interfaces only; no concrete DB yet
   state/                            # ViewModels (ChangeNotifier); mirrors feature names
     drawing/
@@ -59,9 +58,8 @@ lib/
     gallery/
     drawing/
       screen/
-        drawing.screen.new.dart.dart  # active DrawingScreenNew
+        drawing.screen.dart.dart      # active DrawingScreen
         erase.confirm.screen.dart
-        drawing.screen.dart           # legacy
       widgets/
         workspace.canvas.dart
         workspace.painter.dart
@@ -93,7 +91,7 @@ flowchart TD
     Repository --> Models
 ```
 
-- Live shell and composition: `main.dart` (`MultiProvider` + `AppWidget`). `app/` may import every layer; `app.dart` is unused.
+- Live shell and composition: `main.dart` (`MultiProvider` + `AppWidget`).
 - `DrawingViewModel` owns session state: `artworkRepository`, `selectedArtworkId`, `selectedTool`, `selectedCategory`, `density`, active `DrawingTool`, `RegionEngine`, and `LayerManager`. The drawing screen does not construct engines or pass artwork/tool into the route.
 - A screen may import `state/<its feature>/`, its own `widgets/`, `core/ui/`, and `data/models`. It never imports `data/api`, `data/local`, repository implementations, or `core/storage`.
 - A ViewModel imports `foundation.dart` and `dart:ui` only from Flutter for UI types. Prefer repository interfaces; the current app constructs `ArtworkRepositoryImpl` inside `DrawingViewModel` until a fuller composition root exists.
