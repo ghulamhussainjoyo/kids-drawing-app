@@ -39,7 +39,7 @@ class _DrawingScreen extends State<DrawingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final viewModel = Provider.of<DrawingViewModel>(context);
+    final viewModel = Provider.of<DrawingViewModel>(context, listen: false);
     return NativeDeviceOrientationReader(
       builder: (context) {
         final [toolsFlex, notchInset] = getInsets(context);
