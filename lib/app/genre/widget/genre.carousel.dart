@@ -1,5 +1,4 @@
 import 'package:flutter/cupertino.dart';
-import 'package:kids_drawing_flutter/types/genre/genre.model.dart';
 import 'package:kids_drawing_flutter/state/genre/genre.view-model.dart';
 import 'package:provider/provider.dart';
 

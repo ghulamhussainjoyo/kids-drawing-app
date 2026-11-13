@@ -21,6 +21,7 @@ class GenreScreen extends StatelessWidget {
               children: [
                 // Carousel area
                 Positioned(
+                  // Room for the arched title above the focused circle.
                   top: 50,
                   left: 0,
                   right: 0,

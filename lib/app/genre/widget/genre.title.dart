@@ -3,21 +3,28 @@ import 'dart:math' as math;
 import 'package:flutter/cupertino.dart';
 import 'package:kids_drawing_flutter/types/genre/genre.model.dart';
 
-/// Title letters follow the top of the genre circle.
+/// Title letters sit just outside the genre circle.
 class GenreTitle extends StatelessWidget {
   final GenreModel genre;
   final double circleSize;
 
   const GenreTitle({super.key, required this.genre, required this.circleSize});
 
-  double get circleRadius => circleSize / 2;
-
-  double get fontSize => circleSize * 0.14;
-
-  /// Letters sit just outside the circle edge.
-  double get arcRadius => circleRadius + fontSize * 0.5;
-
   double get center => circleSize / 2;
+  double get fontSize => circleSize * 0.13;
+  double get gap => circleSize * (12 / 300);
+
+  /// Letter centers. Half a glyph plus [gap] stays clear of the rim.
+  double get letterRadius => center + gap + fontSize * 0.55;
+
+  /// Space the arch needs above the circle box.
+  double get topOverhang => gap + fontSize;
+
+  /// 0 pulls every letter inside the oval. 1 rests them on [letterRadius].
+  double hideScale(double closeness) {
+    final hiddenScale = (center - fontSize) / letterRadius;
+    return hiddenScale + (1 - hiddenScale) * closeness;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -42,8 +49,7 @@ class GenreTitle extends StatelessWidget {
     for (var index = 0; index < name.length; index++) {
       final letterWidth = widths[index];
       final mid = walked + letterWidth / 2;
-      // 0 is the top of the circle. Left letters are negative.
-      final theta = (mid - totalWidth / 2) / arcRadius;
+      final theta = (mid - totalWidth / 2) / letterRadius;
       final position = letterPosition(theta);
 
       letters.add(
@@ -86,10 +92,10 @@ class GenreTitle extends StatelessWidget {
     return widths;
   }
 
-  /// Top of the circle is theta 0.
+  /// Theta 0 is the top of the circle. Ends follow the rim, with [gap] outside it.
   Offset letterPosition(double theta) {
-    final x = center + arcRadius * math.sin(theta);
-    final y = center - arcRadius * math.cos(theta);
+    final x = center + letterRadius * math.sin(theta);
+    final y = center - letterRadius * math.cos(theta);
     return Offset(x, y);
   }
 }
