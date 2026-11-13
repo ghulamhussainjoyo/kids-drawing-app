@@ -1,15 +1,21 @@
 import 'package:flutter/cupertino.dart';
+import 'package:kids_drawing_flutter/state/gallery/gallery.view-model.dart';
+import 'package:kids_drawing_flutter/state/genre/genre.view-model.dart';
 import 'package:provider/provider.dart';
 
 import 'core/ui/theme/app.theme.dart';
-import 'features/splash/splash.screen.dart';
+import 'app/splash/splash.screen.dart';
 import 'state/drawing/drawing.view-model.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(
     MultiProvider(
-      providers: [ChangeNotifierProvider(create: (_) => DrawingViewModel())],
+      providers: [
+        ChangeNotifierProvider(create: (_) => DrawingViewModel()),
+        ChangeNotifierProvider(create: (_) => GalleryViewModel()),
+        ChangeNotifierProvider(create: (_) => GenreViewModel()),
+      ],
       child: const AppWidget(),
     ),
   );

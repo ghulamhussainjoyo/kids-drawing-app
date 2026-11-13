@@ -1,7 +1,7 @@
 import 'dart:ui';
 
-import '../../data/models/coloring.artwork.dart';
-import '../../data/models/drawing.stroke.dart';
+import '../../types/coloring.artwork.dart';
+import '../../types/drawing.stroke.dart';
 import '../tools/drawing.tool.dart';
 import 'region.engine.dart';
 import 'stroke.dabber.dart';
@@ -14,7 +14,7 @@ import 'stroke.renderer.dart';
 /// image once; undo and redo rebuild it from the stroke list once.
 class LayerManager {
   LayerManager({required this.regionEngine})
-      : strokeRenderer = StrokeRenderer();
+    : strokeRenderer = StrokeRenderer();
 
   final RegionEngine regionEngine;
   final StrokeRenderer strokeRenderer;
@@ -58,12 +58,7 @@ class LayerManager {
     }
 
     if (active != null) {
-      _paintStroke(
-        canvas,
-        active,
-        activeDabber ?? tool.replay(active),
-        tool,
-      );
+      _paintStroke(canvas, active, activeDabber ?? tool.replay(active), tool);
     }
 
     canvas.drawPicture(_outlineCache ??= _recordOutlines());
@@ -94,7 +89,8 @@ class LayerManager {
   ) {
     final ids = [for (final s in committed) s.id];
     final appendedOne =
-        ids.length == _bakedStrokeIds.length + 1 && _startsWith(ids, _bakedStrokeIds);
+        ids.length == _bakedStrokeIds.length + 1 &&
+        _startsWith(ids, _bakedStrokeIds);
     if (appendedOne && _paintImage != null) {
       final stroke = committed.last;
       final dabber = justCommitted != null && justCommitted.seed == stroke.seed

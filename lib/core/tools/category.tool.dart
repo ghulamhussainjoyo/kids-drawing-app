@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import 'package:kids_drawing_flutter/core/type/category.model.dart';
+import 'package:kids_drawing_flutter/types/category.model.dart';
 
 class CategoryTools {
   String getCategoryImage(String name) {

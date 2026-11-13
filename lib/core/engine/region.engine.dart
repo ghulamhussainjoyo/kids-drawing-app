@@ -1,14 +1,14 @@
 import 'dart:math' as math;
 import 'dart:ui';
 
-import '../../data/models/coloring.artwork.dart';
-import '../../data/models/drawing.region.dart';
+import '../../types/coloring.artwork.dart';
+import '../../types/drawing.region.dart';
 
 /// Resolves which region a stroke belongs to, from its first touch only.
 class RegionEngine {
   RegionEngine(this.artwork)
-      : _regionsById = {for (final r in artwork.regions) r.id: r},
-        _edgeSamples = _sampleEdges(artwork);
+    : _regionsById = {for (final r in artwork.regions) r.id: r},
+      _edgeSamples = _sampleEdges(artwork);
 
   final ColoringArtwork artwork;
   final Map<String, DrawingRegion> _regionsById;
@@ -36,7 +36,8 @@ class RegionEngine {
     final reachSquared = pickRadius * pickRadius;
     for (final sample in _edgeSamples) {
       final dSquared = (sample.position - point).distanceSquared;
-      if (dSquared <= reachSquared && dSquared < nearestDistance * nearestDistance) {
+      if (dSquared <= reachSquared &&
+          dSquared < nearestDistance * nearestDistance) {
         nearestDistance = math.sqrt(dSquared);
         nearest = sample.region;
       }
@@ -74,7 +75,8 @@ class RegionEngine {
       for (final metric in region.path.computeMetrics()) {
         for (double d = 0; d <= metric.length; d += _sampleSpacing) {
           final tangent = metric.getTangentForOffset(d);
-          if (tangent != null) samples.add(_EdgeSample(tangent.position, region));
+          if (tangent != null)
+            samples.add(_EdgeSample(tangent.position, region));
         }
       }
     }

@@ -1,7 +1,7 @@
 import 'dart:ui';
 
-import 'package:kids_drawing_flutter/data/models/tools/pencil.model.dart';
-import 'package:kids_drawing_flutter/data/models/tools/stationary.model.dart';
+import 'package:kids_drawing_flutter/types/tools/pencil.model.dart';
+import 'package:kids_drawing_flutter/types/tools/stationary.model.dart';
 
 class MarkerTools {
   List<StationaryModel> getLists() {

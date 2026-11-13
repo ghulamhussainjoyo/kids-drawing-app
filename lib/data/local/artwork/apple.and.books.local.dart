@@ -1,7 +1,7 @@
 import 'dart:ui';
 
-import '../../models/coloring.artwork.dart';
-import '../../models/drawing.region.dart';
+import '../../../types/coloring.artwork.dart';
+import '../../../types/drawing.region.dart';
 
 /// Apple on two stacked books, authored in a 1000 x 1000 space.
 class AppleAndBooksArtwork {
@@ -97,7 +97,9 @@ class AppleAndBooksArtwork {
       final visible = inFront == null
           ? region.shape
           : Path.combine(PathOperation.difference, region.shape, inFront);
-      regions.add(DrawingRegion(id: region.id, name: region.name, path: visible));
+      regions.add(
+        DrawingRegion(id: region.id, name: region.name, path: visible),
+      );
       inFront = inFront == null
           ? region.shape
           : Path.combine(PathOperation.union, inFront, region.shape);

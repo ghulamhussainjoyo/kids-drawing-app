@@ -3,9 +3,9 @@ import 'dart:ui' as ui;
 import 'package:flutter/painting.dart' show HSVColor;
 import 'package:flutter/rendering.dart' show Matrix4;
 
-import '../../data/models/brush.type.dart';
-import '../../data/models/drawing.stroke.dart';
-import '../../data/models/paint.color.dart';
+import '../../types/brush.type.dart';
+import '../../types/drawing.stroke.dart';
+import '../../types/paint.color.dart';
 import '../engine/dab.buffer.dart';
 import '../engine/dab.tip.dart';
 import '../engine/stroke.dabber.dart';

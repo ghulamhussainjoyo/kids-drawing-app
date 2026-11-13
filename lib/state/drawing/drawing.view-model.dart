@@ -9,11 +9,11 @@ import '../../core/engine/stroke.dabber.dart';
 import '../../core/tools/drawing.tool.dart';
 import '../../core/tools/pencil.drawing.tool.dart';
 import '../../core/tools/stationary.tools.dart';
-import '../../data/models/brush.config.dart';
-import '../../data/models/brush.type.dart';
-import '../../data/models/drawing.stroke.dart';
-import '../../data/models/paint.color.dart';
-import '../../data/models/tools/stationary.model.dart';
+import '../../types/brush.config.dart';
+import '../../types/brush.type.dart';
+import '../../types/drawing.stroke.dart';
+import '../../types/paint.color.dart';
+import '../../types/tools/stationary.model.dart';
 import '../../data/repositories/artwork/artwork.repository.dart';
 import '../../data/repositories/artwork/artwork.repository.impl.dart';
 

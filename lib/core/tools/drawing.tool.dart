@@ -1,7 +1,7 @@
 import 'dart:ui';
 
-import '../../data/models/brush.type.dart';
-import '../../data/models/drawing.stroke.dart';
+import '../../types/brush.type.dart';
+import '../../types/drawing.stroke.dart';
 import '../engine/stroke.dabber.dart';
 
 abstract class DrawingTool {

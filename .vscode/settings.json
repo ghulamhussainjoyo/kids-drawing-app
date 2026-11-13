@@ -1,3 +1,7 @@
 {
-  "dart.flutterHotReloadOnSave": "all"
+  "dart.flutterHotReloadOnSave": "all",
+  "cSpell.words": [
+    "LTWH"
+  ],
+  "cmake.ignoreCMakeListsMissing": true
 }

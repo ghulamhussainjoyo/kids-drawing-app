@@ -1,4 +1,4 @@
-import '../../models/coloring.artwork.dart';
+import '../../../types/coloring.artwork.dart';
 
 abstract class ArtworkRepository {
   ColoringArtwork appleAndBooks();

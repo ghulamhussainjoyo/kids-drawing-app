@@ -1,8 +1,8 @@
 import 'package:kids_drawing_flutter/core/tools/category.tool.dart';
 import 'package:kids_drawing_flutter/core/tools/marker.tool.dart';
 import 'package:kids_drawing_flutter/core/tools/pencil.tool.dart';
-import 'package:kids_drawing_flutter/core/type/category.model.dart';
-import 'package:kids_drawing_flutter/data/models/tools/stationary.model.dart';
+import 'package:kids_drawing_flutter/types/category.model.dart';
+import 'package:kids_drawing_flutter/types/tools/stationary.model.dart';
 
 class StationaryTools {
   final _pencilTools = PencilTools();
