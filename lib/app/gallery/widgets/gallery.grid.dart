@@ -1,31 +1,35 @@
-import 'gallery.box.item.dart';
-
 import 'package:flutter/cupertino.dart';
-import 'package:kids_drawing_flutter/app/drawing/screen/drawing.screen.dart.dart';
-import 'package:kids_drawing_flutter/state/drawing/drawing.view-model.dart';
+import 'package:kids_drawing_flutter/data/local/floor/artwork.entity.dart';
+import 'package:kids_drawing_flutter/state/gallery/gallery.view-model.dart';
 import 'package:provider/provider.dart';
 
-class GalleryGrid extends StatelessWidget {
-  final List<String> titles;
-  const GalleryGrid({super.key, required this.titles});
+import 'gallery.box.item.dart';
 
-  void onItemPressed(BuildContext context, String title) {
-    Provider.of<DrawingViewModel>(context, listen: false).selectArtwork(title);
-    final route = CupertinoPageRoute(
-      builder: (context) => const DrawingScreen(),
-    );
-    Navigator.push(context, route);
-  }
+class GalleryGrid extends StatelessWidget {
+  final List<ArtworkEntity> artworks;
+
+  const GalleryGrid({super.key, required this.artworks});
 
   @override
   Widget build(BuildContext context) {
+    final galleryViewModel = Provider.of<GalleryViewModel>(
+      context,
+      listen: false,
+    );
     return GridView.count(
       scrollDirection: Axis.horizontal,
       crossAxisCount: 2,
       padding: const EdgeInsets.all(24),
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
       children: [
-        for (final title in titles)
-          GalleryBoxItem(title: title, onPressed: onItemPressed),
+        for (final artwork in artworks)
+          GalleryBoxItem(
+            artwork: artwork,
+            onPressed: (selected) {
+              galleryViewModel.openArtwork(context, selected);
+            },
+          ),
       ],
     );
   }

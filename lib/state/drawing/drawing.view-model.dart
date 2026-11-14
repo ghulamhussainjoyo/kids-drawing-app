@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:collection';
 import 'dart:ui';
 
@@ -9,37 +10,34 @@ import '../../core/engine/stroke.dabber.dart';
 import '../../core/tools/drawing.tool.dart';
 import '../../core/tools/pencil.drawing.tool.dart';
 import '../../core/tools/stationary.tools.dart';
+import '../../data/local/artwork/artwork.thumbnail.baker.dart';
+import '../../data/local/floor/artwork.entity.dart';
+import '../../data/repositories/artwork/catalog.repository.dart';
 import '../../types/brush.config.dart';
 import '../../types/brush.type.dart';
 import '../../types/drawing.stroke.dart';
 import '../../types/paint.color.dart';
 import '../../types/tools/stationary.model.dart';
-import '../../data/repositories/artwork/artwork.repository.dart';
-import '../../data/repositories/artwork/artwork.repository.impl.dart';
 
 /// Drawing session state: active brush, committed strokes and history.
-///
-/// Listeners are notified for UI-level changes (tool, color, history). The
-/// in-progress stroke is reported separately through [activeStrokeTicks] so
-/// pointer moves repaint the canvas without rebuilding widgets.
 class DrawingViewModel extends ChangeNotifier {
-  DrawingViewModel() {
-    openSelectedArtwork();
+  final CatalogRepository catalogRepository;
+  late ArtworkThumbnailBaker thumbnailBaker;
+  final StationaryTools stationaryTools = StationaryTools();
+
+  DrawingViewModel({required this.catalogRepository}) {
+    thumbnailBaker = ArtworkThumbnailBaker();
   }
 
-  final StationaryTools stationaryTools = StationaryTools();
-  final ArtworkRepository artworkRepository = const ArtworkRepositoryImpl();
   double density = 0.45;
   String? selectedArtworkId;
+  ArtworkEntity? openRow;
   StationaryModel? selectedTool;
-  //@Doc: Layer manager
-  late LayerManager layerManager;
-  late RegionEngine regionEngine;
-  //@Doc: Selected category
+  LayerManager? layerManager;
+  RegionEngine? regionEngine;
   String selectedCategory = 'pencil';
   DrawingTool drawingTool = PencilTool();
 
-  /// Samples closer than this (artwork units) to the previous one are dropped.
   static const double minBrushSize = 12;
   static const double maxBrushSize = 56;
   static const double minSampleDistance = 1.5;
@@ -62,6 +60,7 @@ class DrawingViewModel extends ChangeNotifier {
   int nextStrokeId = 1;
   bool completedStroke = false;
   bool hasOpenedArtwork = false;
+  Timer? _saveTimer;
 
   int get revision => revisionValue;
   BrushConfig get brush => brushConfig;
@@ -76,25 +75,40 @@ class DrawingViewModel extends ChangeNotifier {
     return stationaryTools.getCategoryImage(selectedCategory);
   }
 
-  void openSelectedArtwork() {
+  Future<void> selectArtwork(String artworkKey) async {
+    selectedArtworkId = artworkKey;
+    await openSelectedArtwork();
+    notifyListeners();
+  }
+
+  Future<void> openSelectedArtwork() async {
+    final artworkKey = selectedArtworkId;
+    if (artworkKey == null) {
+      return;
+    }
+    cancelStroke();
+    _saveTimer?.cancel();
     if (hasOpenedArtwork) {
-      cancelStroke();
       strokesList.clear();
       redoStack.clear();
       revisionValue++;
       completedStroke = false;
-      layerManager.dispose();
+      layerManager?.dispose();
     }
-    final page = artworkRepository.appleAndBooks();
-    regionEngine = RegionEngine(page);
-    layerManager = LayerManager(regionEngine: regionEngine);
-    hasOpenedArtwork = true;
-  }
 
-  void selectArtwork(String id) {
-    selectedArtworkId = id;
-    openSelectedArtwork();
-    notifyListeners();
+    final row = await catalogRepository.getByKey(artworkKey);
+    if (row == null) {
+      throw StateError('Artwork not found: $artworkKey');
+    }
+    openRow = row;
+    final page = catalogRepository.loadTemplate(row);
+    final restored = catalogRepository.loadStrokes(row);
+    regionEngine = RegionEngine(page);
+    layerManager = LayerManager(regionEngine: regionEngine!);
+    strokesList.addAll(restored);
+    nextStrokeId = _nextIdAfter(restored);
+    revisionValue++;
+    hasOpenedArtwork = true;
   }
 
   void selectTool(StationaryModel tool) {
@@ -132,13 +146,12 @@ class DrawingViewModel extends ChangeNotifier {
     brushConfig = brushConfig.copyWith(size: size);
   }
 
-  /// Starts a stroke at [point] (artwork coordinates). A touch on an outline
-  /// or beside the art picks the nearest region within [pickRadius]. Returns
-  /// false, and paints nothing, when no region is that close.
   bool beginStroke(Offset point, {double pickRadius = 0}) {
+    final engine = regionEngine;
+    if (engine == null) return false;
     active = null;
     activeDabberField = null;
-    final region = regionEngine.regionAt(point, pickRadius: pickRadius);
+    final region = engine.regionAt(point, pickRadius: pickRadius);
     if (region == null) return false;
     final stroke = DrawingStroke(
       id: nextStrokeId,
@@ -156,8 +169,6 @@ class DrawingViewModel extends ChangeNotifier {
     return true;
   }
 
-  /// Adds a sample. Samples too close to the last stored one are not kept,
-  /// but the drawn stroke still reaches them.
   void extendStroke(Offset point) {
     final current = active;
     if (current == null) return;
@@ -169,7 +180,6 @@ class DrawingViewModel extends ChangeNotifier {
     activeStrokeTicks.value++;
   }
 
-  /// Commits the active stroke as one undo step and returns it.
   DrawingStroke? endStroke() {
     final current = active;
     if (current == null) return null;
@@ -181,10 +191,10 @@ class DrawingViewModel extends ChangeNotifier {
     completedStroke = true;
     activeStrokeTicks.value++;
     notifyListeners();
+    _scheduleSave();
     return current;
   }
 
-  /// Drops the active stroke without touching history.
   void cancelStroke() {
     if (active == null) return;
     active = null;
@@ -197,6 +207,7 @@ class DrawingViewModel extends ChangeNotifier {
     redoStack.add(strokesList.removeLast());
     revisionValue++;
     notifyListeners();
+    _scheduleSave();
   }
 
   void redo() {
@@ -204,6 +215,7 @@ class DrawingViewModel extends ChangeNotifier {
     strokesList.add(redoStack.removeLast());
     revisionValue++;
     notifyListeners();
+    _scheduleSave();
   }
 
   void clearAll() {
@@ -214,6 +226,59 @@ class DrawingViewModel extends ChangeNotifier {
     revisionValue++;
     completedStroke = false;
     notifyListeners();
+    _scheduleSave();
+  }
+
+  void _scheduleSave() {
+    _saveTimer?.cancel();
+    _saveTimer = Timer(const Duration(milliseconds: 500), () {
+      unawaited(saveProgress(bakeThumbnail: false));
+    });
+  }
+
+  /// Flushes strokes and bakes a gallery thumbnail. Call on back / pause.
+  Future<void> flushSave() async {
+    _saveTimer?.cancel();
+    await saveProgress(bakeThumbnail: true);
+  }
+
+  Future<void> saveProgress({required bool bakeThumbnail}) async {
+    final row = openRow;
+    final manager = layerManager;
+    if (row == null || manager == null) {
+      return;
+    }
+    String? thumbPath = row.thumbnailPath;
+    if (bakeThumbnail) {
+      thumbPath = await thumbnailBaker.bake(
+        layerManager: manager,
+        strokes: List<DrawingStroke>.from(strokesList),
+        revision: revisionValue,
+        tool: drawingTool,
+        genre: row.genre,
+        artworkKey: row.artworkKey,
+      );
+    }
+    await catalogRepository.saveProgress(
+      row: row,
+      strokes: List<DrawingStroke>.from(strokesList),
+      artworkSize: manager.artwork.size,
+      thumbnailPath: thumbPath,
+    );
+    final refreshed = await catalogRepository.getByKey(row.artworkKey);
+    if (refreshed != null) {
+      openRow = refreshed;
+    }
+  }
+
+  int _nextIdAfter(List<DrawingStroke> strokes) {
+    var maxId = 0;
+    for (final stroke in strokes) {
+      if (stroke.id > maxId) {
+        maxId = stroke.id;
+      }
+    }
+    return maxId + 1;
   }
 
   bool _sameToolIds(
@@ -229,7 +294,8 @@ class DrawingViewModel extends ChangeNotifier {
 
   @override
   void dispose() {
-    layerManager.dispose();
+    _saveTimer?.cancel();
+    layerManager?.dispose();
     drawingTool.dispose();
     activeStrokeTicks.dispose();
     super.dispose();

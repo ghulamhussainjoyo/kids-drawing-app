@@ -1,9 +1,9 @@
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../../core/engine/burst.engine.dart';
-import '../../../core/engine/canvas.engine.dart';
-import '../../../state/drawing/drawing.view-model.dart';
+import '../../../../core/engine/burst.engine.dart';
+import '../../../../core/engine/canvas.engine.dart';
+import '../../../../state/drawing/drawing.view-model.dart';
 import 'canvas.pinch.dart';
 import 'workspace.painter.dart';
 
@@ -49,7 +49,7 @@ class _WorkspaceCanvasState extends State<WorkspaceCanvas>
     super.initState();
     view = CanvasViewTransform(
       pageRect: widget.pageRect,
-      artworkSize: widget.viewModel.layerManager.artwork.size,
+      artworkSize: widget.viewModel.layerManager!.artwork.size,
     );
     settle = AnimationController(vsync: this, duration: settleDuration)
       ..addListener(onSettleTick);

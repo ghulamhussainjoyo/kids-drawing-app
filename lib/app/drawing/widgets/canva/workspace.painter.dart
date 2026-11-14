@@ -1,8 +1,8 @@
 import 'package:flutter/rendering.dart';
 
-import '../../../core/engine/burst.engine.dart';
-import '../../../core/engine/canvas.engine.dart';
-import '../../../state/drawing/drawing.view-model.dart';
+import '../../../../core/engine/burst.engine.dart';
+import '../../../../core/engine/canvas.engine.dart';
+import '../../../../state/drawing/drawing.view-model.dart';
 
 class WorkspacePainter extends CustomPainter {
   final BurstEngine burstEngine;
@@ -20,7 +20,7 @@ class WorkspacePainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     canvas.save();
     view().apply(canvas);
-    viewModel.layerManager.paint(
+    viewModel.layerManager!.paint(
       canvas,
       tool: viewModel.tool,
       committed: viewModel.strokes,

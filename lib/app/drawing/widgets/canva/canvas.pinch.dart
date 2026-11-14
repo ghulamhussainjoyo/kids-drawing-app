@@ -1,6 +1,6 @@
 import 'dart:ui';
 
-import '../../../core/engine/canvas.engine.dart';
+import '../../../../core/engine/canvas.engine.dart';
 
 /// Snapshot of a two-finger zoom at the moment the pinch started.
 class CanvasPinch {

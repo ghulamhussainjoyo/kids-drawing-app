@@ -5,14 +5,7 @@ import 'package:provider/provider.dart';
 import 'genre.circle.item.dart';
 
 class GenreCarousel extends StatefulWidget {
-  // final List<GenreModel> genres;
-  // final void Function(BuildContext context, GenreModel genre) onGenrePressed;
-  const GenreCarousel({
-    super.key,
-    // required this.genres,
-    // required this.onGenrePressed,
-  });
-
+  const GenreCarousel({super.key});
   @override
   State<GenreCarousel> createState() => _GenreCarouselState();
 }

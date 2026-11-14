@@ -15,9 +15,9 @@ class PencilTools {
       ),
       PencilModel(
         id: '2',
-        name: 'blue',
+        name: 'black',
         imageSize: 48,
-        color: const Color(0xFF2196F3),
+        color: const Color(0xFF000000),
         image: 'assets/pencil/black.png',
       ),
       PencilModel(

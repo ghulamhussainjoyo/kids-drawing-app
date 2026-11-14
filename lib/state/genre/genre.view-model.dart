@@ -25,7 +25,7 @@ class GenreViewModel extends ChangeNotifier {
     selectGenre(genre);
     Navigator.of(context).push(
       CupertinoPageRoute<void>(
-        builder: (_) => GalleryScreen(category: genre.name),
+        builder: (_) => GalleryScreen(category: genre.id),
       ),
     );
   }

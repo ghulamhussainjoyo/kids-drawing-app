@@ -1,29 +1,55 @@
 import 'package:flutter/cupertino.dart';
-import 'package:kids_drawing_flutter/app/drawing/screen/drawing.screen.dart.dart';
-import 'package:kids_drawing_flutter/data/repositories/gallery/gallery.repository.dart';
+import 'package:kids_drawing_flutter/app/drawing/screen/drawing.screen.dart';
+import 'package:kids_drawing_flutter/data/local/floor/artwork.entity.dart';
+import 'package:kids_drawing_flutter/data/repositories/artwork/catalog.repository.dart';
 import 'package:kids_drawing_flutter/state/drawing/drawing.view-model.dart';
-import 'package:kids_drawing_flutter/types/gellery/gallery.model.dart';
 
 class GalleryViewModel extends ChangeNotifier {
-  List<GalleryModel> galleryList = [];
-  final DrawingViewModel drawingViewModel = DrawingViewModel();
-  final GalleryRepository galleryRepository = GalleryRepository();
+  GalleryViewModel({
+    required this.catalogRepository,
+    required this.drawingViewModel,
+  });
 
-  GalleryViewModel() {
-    galleryList = galleryRepository.getGalleryList();
+  final CatalogRepository catalogRepository;
+  final DrawingViewModel drawingViewModel;
+
+  final Map<String, List<ArtworkEntity>> _byGenre = {};
+  bool loading = false;
+
+  List<ArtworkEntity> artworksForGenre(String genre) {
+    return _byGenre[genre] ?? const [];
   }
 
-  List<GalleryModel> getGalleryList() {
-    return galleryRepository.getGalleryList();
+  Future<void> loadGenre(String genre) async {
+    loading = true;
+    notifyListeners();
+    final rows = await catalogRepository.listByGenre(genre);
+    _byGenre[genre] = rows;
+    loading = false;
+    notifyListeners();
   }
 
-  void onGalleryPressed(BuildContext context, String id) {
-    final gallery = galleryList.firstWhere((gallery) => gallery.id == id);
-    drawingViewModel.selectArtwork(gallery.id);
-    drawingViewModel.openSelectedArtwork();
+  Future<void> loadAll(List<String> genreIds) async {
+    loading = true;
+    notifyListeners();
+    for (final genreId in genreIds) {
+      final rows = await catalogRepository.listByGenre(genreId);
+      _byGenre[genreId] = rows;
+    }
+    loading = false;
+    notifyListeners();
+  }
+
+  Future<void> openArtwork(BuildContext context, ArtworkEntity artwork) async {
+    await drawingViewModel.selectArtwork(artwork.artworkKey);
+    if (!context.mounted) {
+      return;
+    }
     final route = CupertinoPageRoute(
       builder: (context) => const DrawingScreen(),
     );
-    Navigator.push(context, route);
+    await Navigator.push(context, route);
+    await drawingViewModel.flushSave();
+    await loadGenre(artwork.genre);
   }
 }

@@ -6,7 +6,7 @@ import '../../../core/engine/burst.engine.dart';
 import '../../../core/engine/canvas.engine.dart';
 import '../../../core/ui/theme/app.colors.dart';
 import '../../../state/drawing/drawing.view-model.dart';
-import '../widgets/workspace.painter.dart';
+import '../widgets/canva/workspace.painter.dart';
 
 class EraseConfirmScreen extends StatelessWidget {
   const EraseConfirmScreen({super.key, required this.viewModel});
@@ -47,13 +47,17 @@ class EraseConfirmScreen extends StatelessWidget {
                             side,
                           );
                           return CustomPaint(
-                            size: Size(constraints.maxWidth, constraints.maxHeight),
+                            size: Size(
+                              constraints.maxWidth,
+                              constraints.maxHeight,
+                            ),
                             painter: WorkspacePainter(
                               viewModel: viewModel,
                               burstEngine: BurstEngine(),
                               view: () => CanvasViewTransform(
                                 pageRect: pageRect,
-                                artworkSize: viewModel.layerManager.artwork.size,
+                                artworkSize:
+                                    viewModel.layerManager!.artwork.size,
                               ),
                               repaint: viewModel,
                             ),

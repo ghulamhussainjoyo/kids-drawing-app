@@ -1,8 +1,13 @@
 import 'package:flutter/cupertino.dart';
-
-import '../widgets/gallery.grid.dart';
+import 'package:kids_drawing_flutter/app/gallery/widgets/gallery.grid.dart';
+import 'package:kids_drawing_flutter/app/gallery/widgets/gallery.section.background.dart';
+import 'package:kids_drawing_flutter/data/local/floor/artwork.entity.dart';
+import 'package:kids_drawing_flutter/state/gallery/gallery.view-model.dart';
+import 'package:kids_drawing_flutter/state/genre/genre.view-model.dart';
+import 'package:provider/provider.dart';
 
 class GalleryScreen extends StatefulWidget {
+  /// Landing id: a catalog genre, or `coloring-arts` for scroller start.
   final String category;
 
   const GalleryScreen({super.key, required this.category});
@@ -12,146 +17,157 @@ class GalleryScreen extends StatefulWidget {
 }
 
 class _GalleryScreenState extends State<GalleryScreen> {
-  int categoryIndex = 0;
-  late final ScrollController controller;
+  static const String coloringArtsId = 'coloring-arts';
 
-  final categoryColor = const {
-    'food': Color(0xFFE8A87C),
-    'music': Color(0xFF8B7CB8),
+  static const Map<String, Color> sectionColors = {
     'school': Color(0xFF7EC8E3),
     'animals': Color(0xFF7CB88B),
+    'music': Color(0xFF8B7CB8),
+    'transport': Color(0xFFE8C87C),
+    'seasons': Color(0xFF81D4FA),
+    'princes': Color(0xFFFF4D94),
+    'fruit-garden': Color(0xFFFF8A3D),
   };
 
-  List<String> get categoryNames => getGalleryList().keys.toList();
-
-  Map<String, List<String>> getGalleryList() {
-    final gallery = {
-      'animals': [
-        'lion',
-        'zebra',
-        'giraffe',
-        'elephant',
-        'monkey',
-        'panda',
-        'snake',
-        'tiger',
-        'bear',
-        'fox',
-        'wolf',
-        'rabbit',
-        'cat',
-        'dog',
-      ],
-      'school': [
-        'book',
-        'ruler',
-        'pencil',
-        'crayons',
-        'scissors',
-        'desk',
-        'pouch',
-        'bag',
-        'stars',
-      ],
-    };
-    return gallery;
-  }
-
-  double categoryWidth(String name) {
-    return groupWidth(getGalleryList()[name]!);
-  }
-
-  double groupWidth(List<String> titles) {
-    final height = MediaQuery.sizeOf(context).height;
-    const padding = 48.0;
-    final cellSize = (height - padding) / 2;
-    final columns = (titles.length / 2).ceil();
-    return padding + columns * cellSize;
-  }
-
-  double get cellSize {
-    const padding = 48.0;
-    final height = MediaQuery.sizeOf(context).height;
-    return (height - padding) / 2;
-  }
-
-  void onScroll() {
-    setState(() {});
-  }
-
-  double offsetForCategory(String category) {
-    var offset = 0.0;
-    for (final name in categoryNames) {
-      if (name == category) {
-        return offset;
-      }
-      offset = offset + categoryWidth(name);
-    }
-    return 0;
-  }
-
-  Color backgroundAtCenter() {
-    final names = categoryNames;
-    if (!controller.hasClients) {
-      return categoryColor[names.first]!;
-    }
-
-    final screenWidth = MediaQuery.sizeOf(context).width;
-    var x = controller.offset + screenWidth / 2;
-    var index = 0;
-    while (index < names.length - 1) {
-      final width = categoryWidth(names[index]);
-      if (x < width) {
-        break;
-      }
-      x = x - width;
-      index = index + 1;
-    }
-
-    final color = categoryColor[names[index]]!;
-    if (index == names.length - 1) {
-      return color;
-    }
-
-    final width = categoryWidth(names[index]);
-    var fadeStart = width - screenWidth;
-    if (fadeStart < 0) {
-      fadeStart = 0;
-    }
-    if (x < fadeStart) {
-      return color;
-    }
-    final blend = ((x - fadeStart) / (width - fadeStart)).clamp(0.0, 1.0);
-    return Color.lerp(color, categoryColor[names[index + 1]], blend)!;
-  }
+  late final ScrollController controller;
+  List<String> sectionIds = const [];
+  bool ready = false;
 
   @override
   void initState() {
     super.initState();
     controller = ScrollController();
-    controller.addListener(onScroll);
+    controller.addListener(_onScroll);
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      controller.jumpTo(offsetForCategory(widget.category));
+      sectionIds = _catalogSectionIds();
+      _loadAndLand();
     });
   }
 
   @override
+  void dispose() {
+    controller.removeListener(_onScroll);
+    controller.dispose();
+    super.dispose();
+  }
+
+  List<String> _catalogSectionIds() {
+    final genres = Provider.of<GenreViewModel>(
+      context,
+      listen: false,
+    ).getGenres();
+    final ids = <String>[];
+    for (final genre in genres) {
+      if (genre.id == coloringArtsId) {
+        continue;
+      }
+      ids.add(genre.id);
+    }
+    return ids;
+  }
+
+  void _onScroll() {
+    setState(() {});
+  }
+
+  Future<void> _loadAndLand() async {
+    final galleryViewModel = Provider.of<GalleryViewModel>(
+      context,
+      listen: false,
+    );
+    await galleryViewModel.loadAll(sectionIds);
+    if (!mounted) {
+      return;
+    }
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) {
+        return;
+      }
+      _jumpToLanding();
+      setState(() {
+        ready = true;
+      });
+    });
+  }
+
+  void _jumpToLanding() {
+    if (!controller.hasClients) {
+      return;
+    }
+    final offset = offsetForLanding(widget.category);
+    final maxOffset = controller.position.maxScrollExtent;
+    controller.jumpTo(offset.clamp(0.0, maxOffset));
+  }
+
+  double sectionWidth(String sectionId) {
+    final galleryViewModel = Provider.of<GalleryViewModel>(
+      context,
+      listen: false,
+    );
+    final artworks = galleryViewModel.artworksForGenre(sectionId);
+    return widthForArtworks(artworks);
+  }
+
+  double widthForArtworks(List<ArtworkEntity> artworks) {
+    final height = MediaQuery.sizeOf(context).height;
+    const padding = 48.0;
+    final cellSize = (height - padding) / 2;
+    final columns = (artworks.length / 2).ceil();
+    final safeColumns = columns < 1 ? 1 : columns;
+    return padding + safeColumns * cellSize;
+  }
+
+  double offsetForLanding(String landingId) {
+    if (landingId == coloringArtsId) {
+      return 0;
+    }
+    var offset = 0.0;
+    for (final sectionId in sectionIds) {
+      if (sectionId == landingId) {
+        return offset;
+      }
+      offset = offset + sectionWidth(sectionId);
+    }
+    return 0;
+  }
+
+  Color backgroundColor() {
+    final scrollOffset = controller.hasClients ? controller.offset : 0.0;
+    final screenWidth = MediaQuery.sizeOf(context).width;
+    final background = GallerySectionBackground(
+      sectionIds: sectionIds,
+      colors: sectionColors,
+      sectionWidth: sectionWidth,
+    );
+    return background.colorAt(
+      scrollOffset: scrollOffset,
+      screenWidth: screenWidth,
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final names = categoryNames;
+    final galleryViewModel = Provider.of<GalleryViewModel>(context);
     return CupertinoPageScaffold(
-      backgroundColor: backgroundAtCenter(),
-      child: ListView.builder(
-        controller: controller,
-        scrollDirection: Axis.horizontal,
-        itemCount: names.length,
-        itemBuilder: (context, index) {
-          final name = names[index];
-          return SizedBox(
-            width: categoryWidth(name),
-            child: GalleryGrid(titles: getGalleryList()[name]!),
-          );
-        },
-      ),
+      backgroundColor: backgroundColor(),
+      child: galleryViewModel.loading && !ready
+          ? const Center(child: CupertinoActivityIndicator())
+          : Opacity(
+              opacity: ready ? 1 : 0,
+              child: ListView(
+                controller: controller,
+                scrollDirection: Axis.horizontal,
+                children: [
+                  for (final sectionId in sectionIds)
+                    SizedBox(
+                      width: sectionWidth(sectionId),
+                      child: GalleryGrid(
+                        artworks: galleryViewModel.artworksForGenre(sectionId),
+                      ),
+                    ),
+                ],
+              ),
+            ),
     );
   }
 }
