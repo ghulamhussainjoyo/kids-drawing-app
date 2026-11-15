@@ -60,6 +60,7 @@ class DrawingViewModel extends ChangeNotifier {
   int nextStrokeId = 1;
   bool completedStroke = false;
   bool hasOpenedArtwork = false;
+  bool clipToRegions = true;
   Timer? _saveTimer;
 
   int get revision => revisionValue;
@@ -107,6 +108,7 @@ class DrawingViewModel extends ChangeNotifier {
     layerManager = LayerManager(regionEngine: regionEngine!);
     strokesList.addAll(restored);
     nextStrokeId = _nextIdAfter(restored);
+    clipToRegions = true;
     revisionValue++;
     hasOpenedArtwork = true;
   }
@@ -146,16 +148,40 @@ class DrawingViewModel extends ChangeNotifier {
     brushConfig = brushConfig.copyWith(size: size);
   }
 
+  void toggleClipToRegions() {
+    clipToRegions = !clipToRegions;
+    notifyListeners();
+  }
+
   bool beginStroke(Offset point, {double pickRadius = 0}) {
     final engine = regionEngine;
-    if (engine == null) return false;
+    if (engine == null) {
+      return false;
+    }
     active = null;
     activeDabberField = null;
-    final region = engine.regionAt(point, pickRadius: pickRadius);
-    if (region == null) return false;
+
+    late final String regionId;
+    if (clipToRegions) {
+      final region = engine.regionAt(point, pickRadius: pickRadius);
+      if (region == null) {
+        return false;
+      }
+      regionId = region.id;
+    } else {
+      final size = engine.artwork.size;
+      if (point.dx < 0 ||
+          point.dy < 0 ||
+          point.dx > size ||
+          point.dy > size) {
+        return false;
+      }
+      regionId = DrawingStroke.freeRegionId;
+    }
+
     final stroke = DrawingStroke(
       id: nextStrokeId,
-      regionId: region.id,
+      regionId: regionId,
       brush: brushConfig,
       seed: nextStrokeId,
       points: [point],
@@ -240,6 +266,19 @@ class DrawingViewModel extends ChangeNotifier {
   Future<void> flushSave() async {
     _saveTimer?.cancel();
     await saveProgress(bakeThumbnail: true);
+  }
+
+  Future<Uint8List?> exportPngBytes() async {
+    final manager = layerManager;
+    if (manager == null) {
+      return null;
+    }
+    return thumbnailBaker.bakeBytes(
+      layerManager: manager,
+      strokes: List<DrawingStroke>.from(strokesList),
+      revision: revisionValue,
+      tool: drawingTool,
+    );
   }
 
   Future<void> saveProgress({required bool bakeThumbnail}) async {

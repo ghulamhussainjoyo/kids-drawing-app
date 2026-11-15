@@ -4,6 +4,9 @@ import 'brush.config.dart';
 
 /// One finger-down-to-lift stroke. Points are in artwork coordinates.
 class DrawingStroke {
+  /// Stroke painted with clip-to-region off; clipped to the full page only.
+  static const String freeRegionId = 'free';
+
   DrawingStroke({
     required this.id,
     required this.regionId,
@@ -14,7 +17,7 @@ class DrawingStroke {
 
   final int id;
 
-  /// The region resolved from the first touch. Every point is clipped to it.
+  /// Region from first touch, or [freeRegionId] when clip mode is off.
   final String regionId;
   final BrushConfig brush;
 

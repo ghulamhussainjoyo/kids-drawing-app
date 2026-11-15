@@ -1,5 +1,8 @@
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart';
 import 'package:kids_drawing_flutter/app/genre/widget/genre.carousel.dart';
+import 'package:kids_drawing_flutter/app/parent_gate/utils/parent.gate.dart';
+import 'package:kids_drawing_flutter/app/setting/screen/setting.screen.dart';
 
 class GenreScreen extends StatelessWidget {
   const GenreScreen({super.key});
@@ -30,19 +33,27 @@ class GenreScreen extends StatelessWidget {
                 ),
 
                 // Top controls
-                const Positioned(
+                Positioned(
                   top: 0,
                   left: 0,
                   right: 0,
                   child: Row(
                     children: [
                       CupertinoButton(
-                        onPressed: null,
+                        onPressed: () async {
+                          final granted = await ParentGate.request(context);
+                          if (!context.mounted || !granted) return;
+                          showDialog<void>(
+                            context: context,
+                            barrierColor: const Color(0x73000000),
+                            builder: (_) => const SettingDialog(),
+                          );
+                        },
                         padding: EdgeInsets.zero,
-                        child: Icon(CupertinoIcons.settings),
+                        child: const Icon(CupertinoIcons.settings),
                       ),
-                      Spacer(),
-                      CupertinoButton(
+                      const Spacer(),
+                      const CupertinoButton(
                         onPressed: null,
                         padding: EdgeInsets.symmetric(
                           horizontal: 16,

@@ -4,7 +4,9 @@ import 'package:flutter/cupertino.dart';
 import 'package:kids_drawing_flutter/app/drawing/metrics/tools.panel.metrics.dart';
 import 'package:provider/provider.dart';
 import 'package:kids_drawing_flutter/core/ui/theme/app.colors.dart';
+import 'package:kids_drawing_flutter/app/drawing/screen/complete.screen.dart';
 import 'package:kids_drawing_flutter/app/drawing/screen/erase.confirm.screen.dart';
+import 'package:kids_drawing_flutter/app/drawing/widgets/actions/drawing.canvas.actions.dart';
 import 'package:kids_drawing_flutter/app/drawing/widgets/controller/controller.tools.dart';
 import 'package:kids_drawing_flutter/app/drawing/widgets/tools/drawing.tools.dart';
 import 'package:kids_drawing_flutter/app/drawing/widgets/canva/workspace.canvas.dart';
@@ -24,6 +26,18 @@ class _DrawingScreen extends State<DrawingScreen> with WidgetsBindingObserver {
       CupertinoPageRoute<void>(
         fullscreenDialog: true,
         builder: (context) => EraseConfirmScreen(viewModel: viewModel),
+      ),
+    );
+  }
+
+  Future<void> openComplete(DrawingViewModel viewModel) async {
+    await viewModel.flushSave();
+    if (!mounted) {
+      return;
+    }
+    await Navigator.of(context).push(
+      CupertinoPageRoute<void>(
+        builder: (context) => CompleteScreen(viewModel: viewModel),
       ),
     );
   }
@@ -74,9 +88,10 @@ class _DrawingScreen extends State<DrawingScreen> with WidgetsBindingObserver {
 
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.inactive ||
-        state == AppLifecycleState.paused ||
-        state == AppLifecycleState.detached) {
+    final isAppPaused = state == AppLifecycleState.paused;
+    final isAppInactive = state == AppLifecycleState.inactive;
+    final isAppDetached = state == AppLifecycleState.detached;
+    if (isAppInactive || isAppPaused || isAppDetached) {
       final viewModel = Provider.of<DrawingViewModel>(context, listen: false);
       viewModel.flushSave();
     }
@@ -145,12 +160,11 @@ class _DrawingScreen extends State<DrawingScreen> with WidgetsBindingObserver {
                               ),
                             ),
                           ),
-                          Padding(
-                            padding: EdgeInsets.all(12),
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [Text('Hello'), Text('World')],
-                            ),
+                          DrawingCanvasActions(
+                            hasPaint: viewModel.strokes.isNotEmpty,
+                            clipToRegions: viewModel.clipToRegions,
+                            onComplete: () => openComplete(viewModel),
+                            onToggleClip: viewModel.toggleClipToRegions,
                           ),
                         ],
                       ),

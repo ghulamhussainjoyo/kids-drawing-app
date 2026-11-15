@@ -7,4 +7,6 @@ abstract final class AppColors {
   static const Color disabled = Color(0xFFC9C9D1);
   static const Color done = Color(0xFF3DBE5B);
   static const Color lavender = Color(0xFFE3D5FA);
+  static const Color teal = Color(0xFF1A7A86);
+  static const Color coral = Color(0xFFE85D5D);
 }

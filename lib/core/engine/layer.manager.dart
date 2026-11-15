@@ -75,8 +75,17 @@ class LayerManager {
     StrokeDabber dabber,
     DrawingTool tool,
   ) {
+    if (stroke.regionId == DrawingStroke.freeRegionId) {
+      final size = artwork.size;
+      final pagePath = Path()
+        ..addRect(Rect.fromLTWH(0, 0, size, size));
+      strokeRenderer.paint(canvas, dabber, pagePath, tool);
+      return;
+    }
     final region = regionEngine.regionById(stroke.regionId);
-    if (region == null) return;
+    if (region == null) {
+      return;
+    }
     strokeRenderer.paint(canvas, dabber, region.path, tool);
   }
 

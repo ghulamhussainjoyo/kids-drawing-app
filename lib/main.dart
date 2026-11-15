@@ -1,6 +1,8 @@
-import 'package:flutter/services.dart';
-import 'package:provider/provider.dart';
 import 'package:flutter/cupertino.dart';
+import 'package:flutter/material.dart' show DefaultMaterialLocalizations;
+import 'package:flutter/services.dart';
+import 'package:kids_drawing_flutter/core/storage/settings.repository.dart';
+import 'package:provider/provider.dart';
 import 'package:kids_drawing_flutter/data/local/artwork/artwork.catalog.seeder.dart';
 import 'package:kids_drawing_flutter/data/local/device.id.store.dart';
 import 'package:kids_drawing_flutter/data/local/floor/app.database.dart';
@@ -14,6 +16,7 @@ import 'core/ui/theme/app.theme.dart';
 import 'state/drawing/drawing.view-model.dart';
 
 final DB_NAME = 'kids_drawing.db';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -22,10 +25,12 @@ Future<void> main() async {
     overlays: [SystemUiOverlay.bottom],
   );
 
-  final database = await $FloorAppDatabase.databaseBuilder(DB_NAME).build();
   final deviceId = await DeviceIdStore().getOrCreate();
-  final seeder = ArtworkCatalogSeeder(artworkDao: database.artworkDao);
-  await seeder.seedMissing(deviceId);
+  final database = await $FloorAppDatabase.databaseBuilder(DB_NAME).build();
+
+  await ArtworkCatalogSeeder(artworkDao: database.artworkDao)
+      .seedMissing(deviceId);
+
   final catalogRepository = CatalogRepositoryImpl(
     deviceId: deviceId,
     artworkDao: database.artworkDao,
@@ -34,6 +39,7 @@ Future<void> main() async {
   runApp(
     MultiProvider(
       providers: [
+        ChangeNotifierProvider(create: (_) => SettingsRepository()..load()),
         Provider<CatalogRepository>.value(value: catalogRepository),
         ChangeNotifierProvider(create: (_) => GenreViewModel()),
         ChangeNotifierProvider(
@@ -55,13 +61,17 @@ Future<void> main() async {
 
 class AppWidget extends StatelessWidget {
   const AppWidget({super.key});
-
   @override
   Widget build(BuildContext context) {
     return CupertinoApp(
       title: 'Kids Drawing',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.data(),
+      localizationsDelegates: const [
+        DefaultMaterialLocalizations.delegate,
+        DefaultCupertinoLocalizations.delegate,
+        DefaultWidgetsLocalizations.delegate,
+      ],
       home: const SplashScreen(),
     );
   }

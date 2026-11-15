@@ -11,6 +11,14 @@ Before creating any class or widget:
 2. If something similar exists, extend, compose, or parameterize it. Do not copy.
 3. If a second feature needs a feature-private widget, move it to `core/ui/widgets/` instead of duplicating.
 
+## Shared buttons
+
+- Round filled buttons (icon, short graphic, or a digit) use `CircleButton` from `core/ui/widgets/circle.button.dart`.
+- Rounded image tiles use `RoundedButton` from `core/ui/widgets/rounded.button.dart`.
+- Do not add another `CupertinoButton` plus `BoxShape.circle` widget, including parent gate.
+- If a change adds a duplicate of an existing widget, delete the duplicate in the same change.
+- Bare text actions (YES/NO, “Try free”, Keep/Let go pills) are not circle buttons.
+
 State in the response which existing classes were reused.
 
 ```dart

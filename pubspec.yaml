@@ -6,8 +6,9 @@ version: 1.0.0+1
 environment:
   sdk: ^3.13.7
 dependencies:
-  flutter_svg: ^2.2.3
+  intl: ^0.20.2
   provider: ^6.1.2
+  flutter_svg: ^2.2.3
   native_device_orientation: ^2.0.3
   flutter:
     sdk: flutter
@@ -21,6 +22,8 @@ dependencies:
   path: ^1.9.1
   path_provider: ^2.1.6
   shared_preferences: ^2.5.6
+  share_plus: ^13.3.1
+  gal: ^3.0.0
 
 dev_dependencies:
   flutter_test:

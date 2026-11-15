@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:kids_drawing_flutter/core/engine/layer.manager.dart';
@@ -9,13 +10,11 @@ import 'package:path_provider/path_provider.dart';
 
 /// Bakes paint + outlines into a square PNG for the gallery.
 class ArtworkThumbnailBaker {
-  Future<String> bake({
+  Future<Uint8List> bakeBytes({
     required LayerManager layerManager,
     required List<DrawingStroke> strokes,
     required int revision,
     required DrawingTool tool,
-    required String genre,
-    required String artworkKey,
   }) async {
     final size = layerManager.artwork.size;
     final recorder = ui.PictureRecorder();
@@ -34,14 +33,30 @@ class ArtworkThumbnailBaker {
     if (bytes == null) {
       throw StateError('Thumbnail bake produced no bytes');
     }
+    return bytes.buffer.asUint8List();
+  }
 
+  Future<String> bake({
+    required LayerManager layerManager,
+    required List<DrawingStroke> strokes,
+    required int revision,
+    required DrawingTool tool,
+    required String genre,
+    required String artworkKey,
+  }) async {
+    final png = await bakeBytes(
+      layerManager: layerManager,
+      strokes: strokes,
+      revision: revision,
+      tool: tool,
+    );
     final docs = await getApplicationDocumentsDirectory();
     final folder = Directory(p.join(docs.path, 'thumbnails', genre));
     if (!folder.existsSync()) {
       folder.createSync(recursive: true);
     }
     final file = File(p.join(folder.path, '$artworkKey.png'));
-    await file.writeAsBytes(bytes.buffer.asUint8List(), flush: true);
+    await file.writeAsBytes(png, flush: true);
     return file.path;
   }
 }
