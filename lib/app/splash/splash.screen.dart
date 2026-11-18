@@ -1,5 +1,5 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:kids_drawing_flutter/core/ui/theme/app.typography.dart';
 
 import '../genre/screen/genre.screen.dart';
 
@@ -33,7 +33,10 @@ class _SplashScreen extends State<SplashScreen> {
   Widget build(BuildContext context) {
     return CupertinoPageScaffold(
       child: Center(
-        child: Text('Splash', style: TextStyle(color: Colors.black)),
+        child: Text(
+          'Splash',
+          style: AppTypography.boldStyle(color: const Color(0xFF000000)),
+        ),
       ),
     );
   }

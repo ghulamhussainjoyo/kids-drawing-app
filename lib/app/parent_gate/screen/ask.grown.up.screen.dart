@@ -2,6 +2,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:kids_drawing_flutter/app/parent_gate/utils/grown.up.math.challenge.dart';
 import 'package:kids_drawing_flutter/app/parent_gate/widgets/grown.up.equation.card.dart';
 import 'package:kids_drawing_flutter/core/ui/theme/app.colors.dart';
+import 'package:kids_drawing_flutter/core/ui/theme/app.typography.dart';
 import 'package:kids_drawing_flutter/core/ui/widgets/circle.button.dart';
 
 /// Full-screen parental gate. Pops `true` on correct answer, `false` on X.
@@ -64,13 +65,12 @@ class _AskGrownUpScreenState extends State<AskGrownUpScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Text(
+                    Text(
                       'Ask a Grown-Up',
                       textAlign: TextAlign.center,
-                      style: TextStyle(
+                      style: AppTypography.boldStyle(
                         color: CupertinoColors.white,
                         fontSize: 32,
-                        fontWeight: FontWeight.w800,
                       ),
                     ),
                     const SizedBox(height: 28),

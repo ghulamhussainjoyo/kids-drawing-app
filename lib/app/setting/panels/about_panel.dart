@@ -1,69 +1,72 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:kids_drawing_flutter/app/setting/widgets/setting.card.dart';
+import 'package:kids_drawing_flutter/app/setting/widgets/setting.colors.dart';
+import 'package:kids_drawing_flutter/app/setting/widgets/setting.panel.scaffold.dart';
 import 'package:kids_drawing_flutter/core/ui/theme/app.colors.dart';
+import 'package:kids_drawing_flutter/core/ui/theme/app.typography.dart';
+import 'package:kids_drawing_flutter/utils/responsive.dart';
+import 'package:package_info_plus/package_info_plus.dart';
 
 class AboutPanel extends StatelessWidget {
   const AboutPanel({super.key});
 
+  static final Future<PackageInfo> _info = PackageInfo.fromPlatform();
+
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(top: 8, bottom: 20, left: 16, right: 28),
+    return SettingPanelScaffold(
+      title: 'About',
+      onClose: () => Navigator.of(context).pop(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'About',
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
-              color: Color(0xFF221A30),
-            ),
-          ),
-          const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.7),
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: const Color(0xFFE5DEEE)),
-            ),
+          SettingCard(
+            radius: 20,
+            padding: EdgeInsets.all(context.rs(16)),
+            margin: EdgeInsets.only(bottom: context.rs(14)),
             child: Row(
               children: [
                 Container(
-                  width: 50,
-                  height: 50,
+                  width: context.rs(50),
+                  height: context.rs(50),
                   decoration: BoxDecoration(
                     color: AppColors.lavender,
-                    borderRadius: BorderRadius.circular(14),
+                    borderRadius: BorderRadius.circular(context.rs(14)),
                   ),
-                  child: const Icon(
+                  child: Icon(
                     CupertinoIcons.paintbrush_fill,
                     color: AppColors.purple,
-                    size: 26,
+                    size: context.rs(26),
                   ),
                 ),
-                const SizedBox(width: 14),
-                const Expanded(
+                SizedBox(width: context.rs(14)),
+                Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         'Kids Drawing',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w800,
-                          color: Color(0xFF221A30),
+                        style: AppTypography.boldStyle(
+                          fontSize: context.rs(16),
+                          color: SettingColors.title,
                         ),
                       ),
-                      SizedBox(height: 2),
-                      Text(
-                        'Version 1.0.0 (Build 1)',
-                        style: TextStyle(
-                          fontSize: 12,
-                          fontWeight: FontWeight.w600,
-                          color: Color(0xFF7C7286),
-                        ),
+                      SizedBox(height: context.rs(2)),
+                      FutureBuilder<PackageInfo>(
+                        future: _info,
+                        builder: (context, snap) {
+                          final info = snap.data;
+                          return Text(
+                            info == null
+                                ? 'Version …'
+                                : 'Version ${info.version} (Build ${info.buildNumber})',
+                            style: AppTypography.numericStyle(
+                              fontSize: context.rs(12),
+                              fontWeight: FontWeight.w600,
+                              color: const Color(0xFF7C7286),
+                            ),
+                          );
+                        },
                       ),
                     ],
                   ),
@@ -71,20 +74,18 @@ class AboutPanel extends StatelessWidget {
               ],
             ),
           ),
-          const SizedBox(height: 14),
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(14),
+            padding: EdgeInsets.all(context.rs(14)),
             decoration: BoxDecoration(
-              color: Colors.white.withOpacity(0.55),
-              borderRadius: BorderRadius.circular(16),
+              color: const Color(0x8CFFFFFF),
+              borderRadius: BorderRadius.circular(context.rs(16)),
             ),
-            child: const Text(
-              'Designed with ❤️ for young creative minds. Unleash imagination with puppies, colors, and art!',
-              style: TextStyle(
-                fontSize: 13,
-                fontWeight: FontWeight.w500,
-                color: Color(0xFF5D5466),
+            child: Text(
+              'Designed with love for young creative minds. Unleash imagination with puppies, colors, and art!',
+              style: AppTypography.semiBoldStyle(
+                fontSize: context.rs(13),
+                color: const Color(0xFF5D5466),
                 height: 1.4,
               ),
             ),

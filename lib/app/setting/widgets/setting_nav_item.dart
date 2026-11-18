@@ -1,5 +1,7 @@
-import 'package:flutter/material.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:kids_drawing_flutter/core/ui/theme/app.colors.dart';
+import 'package:kids_drawing_flutter/core/ui/theme/app.typography.dart';
+import 'package:kids_drawing_flutter/utils/responsive.dart';
 
 class SettingNavItem extends StatelessWidget {
   final Widget icon;
@@ -18,34 +20,41 @@ class SettingNavItem extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 3),
+      padding: EdgeInsets.symmetric(vertical: context.rs(3)),
       child: GestureDetector(
         onTap: onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),
-          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
+          padding: EdgeInsets.symmetric(
+            horizontal: context.rs(14),
+            vertical: context.rs(8),
+          ),
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.lavender : Colors.transparent,
-            borderRadius: BorderRadius.circular(14),
+            color: isSelected
+                ? const Color(0xE6FFFFFF)
+                : const Color(0x00000000),
+            borderRadius: BorderRadius.circular(context.rs(10)),
           ),
           child: Row(
             children: [
               SizedBox(
-                width: 24,
-                height: 24,
+                width: context.rs(24),
+                height: context.rs(24),
                 child: Center(child: icon),
               ),
-              const SizedBox(width: 12),
+              SizedBox(width: context.rs(12)),
               Expanded(
                 child: Text(
                   label,
-                  style: TextStyle(
-                    fontSize: 15,
-                    fontWeight: isSelected ? FontWeight.w700 : FontWeight.w600,
-                    color: isSelected
-                        ? AppColors.purple
-                        : const Color(0xFF555555),
-                  ),
+                  style: isSelected
+                      ? AppTypography.boldStyle(
+                          fontSize: context.rs(15),
+                          color: AppColors.purple,
+                        )
+                      : AppTypography.semiBoldStyle(
+                          fontSize: context.rs(15),
+                          color: const Color(0xFF3A3344),
+                        ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),

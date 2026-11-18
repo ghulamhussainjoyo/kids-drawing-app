@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
+import 'package:kids_drawing_flutter/core/ui/theme/app.typography.dart';
 import 'package:kids_drawing_flutter/types/genre/genre.model.dart';
 
 /// Title letters sit just outside the genre circle.
@@ -76,9 +77,8 @@ class GenreTitle extends StatelessWidget {
 
   /// Real glyph width so I and W take the space they need.
   List<double> letterWidths(String name) {
-    final style = TextStyle(
+    final style = AppTypography.boldStyle(
       fontSize: fontSize,
-      fontWeight: FontWeight.w900,
       height: 1,
     );
     final widths = <double>[];
@@ -115,13 +115,11 @@ class _GenreLetter extends StatelessWidget {
   });
 
   TextStyle heavyStyle({Color? color, Paint? foreground}) {
-    return TextStyle(
+    return AppTypography.boldStyle(
       fontSize: fontSize,
-      fontWeight: FontWeight.w900,
       height: 1,
       color: color,
-      foreground: foreground,
-    );
+    ).copyWith(foreground: foreground);
   }
 
   @override

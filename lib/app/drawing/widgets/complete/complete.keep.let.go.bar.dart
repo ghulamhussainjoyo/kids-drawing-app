@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:kids_drawing_flutter/core/ui/theme/app.colors.dart';
+import 'package:kids_drawing_flutter/core/ui/theme/app.typography.dart';
 
 /// Compact Keep / Let go row that replaces the action icons.
 class CompleteKeepLetGoBar extends StatelessWidget {
@@ -48,9 +49,8 @@ class _Pill extends StatelessWidget {
       onPressed: onPressed,
       child: Text(
         label,
-        style: const TextStyle(
+        style: AppTypography.boldStyle(
           color: CupertinoColors.white,
-          fontWeight: FontWeight.w700,
           fontSize: 16,
         ),
       ),

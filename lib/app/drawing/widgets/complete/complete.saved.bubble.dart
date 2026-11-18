@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:kids_drawing_flutter/core/ui/theme/app.typography.dart';
 
 /// Brief "Saved!" feedback after a successful gallery download.
 class CompleteSavedBubble extends StatelessWidget {
@@ -19,12 +20,11 @@ class CompleteSavedBubble extends StatelessWidget {
           ),
         ],
       ),
-      child: const Text(
+      child: Text(
         'Saved!',
-        style: TextStyle(
-          color: Color(0xFF3A3A3A),
+        style: AppTypography.boldStyle(
+          color: const Color(0xFF3A3A3A),
           fontSize: 18,
-          fontWeight: FontWeight.w800,
         ),
       ),
     );

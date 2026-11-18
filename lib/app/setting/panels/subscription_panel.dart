@@ -1,20 +1,19 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:kids_drawing_flutter/app/setting/widgets/setting.card.dart';
+import 'package:kids_drawing_flutter/app/setting/widgets/setting.panel.scaffold.dart';
 import 'package:kids_drawing_flutter/core/ui/theme/app.colors.dart';
+import 'package:kids_drawing_flutter/core/ui/theme/app.typography.dart';
+import 'package:kids_drawing_flutter/utils/responsive.dart';
 
 class SubscriptionPanel extends StatelessWidget {
   const SubscriptionPanel({super.key});
 
-  void openPaywallPlaceholder(BuildContext context) {
+  void _openPaywall(BuildContext context) {
     Navigator.of(context).push(
       CupertinoPageRoute<void>(
-        builder: (context) => const CupertinoPageScaffold(
-          navigationBar: CupertinoNavigationBar(
-            middle: Text('Try Free'),
-          ),
-          child: Center(
-            child: Text('Paywall coming soon'),
-          ),
+        builder: (_) => const CupertinoPageScaffold(
+          navigationBar: CupertinoNavigationBar(middle: Text('Try Free')),
+          child: Center(child: Text('Paywall coming soon')),
         ),
       ),
     );
@@ -22,161 +21,62 @@ class SubscriptionPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.only(top: 8, bottom: 20, left: 16, right: 28),
+    return SettingPanelScaffold(
+      title: 'Subscription',
+      onClose: () => Navigator.of(context).pop(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Subscription',
-            style: TextStyle(
-              fontSize: 22,
-              fontWeight: FontWeight.w800,
-              color: Color(0xFF221A30),
-            ),
-          ),
-          const SizedBox(height: 14),
+          _PlanTicket(onTap: () => _openPaywall(context)),
+          SizedBox(height: context.rs(4)),
           GestureDetector(
-            onTap: () => openPaywallPlaceholder(context),
-            child: SizedBox(
-              height: 110,
-              width: double.infinity,
-              child: CustomPaint(
-                painter: _TicketPainter(),
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(18, 16, 18, 16),
-                  child: Row(
-                    children: [
-                      Expanded(
-                        flex: 7,
-                        child: Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 14,
-                            vertical: 8,
-                          ),
-                          decoration: BoxDecoration(
-                            color: const Color(0xFF2D1B00),
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                'No plan yet',
-                                style: TextStyle(
-                                  fontSize: 12,
-                                  fontWeight: FontWeight.w600,
-                                  color: Color(0xFFFFD464),
-                                ),
-                              ),
-                              SizedBox(height: 4),
-                              Row(
-                                children: [
-                                  Expanded(
-                                    child: Text(
-                                      'Try Free for 7 days',
-                                      style: TextStyle(
-                                        fontSize: 16,
-                                        fontWeight: FontWeight.w800,
-                                        color: Colors.white,
-                                      ),
-                                    ),
-                                  ),
-                                  Icon(
-                                    CupertinoIcons.chevron_forward,
-                                    size: 16,
-                                    color: Colors.white,
-                                  ),
-                                ],
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                      const SizedBox(width: 16),
-                      const Expanded(
-                        flex: 2,
-                        child: Center(
-                          child: Icon(
-                            Icons.star_rounded,
-                            size: 44,
-                            color: Color(0xFF3A240C),
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-          ),
-          const SizedBox(height: 14),
-          GestureDetector(
+            behavior: HitTestBehavior.opaque,
             onTap: () {},
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
-              decoration: BoxDecoration(
-                color: const Color(0xCCFFFFFF),
-                borderRadius: BorderRadius.circular(16),
-                border: Border.all(color: const Color(0xFFE5DEEE)),
-              ),
+            child: SettingCard(
               child: Row(
                 children: [
                   Container(
-                    width: 32,
-                    height: 32,
+                    width: context.rs(32),
+                    height: context.rs(32),
                     decoration: const BoxDecoration(
                       shape: BoxShape.circle,
                       color: AppColors.purple,
                     ),
-                    child: const Icon(
+                    child: Icon(
                       CupertinoIcons.arrow_2_circlepath,
-                      color: Colors.white,
-                      size: 18,
+                      color: CupertinoColors.white,
+                      size: context.rs(18),
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  const Text(
+                  SizedBox(width: context.rs(12)),
+                  Text(
                     'Restore Purchases',
-                    style: TextStyle(
-                      fontSize: 15,
-                      fontWeight: FontWeight.w700,
-                      color: Color(0xFF261D32),
+                    style: AppTypography.boldStyle(
+                      fontSize: context.rs(15),
+                      color: const Color(0xFF261D32),
                     ),
                   ),
                 ],
               ),
             ),
           ),
-          const SizedBox(height: 18),
-          const Center(
+          SizedBox(height: context.rs(8)),
+          Center(
             child: Row(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.min,
               children: [
-                Text(
-                  'Privacy Policy',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.purple,
-                  ),
-                ),
+                _LinkText('Privacy Policy', onTap: () {}),
                 Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 8),
+                  padding: EdgeInsets.symmetric(horizontal: context.rs(8)),
                   child: Text(
                     '•',
-                    style: TextStyle(color: Color(0xFF9F98AA), fontSize: 14),
+                    style: AppTypography.semiBoldStyle(
+                      fontSize: context.rs(14),
+                      color: const Color(0xFF9F98AA),
+                    ),
                   ),
                 ),
-                Text(
-                  'Terms of Use',
-                  style: TextStyle(
-                    fontSize: 12,
-                    fontWeight: FontWeight.w700,
-                    color: AppColors.purple,
-                  ),
-                ),
+                _LinkText('Terms of Use', onTap: () {}),
               ],
             ),
           ),
@@ -186,63 +86,195 @@ class SubscriptionPanel extends StatelessWidget {
   }
 }
 
+class _LinkText extends StatelessWidget {
+  final String text;
+  final VoidCallback onTap;
+
+  const _LinkText(this.text, {required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
+        padding: EdgeInsets.symmetric(vertical: context.rs(6)),
+        child: Text(
+          text,
+          style: AppTypography.boldStyle(
+            fontSize: context.rs(12),
+            color: AppColors.purple,
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PlanTicket extends StatelessWidget {
+  final VoidCallback onTap;
+
+  const _PlanTicket({required this.onTap});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: context.rs(14)),
+      child: GestureDetector(
+        onTap: onTap,
+        child: ConstrainedBox(
+          constraints: BoxConstraints(minHeight: context.rs(110)),
+          child: CustomPaint(
+            painter: _TicketPainter(
+              radius: context.rs(16),
+              notchRadius: context.rs(10),
+              dash: context.rs(4),
+              gap: context.rs(3),
+              strokeWidth: context.rs(1.5),
+            ),
+            child: Padding(
+              padding: EdgeInsets.symmetric(
+                horizontal: context.rs(18),
+                vertical: context.rs(16),
+              ),
+              child: Center(
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 7,
+                      child: Container(
+                        padding: EdgeInsets.symmetric(
+                          horizontal: context.rs(14),
+                          vertical: context.rs(8),
+                        ),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF2D1B00),
+                          borderRadius: BorderRadius.circular(context.rs(12)),
+                        ),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              'No plan yet',
+                              style: AppTypography.semiBoldStyle(
+                                fontSize: context.rs(12),
+                                color: const Color(0xFFFFD464),
+                              ),
+                            ),
+                            SizedBox(height: context.rs(4)),
+                            Row(
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    'Try Free for 7 days',
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: AppTypography.boldStyle(
+                                      fontSize: context.rs(16),
+                                      color: CupertinoColors.white,
+                                    ),
+                                  ),
+                                ),
+                                Icon(
+                                  CupertinoIcons.chevron_forward,
+                                  size: context.rs(16),
+                                  color: CupertinoColors.white,
+                                ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: context.rs(16)),
+                    Expanded(
+                      flex: 2,
+                      child: Icon(
+                        CupertinoIcons.star_fill,
+                        size: context.rs(40),
+                        color: const Color(0xFF3A240C),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _TicketPainter extends CustomPainter {
+  final double radius;
+  final double notchRadius;
+  final double dash;
+  final double gap;
+  final double strokeWidth;
+
+  const _TicketPainter({
+    required this.radius,
+    required this.notchRadius,
+    required this.dash,
+    required this.gap,
+    required this.strokeWidth,
+  });
+
   @override
   void paint(Canvas canvas, Size size) {
-    final path = Path();
-    const radius = 16.0;
-    const notchR = 10.0;
     final midX = size.width * 0.72;
+    final w = size.width;
+    final h = size.height;
 
-    path.moveTo(radius, 0);
-    path.lineTo(midX - notchR, 0);
-    path.arcToPoint(
-      Offset(midX + notchR, 0),
-      radius: const Radius.circular(notchR),
-      clockwise: false,
-    );
-    path.lineTo(size.width - radius, 0);
-    path.quadraticBezierTo(size.width, 0, size.width, radius);
-    path.lineTo(size.width, size.height - radius);
-    path.quadraticBezierTo(
-      size.width,
-      size.height,
-      size.width - radius,
-      size.height,
-    );
-    path.lineTo(midX + notchR, size.height);
-    path.arcToPoint(
-      Offset(midX - notchR, size.height),
-      radius: const Radius.circular(notchR),
-      clockwise: false,
-    );
-    path.lineTo(radius, size.height);
-    path.quadraticBezierTo(0, size.height, 0, size.height - radius);
-    path.lineTo(0, radius);
-    path.quadraticBezierTo(0, 0, radius, 0);
-    path.close();
+    final path = Path()
+      ..moveTo(radius, 0)
+      ..lineTo(midX - notchRadius, 0)
+      ..arcToPoint(
+        Offset(midX + notchRadius, 0),
+        radius: Radius.circular(notchRadius),
+        clockwise: false,
+      )
+      ..lineTo(w - radius, 0)
+      ..quadraticBezierTo(w, 0, w, radius)
+      ..lineTo(w, h - radius)
+      ..quadraticBezierTo(w, h, w - radius, h)
+      ..lineTo(midX + notchRadius, h)
+      ..arcToPoint(
+        Offset(midX - notchRadius, h),
+        radius: Radius.circular(notchRadius),
+        clockwise: false,
+      )
+      ..lineTo(radius, h)
+      ..quadraticBezierTo(0, h, 0, h - radius)
+      ..lineTo(0, radius)
+      ..quadraticBezierTo(0, 0, radius, 0)
+      ..close();
 
-    final fill = Paint()
-      ..shader = const LinearGradient(
-        colors: [Color(0xFFFFDF7D), Color(0xFFEDB02B)],
-        begin: Alignment.topLeft,
-        end: Alignment.bottomRight,
-      ).createShader(Offset.zero & size);
-    canvas.drawPath(path, fill);
+    canvas.drawPath(
+      path,
+      Paint()
+        ..shader = const LinearGradient(
+          colors: [Color(0xFFFFDF7D), Color(0xFFEDB02B)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ).createShader(Offset.zero & size),
+    );
 
     final dashPaint = Paint()
       ..color = const Color(0x669B670B)
-      ..strokeWidth = 1.5
+      ..strokeWidth = strokeWidth
       ..style = PaintingStyle.stroke;
-    const dash = 4.0;
-    const gap = 3.0;
-    var y = 16.0;
-    while (y < size.height - 16) {
+    for (var y = radius; y < h - radius; y += dash + gap) {
       canvas.drawLine(Offset(midX, y), Offset(midX, y + dash), dashPaint);
-      y += dash + gap;
     }
   }
 
   @override
-  bool shouldRepaint(covariant _TicketPainter oldDelegate) => false;
+  bool shouldRepaint(covariant _TicketPainter old) =>
+      old.radius != radius ||
+      old.notchRadius != notchRadius ||
+      old.dash != dash ||
+      old.gap != gap ||
+      old.strokeWidth != strokeWidth;
 }

@@ -76,9 +76,9 @@ class _CircleButtonState extends State<CircleButton> {
   @override
   Widget build(BuildContext context) {
     final diameter = widget.responsive ? context.rs(widget.size) : widget.size;
-    final lip = diameter * 0.08;
+    final lip = diameter * 0.06;
+    final faceHeight = diameter - lip;
     final graphicSize = getGraphicSize(diameter);
-    final radius = BorderRadius.circular(diameter / 2);
     final lipColor = Color.lerp(widget.color, const Color(0xFF000000), 0.25)!;
 
     return GestureDetector(
@@ -89,46 +89,38 @@ class _CircleButtonState extends State<CircleButton> {
       onTap: widget.onPressed,
       child: SizedBox(
         width: diameter,
-        height: diameter + lip,
+        height: diameter, // ab square, pehle diameter + lip tha
         child: Stack(
           children: [
-            // Neeche wali dark circle (fixed)
-            Positioned(
-              left: 0,
-              right: 0,
-              bottom: 0,
-              height: diameter,
+            // Neeche wala dark base: poora circle
+            Positioned.fill(
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   color: lipColor,
-                  borderRadius: radius,
+                  shape: BoxShape.circle,
                 ),
               ),
             ),
-            // Upar wali circle: press pe lip jitna neeche
+            // Upar wali face: full width, height diameter - lip
             AnimatedPositioned(
               duration: _pressDuration,
               curve: Curves.easeOut,
               left: 0,
               right: 0,
               top: _pressed ? lip : 0,
-              height: diameter,
+              height: faceHeight,
               child: DecoratedBox(
                 decoration: BoxDecoration(
                   color: widget.color,
-                  borderRadius: radius,
+                  borderRadius: BorderRadius.all(
+                    Radius.elliptical(diameter / 2, faceHeight / 2),
+                  ),
                 ),
-                child: ClipRRect(
-                  borderRadius: radius,
-                  child: Center(
-                    child: SizedBox(
-                      width: graphicSize,
-                      height: graphicSize,
-                      child: FittedBox(
-                        fit: BoxFit.contain,
-                        child: widget.image,
-                      ),
-                    ),
+                child: Center(
+                  child: SizedBox(
+                    width: graphicSize,
+                    height: graphicSize,
+                    child: FittedBox(fit: BoxFit.contain, child: widget.image),
                   ),
                 ),
               ),

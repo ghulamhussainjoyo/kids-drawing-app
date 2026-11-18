@@ -14,6 +14,16 @@ Screens import `state/<its feature>/`, own `widgets/`, `core/ui/`, and `data/mod
 
 No brush geometry, clipping, or hit-testing in a widget. The widget paints; `core/engine` computes.
 
+## Typography
+
+Use [`AppTypography`](lib/core/ui/theme/app.typography.dart) for all visible text:
+
+- Nunito via `boldStyle` / `semiBoldStyle` for UI copy (headers, nav, buttons, cards)
+- `numericStyle` for dynamic numbers and percentages (system font + tabular figures)
+- Never hardcode `fontFamily` or fall back to bare `TextStyle` for labels/headings
+
+See also the always-applied `typography` rule.
+
 ```dart
 // BAD — clipping inside the canvas widget
 class DrawingCanvas extends StatelessWidget {

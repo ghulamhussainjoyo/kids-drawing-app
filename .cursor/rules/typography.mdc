@@ -1,0 +1,38 @@
+---
+description: Nunito for UI copy; system tabular font for dynamic numbers
+globs: lib/**/*.dart
+alwaysApply: true
+---
+
+# Typography
+
+Primary UI font is **Nunito**. Dynamic numbers use the **platform system** font. Never hardcode `fontFamily: 'Nunito'` inline.
+
+## Tokens
+
+Import from [`lib/core/ui/theme/app.typography.dart`](lib/core/ui/theme/app.typography.dart):
+
+- `AppTypography.boldStyle` — Nunito Bold (`FontWeight.w700`) for headers, selected labels, CTAs
+- `AppTypography.semiBoldStyle` — Nunito SemiBold (`FontWeight.w600`) for body labels, nav, cards
+- `AppTypography.numericStyle` — system sans + `FontFeature.tabularFigures()` for `%`, counters, timers, math digits
+
+Assets: `assets/fonts/Nunito-Variable.ttf` registered as family `Nunito` at weights 600 and 700 in `pubspec.yaml`.
+
+## Where to use what
+
+| Content | Token |
+| --- | --- |
+| Screen / section titles, buttons, nav items, list labels | `boldStyle` or `semiBoldStyle` |
+| Volume `%`, age chips, parent-gate equation / answers, timers | `numericStyle` |
+
+```dart
+// BAD — system default or inline family
+Text('Music', style: TextStyle(fontWeight: FontWeight.w800));
+Text('45%', style: AppTypography.boldStyle());
+
+// GOOD
+Text('Music', style: AppTypography.boldStyle(fontSize: context.rs(22)));
+Text('45%', style: AppTypography.numericStyle(fontSize: context.rs(14)));
+```
+
+Cupertino theme text styles already default to Nunito via `AppTheme.data()`. Explicit styles still use `AppTypography`.

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:kids_drawing_flutter/app/genre/widget/genre.carousel.dart';
 import 'package:kids_drawing_flutter/app/parent_gate/utils/parent.gate.dart';
 import 'package:kids_drawing_flutter/app/setting/screen/setting.screen.dart';
+import 'package:kids_drawing_flutter/core/ui/theme/app.typography.dart';
 
 class GenreScreen extends StatelessWidget {
   const GenreScreen({super.key});
@@ -46,6 +47,7 @@ class GenreScreen extends StatelessWidget {
                           showDialog<void>(
                             context: context,
                             barrierColor: const Color(0x73000000),
+                            useSafeArea: false,
                             builder: (_) => const SettingDialog(),
                           );
                         },
@@ -53,29 +55,35 @@ class GenreScreen extends StatelessWidget {
                         child: const Icon(CupertinoIcons.settings),
                       ),
                       const Spacer(),
-                      const CupertinoButton(
+                      CupertinoButton(
                         onPressed: null,
-                        padding: EdgeInsets.symmetric(
+                        padding: const EdgeInsets.symmetric(
                           horizontal: 16,
                           vertical: 8,
                         ),
-                        child: Text('Try free for 7 days'),
+                        child: Text(
+                          'Try free for 7 days',
+                          style: AppTypography.semiBoldStyle(),
+                        ),
                       ),
                     ],
                   ),
                 ),
                 // Bottom controls
-                const Positioned(
+                Positioned(
                   bottom: 0,
                   left: 0,
                   right: 0,
                   child: Row(
                     children: [
-                      Spacer(),
+                      const Spacer(),
                       CupertinoButton(
                         padding: EdgeInsets.zero,
                         onPressed: null,
-                        child: Text('Bottom left'),
+                        child: Text(
+                          'Bottom left',
+                          style: AppTypography.semiBoldStyle(),
+                        ),
                       ),
                     ],
                   ),

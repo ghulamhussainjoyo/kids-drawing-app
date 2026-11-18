@@ -1,7 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart' show DefaultMaterialLocalizations;
 import 'package:flutter/services.dart';
-import 'package:kids_drawing_flutter/core/storage/settings.repository.dart';
+import 'package:kids_drawing_flutter/core/storage/local.storage.dart';
+import 'package:kids_drawing_flutter/data/repositories/settings/settings.repository.dart';
+import 'package:kids_drawing_flutter/data/repositories/settings/settings.repository.impl.dart';
+import 'package:kids_drawing_flutter/state/setting/setting.view-model.dart';
 import 'package:provider/provider.dart';
 import 'package:kids_drawing_flutter/data/local/artwork/artwork.catalog.seeder.dart';
 import 'package:kids_drawing_flutter/data/local/device.id.store.dart';
@@ -10,6 +13,7 @@ import 'package:kids_drawing_flutter/data/repositories/artwork/catalog.repositor
 import 'package:kids_drawing_flutter/data/repositories/artwork/catalog.repository.impl.dart';
 import 'package:kids_drawing_flutter/state/gallery/gallery.view-model.dart';
 import 'package:kids_drawing_flutter/state/genre/genre.view-model.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'app/splash/splash.screen.dart';
 import 'core/ui/theme/app.theme.dart';
@@ -36,10 +40,17 @@ Future<void> main() async {
     artworkDao: database.artworkDao,
   );
 
+  final prefs = await SharedPreferences.getInstance();
+  final localStorage = LocalStorage(prefs);
+  final settingsRepository = SettingsRepositoryImpl(localStorage);
+
   runApp(
     MultiProvider(
       providers: [
-        ChangeNotifierProvider(create: (_) => SettingsRepository()..load()),
+        Provider<SettingsRepository>.value(value: settingsRepository),
+        ChangeNotifierProvider(
+          create: (_) => SettingViewModel(settingsRepository)..load(),
+        ),
         Provider<CatalogRepository>.value(value: catalogRepository),
         ChangeNotifierProvider(create: (_) => GenreViewModel()),
         ChangeNotifierProvider(

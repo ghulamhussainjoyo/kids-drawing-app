@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter/cupertino.dart';
+import 'package:kids_drawing_flutter/core/ui/theme/app.typography.dart';
 
 /// Polaroid hung on the clothesline with clothespin accents and a date.
 class CompletePolaroidCard extends StatelessWidget {
@@ -69,10 +70,9 @@ class CompletePolaroidCard extends StatelessWidget {
                 const SizedBox(height: 12),
                 Text(
                   dateLabel,
-                  style: const TextStyle(
-                    color: Color(0xFF3A3A3A),
+                  style: AppTypography.boldStyle(
+                    color: const Color(0xFF3A3A3A),
                     fontSize: 16,
-                    fontWeight: FontWeight.w700,
                   ),
                 ),
               ],

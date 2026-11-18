@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:kids_drawing_flutter/app/parent_gate/utils/grown.up.math.challenge.dart';
+import 'package:kids_drawing_flutter/core/ui/theme/app.typography.dart';
 import 'package:kids_drawing_flutter/core/ui/widgets/circle.button.dart';
 
 /// White card with the math equation and three answer circles.
@@ -41,8 +42,8 @@ class GrownUpEquationCard extends StatelessWidget {
           Text(
             challenge.equation,
             textAlign: TextAlign.center,
-            style: const TextStyle(
-              color: Color(0xFF3A3A3A),
+            style: AppTypography.numericStyle(
+              color: const Color(0xFF3A3A3A),
               fontSize: 36,
               fontWeight: FontWeight.w800,
             ),
@@ -58,10 +59,9 @@ class GrownUpEquationCard extends StatelessWidget {
                   onPressed: () => onAnswer(challenge.options[i]),
                   image: Text(
                     '${challenge.options[i]}',
-                    style: const TextStyle(
-                      color: Color(0xFFFFFFFF),
+                    style: AppTypography.numericStyle(
+                      color: const Color(0xFFFFFFFF),
                       fontSize: 24,
-                      fontWeight: FontWeight.w700,
                     ),
                   ),
                 ),
