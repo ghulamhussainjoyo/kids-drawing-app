@@ -1,169 +1,161 @@
-import 'dart:async';
 import 'dart:math';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 
-import 'package:flutter_svg/svg.dart' as svg;
-
-/// Neutral glitter grain for [GlitterTool] (tinted per stroke via modulate).
+/// Tip and sparkle images for the glitter brush, built once in code.
 class GlitterTextures {
-  static const String grainAsset = 'assets/brushes/glitter-texture.svg';
-  static const double stampCell = 80;
-  static const int rasterPixels = 256;
+  GlitterTextures()
+    : tip = buildTip(),
+      sparkles = buildSparkles(),
+      glints = [for (var i = 0; i < glintSets; i++) buildGlints(i)];
 
-  /// White RGB; alpha from luma so a flat color field drops out after threshold.
-  static const ui.ColorFilter _speckFromLuma = ui.ColorFilter.matrix([
-    0,
-    0,
-    0,
-    0,
-    255,
-    0,
-    0,
-    0,
-    0,
-    255,
-    0,
-    0,
-    0,
-    0,
-    255,
-    0.2126,
-    0.7152,
-    0.0722,
-    0,
-    0,
-  ]);
+  final ui.Image tip;
+  final ui.Image sparkles;
 
-  ui.Image? _grain;
-  Future<void>? _loadFuture;
+  /// Sets of bright glints that fade in and out in turn to make the glitter
+  /// shimmer. Same tile size as [sparkles].
+  final List<ui.Image> glints;
 
-  static const int variantCount = 1;
+  static const int glintSets = 3;
 
-  int get variants => variantCount;
+  static const double tipPixels = 96;
 
-  ui.Image? get grain => _grain;
-
-  Future<void> ensureLoaded() {
-    _loadFuture ??= _loadGrain();
-    return _loadFuture!;
-  }
-
-  Future<void> _loadGrain() async {
-    ui.Image? candidate;
-    try {
-      candidate = await _rasterSvgGrain();
-      if (await _isTooSolid(candidate)) {
-        candidate.dispose();
-        candidate = null;
-      }
-    } catch (_) {
-      candidate?.dispose();
-      candidate = null;
-    }
-    _grain = candidate ?? _buildSpeckFallback(rasterPixels);
-  }
-
-  Future<ui.Image> _rasterSvgGrain() async {
-    final pictureInfo = await svg.vg.loadPicture(
-      const svg.SvgAssetLoader(grainAsset),
-      null,
-    );
-    final srcSize = pictureInfo.size;
-    final side = rasterPixels;
-    final recorder = ui.PictureRecorder();
-    final canvas = ui.Canvas(recorder);
-    final scale = side / srcSize.width;
-    final layer = ui.Rect.fromLTWH(0, 0, side.toDouble(), side.toDouble());
-    canvas.saveLayer(
-      layer,
-      ui.Paint()..colorFilter = _speckFromLuma,
-    );
-    canvas.scale(scale, scale);
-    canvas.drawPicture(pictureInfo.picture);
-    canvas.restore();
-    pictureInfo.picture.dispose();
-    final picture = recorder.endRecording();
-    final image = await picture.toImage(side, side);
-    picture.dispose();
-    return _keepBrightSpecks(image);
-  }
-
-  /// Drops low-alpha and mid-tone fill; keeps bright glitter specks only.
-  Future<ui.Image> _keepBrightSpecks(ui.Image image) async {
-    final w = image.width;
-    final h = image.height;
-    final data = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
-    if (data == null) return image;
-    final bytes = Uint8List.fromList(data.buffer.asUint8List());
-    final pixels = bytes.length ~/ 4;
-    for (var i = 0; i < pixels; i++) {
-      final o = i * 4;
-      final r = bytes[o];
-      final g = bytes[o + 1];
-      final b = bytes[o + 2];
-      final a = bytes[o + 3];
-      final luma = (r + g + b) / 3;
-      if (a < 24 || luma < 200) {
-        bytes[o + 3] = 0;
-      } else {
-        bytes[o] = 255;
-        bytes[o + 1] = 255;
-        bytes[o + 2] = 255;
-      }
-    }
-    image.dispose();
-    return _imageFromRgba(bytes, w, h);
-  }
-
-  Future<ui.Image> _imageFromRgba(Uint8List bytes, int w, int h) {
-    final done = Completer<ui.Image>();
-    ui.decodeImageFromPixels(
-      bytes,
-      w,
-      h,
-      ui.PixelFormat.rgba8888,
-      done.complete,
-    );
-    return done.future;
-  }
-
-  static Future<bool> _isTooSolid(ui.Image image) async {
-    final data = await image.toByteData(format: ui.ImageByteFormat.rawRgba);
-    if (data == null) return true;
-    final bytes = data.buffer.asUint8List();
-    final pixels = bytes.length ~/ 4;
-    var visible = 0;
-    for (var i = 0; i < pixels; i++) {
-      if (bytes[i * 4 + 3] > 20) visible++;
-    }
-    return visible / pixels > 0.22;
-  }
-
-  static ui.Image _buildSpeckFallback(int side) {
-    final random = Random(41);
-    final recorder = ui.PictureRecorder();
-    final canvas = ui.Canvas(recorder);
-    final count = side * 18;
-    for (var i = 0; i < count; i++) {
-      final x = random.nextDouble() * side;
-      final y = random.nextDouble() * side;
-      final s = 0.6 + random.nextDouble() * 2.2;
-      final a = 0.35 + random.nextDouble() * 0.65;
-      canvas.drawRect(
-        ui.Rect.fromLTWH(x, y, s, s),
-        ui.Paint()..color = ui.Color.fromRGBO(255, 255, 255, a),
-      );
-    }
-    final picture = recorder.endRecording();
-    final image = picture.toImageSync(side, side);
-    picture.dispose();
-    return image;
-  }
+  /// Side of the repeating sparkle tile, in artwork units.
+  static const double sparkleTile = 128;
+  static const double sparklePixelsPerUnit = 2;
 
   void dispose() {
-    _grain?.dispose();
-    _grain = null;
-    _loadFuture = null;
+    tip.dispose();
+    sparkles.dispose();
+    for (final image in glints) {
+      image.dispose();
+    }
+  }
+
+  /// Opaque round tip with a thin soft rim, so glitter lays down as solid
+  /// paint that never darkens where it overlaps.
+  static ui.Image buildTip() {
+    const radius = tipPixels / 2;
+    const center = ui.Offset(radius, radius);
+    return _render(tipPixels, tipPixels, (canvas) {
+      canvas.drawCircle(
+        center,
+        radius,
+        ui.Paint()
+          ..shader = ui.Gradient.radial(
+            center,
+            radius,
+            const [
+              ui.Color(0xFFFFFFFF),
+              ui.Color(0xFFFFFFFF),
+              ui.Color(0x00FFFFFF),
+            ],
+            const [0, 0.86, 1],
+          ),
+      );
+    });
+  }
+
+  /// Transparent tile of fine glitter flecks covering about a third of it:
+  /// bright sparkles, pale mid tones and dark grains. Tiles seamlessly.
+  static ui.Image buildSparkles() {
+    const pixels = sparkleTile * sparklePixelsPerUnit;
+    final random = Random(23);
+    return _render(pixels, pixels, (canvas) {
+      final fleck = ui.Paint()..isAntiAlias = false;
+      for (var i = 0; i < 4800; i++) {
+        final kind = random.nextDouble();
+        if (kind < 0.45) {
+          fleck.color = ui.Color.fromRGBO(
+            255,
+            255,
+            255,
+            0.55 + random.nextDouble() * 0.45,
+          );
+        } else if (kind < 0.75) {
+          fleck.color = ui.Color.fromRGBO(
+            225,
+            230,
+            245,
+            0.3 + random.nextDouble() * 0.3,
+          );
+        } else {
+          fleck.color = ui.Color.fromRGBO(
+            0,
+            0,
+            20,
+            0.22 + random.nextDouble() * 0.25,
+          );
+        }
+        final side = (0.7 + random.nextDouble() * 0.9) * sparklePixelsPerUnit;
+        final x = random.nextDouble() * pixels;
+        final y = random.nextDouble() * pixels;
+        // Draw wrapped copies so flecks on the border tile seamlessly.
+        for (final dx in const [-pixels, 0.0, pixels]) {
+          for (final dy in const [-pixels, 0.0, pixels]) {
+            canvas.drawRect(
+              ui.Rect.fromLTWH(x + dx, y + dy, side, side),
+              fleck,
+            );
+          }
+        }
+      }
+    });
+  }
+
+  /// Transparent tile of sparse bright glints: small squares, some with a
+  /// faint cross flare. Each [set] has its own random layout.
+  static ui.Image buildGlints(int set) {
+    const pixels = sparkleTile * sparklePixelsPerUnit;
+    final random = Random(101 + set * 17);
+    return _render(pixels, pixels, (canvas) {
+      final glint = ui.Paint()..isAntiAlias = false;
+      final flare = ui.Paint()
+        ..strokeWidth = 0.5 * sparklePixelsPerUnit
+        ..strokeCap = ui.StrokeCap.round;
+      for (var i = 0; i < 700; i++) {
+        final alpha = 0.7 + random.nextDouble() * 0.3;
+        glint.color = ui.Color.fromRGBO(255, 255, 255, alpha);
+        final side = (0.8 + random.nextDouble() * 1.2) * sparklePixelsPerUnit;
+        final x = random.nextDouble() * pixels;
+        final y = random.nextDouble() * pixels;
+        final withFlare = random.nextDouble() < 0.12;
+        flare.color = ui.Color.fromRGBO(255, 255, 255, alpha * 0.6);
+        for (final dx in const [-pixels, 0.0, pixels]) {
+          for (final dy in const [-pixels, 0.0, pixels]) {
+            final center = ui.Offset(x + dx, y + dy);
+            canvas.drawRect(
+              ui.Rect.fromCenter(center: center, width: side, height: side),
+              glint,
+            );
+            if (!withFlare) continue;
+            final arm = side * 1.8;
+            canvas
+              ..drawLine(
+                center - ui.Offset(arm, 0),
+                center + ui.Offset(arm, 0),
+                flare,
+              )
+              ..drawLine(
+                center - ui.Offset(0, arm),
+                center + ui.Offset(0, arm),
+                flare,
+              );
+          }
+        }
+      }
+    });
+  }
+
+  static ui.Image _render(
+    double width,
+    double height,
+    void Function(ui.Canvas canvas) draw,
+  ) {
+    final recorder = ui.PictureRecorder();
+    draw(ui.Canvas(recorder));
+    final picture = recorder.endRecording();
+    final image = picture.toImageSync(width.toInt(), height.toInt());
+    picture.dispose();
+    return image;
   }
 }

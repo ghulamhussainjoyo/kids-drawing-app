@@ -11,6 +11,16 @@ abstract class DrawingTool {
 
   void paint(Canvas canvas, StrokeDabber dabber);
 
+  /// Animated overlay for this tool's visible paint, such as glitter glints.
+  /// [coverage] draws opaque pixels wherever the paint shows; the overlay is
+  /// kept only there. Most tools have none.
+  void paintShimmer(
+    Canvas canvas, {
+    required Rect bounds,
+    required double seconds,
+    required void Function(Canvas canvas) coverage,
+  }) {}
+
   void dispose() {}
 
   StrokeDabber replay(DrawingStroke stroke) {

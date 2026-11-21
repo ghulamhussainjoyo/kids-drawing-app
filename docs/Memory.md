@@ -22,8 +22,8 @@ Build a commercial children's drawing and coloring app for iOS and Android. The 
 - Active drawing UI: `lib/app/drawing/screen/drawing.screen.dart` with `widgets/canva/workspace.canvas.dart` / `workspace.painter.dart`.
 - Paint engines (one `DrawingTool` per pen): `PencilTool`, `MarkerTool`, `GlitterTool` in `core/tools/`. Routed via `DrawingToolKit` (`forCategory` / `forType`); `DrawingViewModel` exposes `tool` and `toolFor` for active category and per-stroke replay.
 - Stick catalogs only (not paint): `PencilTools`, `MarkerTools`, `GlitterTools` + `StationaryTools` / `CategoryTools` in `core/tools/stationary/`. `selectCategory` sets `brushConfig.type`; each stroke persists `brush.type` in JSON (`StrokesJsonCodec`).
-- `LayerManager` bakes pencil/marker to `_paintImage`; glitter to separate `_glitterImage`. Active glitter is rasterized per frame in stroke bounds and twinkles with the same shader as baked glitter. Glitter twinkle: `GlitterTwinkle` + `shaders/glitter.frag`; `WorkspaceCanvas` runs `glitterTicker` when committed **or** active strokes use glitter; `layerManager.paint(..., time:)` drives the shader.
-- Glitter **paint** grain: `GlitterTextures` tries `assets/brushes/glitter-texture.svg` (bright-speck threshold, rejected if too solid) else procedural speck tile; `stampCell` 80; tint via `BlendMode.modulate`. `assets/stationary/glitter/*.png` is rail UI only (`GlitterTools`). Do not use removed `assets/glitter/stamps/`.
+- `LayerManager` bakes all committed paint to `_paintImage` and a coarser `_glitterMask` (glitter adds, later non-glitter strokes cut). Shimmer is drawn live over mask + active glitter stroke through `DrawingTool.paintShimmer`; `WorkspaceCanvas` runs `shimmerTicker` (20 fps) when committed **or** active strokes use glitter; `layerManager.paint(..., shimmerSeconds:)`; thumbnails/export pass none (still).
+- Glitter **paint**: opaque round tip (no build-up on overlap) + procedural sparkle tile fixed to the page (srcATop). Stick colors in `GlitterTools` are sampled from each `assets/stationary/glitter/*.png` tube. `PaintColor`/`StationaryModel` hold a `colors` list; several colors blend along the stroke.
 - Genre hub: `GenreLiveBackground` (animated PNG scenery) behind carousel; gated by `liveBackgroundOn` in `SettingsRepository` / `SettingViewModel` (default on). Settings UI toggle for live background not wired yet.
 - Settings: parent gate on genre hub → `SettingDialog`; panels use `SettingPanelScaffold` (fixed header + scroll body). Persistence: `SettingsRepository` in `data/`, `SettingViewModel` in `state/setting/`.
 - Brush size: left density slider → `DrawingViewModel.setDensity` → size `12 + density * 44` for subsequent strokes.
@@ -48,7 +48,7 @@ Build a commercial children's drawing and coloring app for iOS and Android. The 
 - **Composition:** `lib/main.dart` — Floor DB, catalog seed, `MultiProvider` (`DrawingViewModel`, `GalleryViewModel`, `GenreViewModel`, `SettingViewModel`), `CupertinoApp` → `SplashScreen`.
 - **Presentation:** `lib/app/` — `splash`, `genre`, `gallery`, `drawing`, `setting`, `parent_gate` (screens + feature widgets).
 - **State:** `lib/state/<feature>/` — ViewModels only.
-- **Engine & tools:** `lib/core/engine/` (includes `glitter.twinkle.dart`), `lib/core/tools/` (`drawing.tool.kit.dart`, `*.drawing.tool.dart`, textures, stationary catalogs). Engine does not import concrete tools.
+- **Engine & tools:** `lib/core/engine/`, `lib/core/tools/` (`drawing.tool.kit.dart`, `*.drawing.tool.dart`, textures, stationary catalogs). Engine does not import concrete tools.
 - **Data:** `lib/data/` — Floor, JSON artwork loaders, repository interfaces/impls (including settings).
 - **Types:** `lib/types/` — domain models (strokes, regions, artwork, gallery, genre, stationary).
 
@@ -80,8 +80,8 @@ At least 60 FPS on agreed baseline devices, 120 FPS where supported, aim under 2
 - Flutter setup and app launch: complete.
 - App shell: `CupertinoApp` via `AppWidget` in `lib/main.dart` with `MultiProvider` (`SettingViewModel`, `GenreViewModel`, `DrawingViewModel`, `GalleryViewModel`).
 - Navigation: Splash → Genre → Gallery → Drawing; settings modal from Genre (parent gate).
-- Pencil, marker, glitter: implemented (`DrawingToolKit`, category rail, per-stroke `toolFor`). Pencil look unchanged from original tuned engine; marker semi-opaque dabs; glitter colored grain dabs on separate baked layer with shader twinkle (live + committed).
-- Glitter animation: shader twinkle when `glitter.frag` loads; static glitter image if shader fails (`GlitterTwinkle` logs and falls back).
+- Pencil, marker, glitter: implemented (`DrawingToolKit`, category rail, per-stroke `toolFor`). Pencil look unchanged from original tuned engine; marker semi-opaque dabs; glitter opaque sparkle band with live shimmer (while drawing and after).
+- Glitter animation: 3 glint tile sets fading in turn (1.2 s period), masked to visible glitter. Shader twinkle (`glitter.frag`) was replaced 2026-11-21. Burst rewritten 2026-11-21: pops from the lift point in screen space.
 - Genre live background: implemented; `liveBackgroundOn` pref only (no settings panel toggle yet).
 - Region coloring, density, stick colors, undo/redo, pinch/burst, clear-all confirm, stroke persistence + thumbnail bake (`saveProgress`, `ArtworkThumbnailBaker`): implemented. Device FPS/latency not measured.
 - Code layout: MVVM (`lib/app/`, `core/`, `state/`, `data/`, `types/`). Live composition is `main.dart` `MultiProvider` (not `app.dependencies.dart`).

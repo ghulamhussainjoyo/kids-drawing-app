@@ -46,7 +46,7 @@ class DrawingViewModel extends ChangeNotifier {
   final List<DrawingStroke> redoStack = [];
   final ValueNotifier<int> activeStrokeTicks = ValueNotifier<int>(0);
 
-  final paintColor = PaintColor(id: 'red', color: Color(0xFFF44336));
+  final paintColor = PaintColor.solid(id: 'red', color: Color(0xFFF44336));
 
   late BrushConfig brushConfig = BrushConfig(
     size: 32,
@@ -113,13 +113,12 @@ class DrawingViewModel extends ChangeNotifier {
     clipToRegions = true;
     revisionValue++;
     hasOpenedArtwork = true;
-    await _toolKit.preload();
   }
 
   void selectTool(StationaryModel tool) {
     selectedTool = tool;
     brushConfig = brushConfig.copyWith(
-      paintColor: PaintColor(id: tool.id, color: tool.color),
+      paintColor: PaintColor(id: tool.id, colors: tool.colors),
     );
     notifyListeners();
   }

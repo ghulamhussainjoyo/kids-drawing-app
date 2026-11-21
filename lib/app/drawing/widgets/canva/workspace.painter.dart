@@ -1,22 +1,20 @@
 import 'package:flutter/rendering.dart';
 
-import '../../../../core/engine/burst.engine.dart';
 import '../../../../core/engine/canvas.engine.dart';
 import '../../../../state/drawing/drawing.view-model.dart';
 
-double _noGlitterTime() => 0;
-
 class WorkspacePainter extends CustomPainter {
-  final BurstEngine burstEngine;
   final DrawingViewModel viewModel;
   final CanvasViewTransform Function() view;
-  final double Function() glitterTime;
+
+  /// Current shimmer time; null paints glitter still.
+  final double Function()? shimmerSeconds;
+
   WorkspacePainter({
     required this.view,
+    this.shimmerSeconds,
     required this.viewModel,
     required super.repaint,
-    required this.burstEngine,
-    this.glitterTime = _noGlitterTime,
   });
 
   @override
@@ -30,9 +28,8 @@ class WorkspacePainter extends CustomPainter {
       revision: viewModel.revision,
       active: viewModel.activeStroke,
       activeDabber: viewModel.activeDabber,
-      time: glitterTime(),
+      shimmerSeconds: shimmerSeconds?.call(),
     );
-    burstEngine.paint(canvas);
     canvas.restore();
   }
 

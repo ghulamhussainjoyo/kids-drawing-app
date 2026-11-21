@@ -1,11 +1,11 @@
 import 'package:flutter/scheduler.dart';
 import 'package:flutter/widgets.dart';
 
-import '../../../../core/engine/burst.engine.dart';
 import '../../../../core/engine/canvas.engine.dart';
-import '../../../../core/engine/layer.manager.dart';
 import '../../../../state/drawing/drawing.view-model.dart';
 import '../../../../types/brush.type.dart';
+import '../../../../types/drawing.stroke.dart';
+import 'burst.overlay.dart';
 import 'canvas.pinch.dart';
 import 'workspace.painter.dart';
 
@@ -26,22 +26,22 @@ class WorkspaceCanvas extends StatefulWidget {
 
 class _WorkspaceCanvasState extends State<WorkspaceCanvas>
     with TickerProviderStateMixin {
-  static const double burstParticleSize = 42;
   static const Duration settleDuration = Duration(milliseconds: 320);
   static const double fingertipRadius = 22;
 
+  /// Shimmer frames per second; glints don't need the full display rate.
+  static const int shimmerFps = 20;
+
   final Map<int, Offset> pointers = {};
-  final BurstEngine burstEngine = BurstEngine();
+  final GlobalKey<BurstOverlayState> burstKey = GlobalKey();
   final ValueNotifier<int> repaintTicks = ValueNotifier<int>(0);
+
+  /// Shimmer time in seconds, stepped at [shimmerFps].
+  final ValueNotifier<double> shimmerClock = ValueNotifier<double>(0);
+  late final Ticker shimmerTicker = createTicker(onShimmerTick);
 
   late CanvasViewTransform view;
   late final AnimationController settle;
-  late final Ticker burstTicker;
-  Duration burstTickerBase = Duration.zero;
-
-  /// Drives the glitter twinkle; runs only while the page has glitter.
-  late final Ticker glitterTicker;
-  double glitterTime = 0;
 
   CanvasViewTransform? settleFrom;
   CanvasViewTransform? settleTo;
@@ -59,23 +59,20 @@ class _WorkspaceCanvasState extends State<WorkspaceCanvas>
     );
     settle = AnimationController(vsync: this, duration: settleDuration)
       ..addListener(onSettleTick);
-    burstTicker = createTicker(onBurstTick);
-    glitterTicker = createTicker(onGlitterTick);
-    widget.viewModel.layerManager!.twinkle.ensureLoaded();
-    widget.viewModel.addListener(syncGlitterTicker);
-    widget.viewModel.activeStrokeTicks.addListener(syncGlitterTicker);
-    syncGlitterTicker();
+    widget.viewModel.addListener(syncShimmer);
+    widget.viewModel.activeStrokeTicks.addListener(syncShimmer);
+    syncShimmer();
   }
 
   @override
   void didUpdateWidget(WorkspaceCanvas oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.viewModel != widget.viewModel) {
-      oldWidget.viewModel.removeListener(syncGlitterTicker);
-      oldWidget.viewModel.activeStrokeTicks.removeListener(syncGlitterTicker);
-      widget.viewModel.addListener(syncGlitterTicker);
-      widget.viewModel.activeStrokeTicks.addListener(syncGlitterTicker);
-      syncGlitterTicker();
+      oldWidget.viewModel.removeListener(syncShimmer);
+      oldWidget.viewModel.activeStrokeTicks.removeListener(syncShimmer);
+      widget.viewModel.addListener(syncShimmer);
+      widget.viewModel.activeStrokeTicks.addListener(syncShimmer);
+      syncShimmer();
     }
     if (oldWidget.pageRect != widget.pageRect) {
       settle.stop();
@@ -85,13 +82,34 @@ class _WorkspaceCanvasState extends State<WorkspaceCanvas>
 
   @override
   void dispose() {
-    widget.viewModel.removeListener(syncGlitterTicker);
-    widget.viewModel.activeStrokeTicks.removeListener(syncGlitterTicker);
+    widget.viewModel.removeListener(syncShimmer);
+    widget.viewModel.activeStrokeTicks.removeListener(syncShimmer);
+    shimmerTicker.dispose();
+    shimmerClock.dispose();
     settle.dispose();
-    burstTicker.dispose();
-    glitterTicker.dispose();
     repaintTicks.dispose();
     super.dispose();
+  }
+
+  /// Runs the shimmer only while the page has glitter on it, including a
+  /// glitter stroke still being drawn.
+  void syncShimmer() {
+    bool isGlitter(DrawingStroke? stroke) =>
+        stroke?.brush.type == BrushType.glitter;
+    final viewModel = widget.viewModel;
+    final hasGlitter =
+        isGlitter(viewModel.activeStroke) || viewModel.strokes.any(isGlitter);
+    if (hasGlitter && !shimmerTicker.isActive) {
+      shimmerTicker.start();
+    } else if (!hasGlitter && shimmerTicker.isActive) {
+      shimmerTicker.stop();
+    }
+  }
+
+  void onShimmerTick(Duration elapsed) {
+    final step = elapsed.inMicroseconds * shimmerFps ~/ 1000000;
+    final seconds = step / shimmerFps;
+    if (seconds != shimmerClock.value) shimmerClock.value = seconds;
   }
 
   void setView(CanvasViewTransform next) {
@@ -111,38 +129,6 @@ class _WorkspaceCanvasState extends State<WorkspaceCanvas>
     settleFrom = view;
     settleTo = target;
     settle.forward(from: 0);
-  }
-
-  void onBurstTick(Duration elapsed) {
-    burstEngine.update(burstTickerBase + elapsed);
-    repaintTicks.value++;
-    if (!burstEngine.isActive) burstTicker.stop();
-  }
-
-  void onGlitterTick(Duration elapsed) {
-    glitterTime = elapsed.inMicroseconds / 1e6;
-    repaintTicks.value++;
-  }
-
-  /// Starts the twinkle clock when committed or active strokes use glitter.
-  void syncGlitterTicker() {
-    final vm = widget.viewModel;
-    final needs =
-        LayerManager.usesGlitter(vm.strokes) ||
-        vm.activeStroke?.brush.type == BrushType.glitter;
-    if (needs && !glitterTicker.isActive) {
-      glitterTicker.start();
-    } else if (!needs && glitterTicker.isActive) {
-      glitterTicker.stop();
-    }
-  }
-
-  void spawnBurst(List<Offset> points) {
-    burstEngine.spawn(points, particleSize: burstParticleSize);
-    if (!burstTicker.isActive) {
-      burstTickerBase = burstEngine.now;
-      burstTicker.start();
-    }
   }
 
   void onPointerDown(PointerDownEvent event) {
@@ -202,7 +188,7 @@ class _WorkspaceCanvasState extends State<WorkspaceCanvas>
     if (event.pointer == drawingPointer) {
       drawingPointer = null;
       final stroke = widget.viewModel.endStroke();
-      if (stroke != null) spawnBurst(stroke.points);
+      if (stroke != null) burstKey.currentState?.spawn(event.localPosition);
     }
     endPinchIfNeeded();
   }
@@ -233,21 +219,28 @@ class _WorkspaceCanvasState extends State<WorkspaceCanvas>
         onPointerMove: onPointerMove,
         onPointerUp: onPointerUp,
         onPointerCancel: onPointerCancel,
-        child: ClipRect(
-          child: CustomPaint(
-            size: Size.infinite,
-            painter: WorkspacePainter(
-              viewModel: widget.viewModel,
-              burstEngine: burstEngine,
-              view: () => view,
-              glitterTime: () => glitterTime,
-              repaint: Listenable.merge([
-                widget.viewModel,
-                widget.viewModel.activeStrokeTicks,
-                repaintTicks,
-              ]),
+        child: Stack(
+          fit: StackFit.expand,
+          clipBehavior: Clip.none,
+          children: [
+            ClipRect(
+              child: CustomPaint(
+                size: Size.infinite,
+                painter: WorkspacePainter(
+                  viewModel: widget.viewModel,
+                  view: () => view,
+                  shimmerSeconds: () => shimmerClock.value,
+                  repaint: Listenable.merge([
+                    widget.viewModel,
+                    widget.viewModel.activeStrokeTicks,
+                    repaintTicks,
+                    shimmerClock,
+                  ]),
+                ),
+              ),
             ),
-          ),
+            BurstOverlay(key: burstKey),
+          ],
         ),
       ),
     );

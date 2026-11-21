@@ -1,11 +1,9 @@
 import 'dart:ui' as ui;
 
-import 'package:flutter/painting.dart' show HSVColor;
 import 'package:flutter/rendering.dart' show Matrix4;
 
 import '../../types/brush.type.dart';
 import '../../types/drawing.stroke.dart';
-import '../../types/paint.color.dart';
 import '../engine/dab.buffer.dart';
 import '../engine/dab.tip.dart';
 import '../engine/stroke.dabber.dart';
@@ -17,8 +15,6 @@ class PencilTool extends DrawingTool {
   PencilTool() : textures = PencilTextures();
 
   final PencilTextures textures;
-
-  static const double rainbowHuePerUnit = 0.9;
 
   static const DabTip pencilTip = DabTip(
     pixels: PencilTextures.tipPixels,
@@ -38,9 +34,8 @@ class PencilTool extends DrawingTool {
       tip: pencilTip,
       width: stroke.brush.size,
       seed: stroke.seed,
-      colorAt: (distance) {
-        return colorAt(stroke.brush.paintColor, stroke.seed, distance);
-      },
+      colorAt: (distance) =>
+          stroke.brush.paintColor.colorAt(distance, stroke.seed),
     );
   }
 
@@ -96,12 +91,5 @@ class PencilTool extends DrawingTool {
         matrix.storage,
         filterQuality: ui.FilterQuality.medium,
       );
-  }
-
-  static ui.Color colorAt(PaintColor paintColor, int seed, double distance) {
-    if (!paintColor.isRainbow) return paintColor.color;
-    final startHue = (seed * 47) % 360.0;
-    final hue = (startHue + distance * rainbowHuePerUnit) % 360;
-    return HSVColor.fromAHSV(1, hue, 0.8, 0.98).toColor();
   }
 }

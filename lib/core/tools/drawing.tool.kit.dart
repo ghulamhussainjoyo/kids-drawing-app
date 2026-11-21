@@ -35,8 +35,6 @@ class DrawingToolKit {
     return pencil;
   }
 
-  Future<void> preload() => glitter.ensureLoaded();
-
   void dispose() {
     pencil.dispose();
     marker.dispose();

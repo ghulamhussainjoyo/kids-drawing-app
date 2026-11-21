@@ -23,7 +23,7 @@ The UI sends normalized input and commands to the engine. It must not implement 
 
 ## 3. Codebase map (live tree)
 
-**Last updated:** 2026-11-20
+**Last updated:** 2026-11-21
 
 Single source of truth for file locations. Stack: Flutter `CupertinoApp`, Provider MVVM, Floor SQLite catalog, SharedPreferences settings via `LocalStorage` → `SettingsRepository`. User flow: **Splash → Genre → Gallery → Drawing**; settings from Genre via parent gate → `SettingDialog`.
 
@@ -58,8 +58,9 @@ Presentation routes and widgets: `lib/app/`. Domain types: `lib/types/`. No `lib
 - `app/drawing/widgets/actions/complete.check.button.dart` — Navigates to CompleteScreen when artwork done.
 - `app/drawing/widgets/actions/drawing.canvas.actions.dart` — Undo/redo/erase action cluster for canvas column.
 - `app/drawing/widgets/canva/canvas.pinch.dart` — Pinch/zoom/pan gesture math; updates CanvasViewTransform.
-- `app/drawing/widgets/canva/workspace.canvas.dart` — Pointer input → ViewModel strokes; `glitterTicker` when committed or active glitter; hosts WorkspacePainter.
-- `app/drawing/widgets/canva/workspace.painter.dart` — CustomPainter: regions, layers, bursts, glitter twinkle.
+- `app/drawing/widgets/canva/burst.overlay.dart` — Screen-space burst layer over the canvas; own ticker only while particles live; `spawn(point)` on finger lift.
+- `app/drawing/widgets/canva/workspace.canvas.dart` — Pointer input → ViewModel strokes; `shimmerTicker` (20 fps) while committed or active glitter; hosts WorkspacePainter + BurstOverlay.
+- `app/drawing/widgets/canva/workspace.painter.dart` — CustomPainter: regions, layers, glitter shimmer (`shimmerSeconds`).
 - `app/drawing/widgets/complete/complete.action.bar.dart` — Top actions on completion screen.
 - `app/drawing/widgets/complete/complete.keep.let.go.bar.dart` — Keep vs Let go pill bar.
 - `app/drawing/widgets/complete/complete.polaroid.card.dart` — Polaroid frame with snapshot preview.
@@ -128,13 +129,12 @@ Presentation routes and widgets: `lib/app/`. Domain types: `lib/types/`. No `lib
 
 #### `lib/core/engine/`
 
-- `core/engine/burst.engine.dart` — Finger-lift particle burst; ephemeral not in undo.
-- `core/engine/burst.shape.dart` — BurstShape enum for burst particles.
+- `core/engine/burst.engine.dart` — Finger-lift particle burst from the lift point, screen space, immutable particles; ephemeral not in undo.
+- `core/engine/burst.shapes.dart` — BurstShape enum + unit paths (star, flower, heart, butterfly, sparkle).
 - `core/engine/canvas.engine.dart` — CanvasViewTransform zoom/pan/fit math.
 - `core/engine/dab.buffer.dart` — Ring buffer of dab stamps for rendering.
 - `core/engine/dab.tip.dart` — Single dab stamp geometry.
-- `core/engine/glitter.twinkle.dart` — Loads `shaders/glitter.frag`; twinkle paint for baked/active glitter rasters.
-- `core/engine/layer.manager.dart` — Paints layers; bakes `_glitterImage`; active glitter bounds raster + shader twinkle.
+- `core/engine/layer.manager.dart` — Paints layers; bakes `_paintImage` + `_glitterMask` (where glitter is still visible); shimmer over committed + active glitter via `DrawingTool.paintShimmer`.
 - `core/engine/region.engine.dart` — Region hit-test, clip paths, first-touch region pick.
 - `core/engine/stroke.dabber.dart` — Converts pointer samples to dab sequence.
 - `core/engine/stroke.renderer.dart` — Paints dab buffers and strokes to canvas.
@@ -146,10 +146,10 @@ Presentation routes and widgets: `lib/app/`. Domain types: `lib/types/`. No `lib
 
 #### `lib/core/tools/`
 
-- `core/tools/drawing.tool.dart` — Abstract DrawingTool paint engine interface.
+- `core/tools/drawing.tool.dart` — Abstract DrawingTool paint engine interface; optional `paintShimmer` overlay hook.
 - `core/tools/drawing.tool.kit.dart` — Resolves active DrawingTool from BrushType.
-- `core/tools/glitter.drawing.tool.dart` — GlitterTool: modulate dabs with stick color + neutral grain.
-- `core/tools/glitter.textures.dart` — SVG speck threshold or procedural grain tile; `stampCell` 80 (not rail PNGs).
+- `core/tools/glitter.drawing.tool.dart` — GlitterTool: opaque band + page-fixed sparkle flecks (srcATop); `paintShimmer` fades 3 glint sets.
+- `core/tools/glitter.textures.dart` — Procedural tip, sparkle tile and glint tiles, built once with `toImageSync`.
 - `core/tools/marker.drawing.tool.dart` — MarkerTool paint engine.
 - `core/tools/marker.textures.dart` — Marker tip texture assets.
 - `core/tools/marker.tool.dart` — MarkerTools color stick catalog.
@@ -210,10 +210,10 @@ Presentation routes and widgets: `lib/app/`. Domain types: `lib/types/`. No `lib
 - `types/drawing.stroke.dart` — Stroke points, color, regionId, brush.
 - `types/gellery/gallery.model.dart` — Gallery section model (note folder spelling).
 - `types/genre/genre.model.dart` — Genre carousel item model.
-- `types/paint.color.dart` — Paint color wrapper for tools.
+- `types/paint.color.dart` — Paint colors as a list: one = solid, more = blend along the stroke (`colorAt`).
 - `types/tools/glitter.model.dart` — Glitter stick model.
 - `types/tools/pencil.model.dart` — Pencil stick model.
-- `types/tools/stationary.model.dart` — Base stick model for catalogs.
+- `types/tools/stationary.model.dart` — Base stick model for catalogs; `colors` list, `color` = first.
 
 #### `lib/utils/`
 
@@ -231,7 +231,6 @@ Presentation routes and widgets: `lib/app/`. Domain types: `lib/types/`. No `lib
 - `assets/png/` — Shared PNGs (e.g. settings puppy).
 - `assets/svgs/` — SVG assets (paw, category backgrounds).
 
-Non-Dart: `shaders/glitter.frag` — Fragment shader twinkle on glitter layer rasters (declared in `pubspec.yaml` `flutter: shaders`).
 
 ### 3.4 Project docs and Cursor rules
 

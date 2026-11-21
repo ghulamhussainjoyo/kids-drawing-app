@@ -35,6 +35,10 @@ class StrokesJsonCodec {
           'type': stroke.brush.type.name,
           'color': stroke.brush.paintColor.color.toARGB32(),
           'colorId': stroke.brush.paintColor.id,
+          'colors': [
+            for (final color in stroke.brush.paintColor.colors)
+              color.toARGB32(),
+          ],
         },
         'params': <String, dynamic>{},
         'points': points,
@@ -60,6 +64,10 @@ class StrokesJsonCodec {
       final typeName = brushMap['type'] as String? ?? 'pencil';
       final colorValue = brushMap['color'] as int? ?? 0xFFF44336;
       final colorId = brushMap['colorId'] as String? ?? 'color';
+      final colorsRaw = brushMap['colors'] as List<dynamic>?;
+      final colors = colorsRaw == null || colorsRaw.isEmpty
+          ? [Color(colorValue)]
+          : [for (final value in colorsRaw) Color(value as int)];
       final pointsRaw = stroke['points'] as List<dynamic>? ?? const [];
       final points = <Offset>[];
       for (final pointRaw in pointsRaw) {
@@ -76,10 +84,7 @@ class StrokesJsonCodec {
           brush: BrushConfig(
             size: (brushMap['size'] as num?)?.toDouble() ?? 32,
             type: _brushType(typeName),
-            paintColor: PaintColor(
-              id: colorId,
-              color: Color(colorValue),
-            ),
+            paintColor: PaintColor(id: colorId, colors: colors),
           ),
           points: points,
         ),

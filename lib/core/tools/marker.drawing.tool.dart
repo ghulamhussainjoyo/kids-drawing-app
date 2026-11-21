@@ -32,7 +32,8 @@ class MarkerTool extends DrawingTool {
       tip: markerTip,
       width: stroke.brush.size,
       seed: stroke.seed,
-      colorAt: (_) => stroke.brush.paintColor.color,
+      colorAt: (distance) =>
+          stroke.brush.paintColor.colorAt(distance, stroke.seed),
     );
   }
 
