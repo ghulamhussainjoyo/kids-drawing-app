@@ -3,7 +3,7 @@ import 'dart:typed_data';
 import 'dart:ui' as ui;
 
 import 'package:kids_drawing_flutter/core/engine/layer.manager.dart';
-import 'package:kids_drawing_flutter/core/tools/drawing.tool.dart';
+import 'package:kids_drawing_flutter/core/tools/drawing.tool.registry.dart';
 import 'package:kids_drawing_flutter/types/drawing.stroke.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -14,7 +14,7 @@ class ArtworkThumbnailBaker {
     required LayerManager layerManager,
     required List<DrawingStroke> strokes,
     required int revision,
-    required DrawingTool tool,
+    required DrawingToolRegistry tools,
   }) async {
     final size = layerManager.artwork.size;
     final recorder = ui.PictureRecorder();
@@ -23,7 +23,7 @@ class ArtworkThumbnailBaker {
       canvas,
       committed: strokes,
       revision: revision,
-      tool: tool,
+      tools: tools,
     );
     final picture = recorder.endRecording();
     final image = await picture.toImage(size.round(), size.round());
@@ -40,7 +40,7 @@ class ArtworkThumbnailBaker {
     required LayerManager layerManager,
     required List<DrawingStroke> strokes,
     required int revision,
-    required DrawingTool tool,
+    required DrawingToolRegistry tools,
     required String genre,
     required String artworkKey,
   }) async {
@@ -48,7 +48,7 @@ class ArtworkThumbnailBaker {
       layerManager: layerManager,
       strokes: strokes,
       revision: revision,
-      tool: tool,
+      tools: tools,
     );
     final docs = await getApplicationDocumentsDirectory();
     final folder = Directory(p.join(docs.path, 'thumbnails', genre));

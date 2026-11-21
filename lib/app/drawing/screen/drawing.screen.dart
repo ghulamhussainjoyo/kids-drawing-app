@@ -131,7 +131,7 @@ class _DrawingScreen extends State<DrawingScreen> with WidgetsBindingObserver {
                       child: ControllerTools(
                         density: viewModel.density,
                         onDensityChanged: viewModel.setDensity,
-                        selectedCategoryImage: viewModel.categoryImage,
+                        selectedCategory: viewModel.category,
                         onBack: () => flushAndPop(viewModel),
                         onEraser: () => openEraseConfirm(viewModel),
                         onUndo: viewModel.canUndo ? viewModel.undo : null,

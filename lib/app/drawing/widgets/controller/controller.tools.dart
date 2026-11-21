@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:kids_drawing_flutter/core/ui/theme/app.colors.dart';
 import 'package:kids_drawing_flutter/core/ui/widgets/circle.button.dart';
 import 'package:kids_drawing_flutter/app/drawing/widgets/tools/size.slider.display.dart';
+import 'package:kids_drawing_flutter/app/drawing/widgets/tools/category.icon.dart';
+import 'package:kids_drawing_flutter/types/category.model.dart';
 
 class ControllerTools extends StatefulWidget {
   final double density;
@@ -9,7 +11,7 @@ class ControllerTools extends StatefulWidget {
   final VoidCallback? onUndo;
   final VoidCallback? onRedo;
   final VoidCallback? onEraser;
-  final String selectedCategoryImage;
+  final CategoryModel selectedCategory;
   final ValueChanged<double> onDensityChanged;
 
   const ControllerTools({
@@ -19,7 +21,7 @@ class ControllerTools extends StatefulWidget {
     this.onRedo,
     this.onEraser,
     required this.density,
-    required this.selectedCategoryImage,
+    required this.selectedCategory,
     required this.onDensityChanged,
   });
 
@@ -111,8 +113,8 @@ class _ControllerToolsState extends State<ControllerTools> {
                         height: badgeSize,
                         child: ColoredBox(
                           color: AppColors.lavender,
-                          child: Image.asset(
-                            widget.selectedCategoryImage,
+                          child: CategoryIcon(
+                            category: widget.selectedCategory,
                             fit: BoxFit.cover,
                           ),
                         ),

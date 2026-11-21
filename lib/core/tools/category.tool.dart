@@ -1,16 +1,17 @@
 import 'dart:ui';
 
+import 'package:kids_drawing_flutter/types/brush.type.dart';
 import 'package:kids_drawing_flutter/types/category.model.dart';
 
 class CategoryTools {
-  String getCategoryImage(String name) {
+  CategoryModel getCategory(String name) {
     final categories = getCategoryList();
     for (final category in categories) {
       if (category.name == name) {
-        return category.image;
+        return category;
       }
     }
-    return categories.first.image;
+    return categories.first;
   }
 
   List<CategoryModel> getCategoryList() {
@@ -30,6 +31,14 @@ class CategoryTools {
         imageSize: 56,
         mutedColor: Color(0xFFFFAB2E),
         activeColor: Color(0xFFFF9800),
+      ),
+      CategoryModel(
+        name: 'glitter',
+        size: 48,
+        imageSize: 56,
+        brushType: BrushType.glitter,
+        mutedColor: Color(0xFF6C7BF0),
+        activeColor: Color(0xFF4A5AE8),
       ),
       CategoryModel(
         size: 48,

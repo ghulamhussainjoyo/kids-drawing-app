@@ -2,7 +2,6 @@ import 'dart:math' as math;
 
 import 'package:flutter/cupertino.dart';
 
-import '../../../core/engine/burst.engine.dart';
 import '../../../core/engine/canvas.engine.dart';
 import '../../../core/ui/theme/app.colors.dart';
 import '../../../state/drawing/drawing.view-model.dart';
@@ -53,7 +52,6 @@ class EraseConfirmScreen extends StatelessWidget {
                             ),
                             painter: WorkspacePainter(
                               viewModel: viewModel,
-                              burstEngine: BurstEngine(),
                               view: () => CanvasViewTransform(
                                 pageRect: pageRect,
                                 artworkSize:

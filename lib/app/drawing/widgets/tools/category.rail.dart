@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kids_drawing_flutter/types/category.model.dart';
 import 'package:kids_drawing_flutter/core/ui/widgets/rounded.button.dart';
+import 'package:kids_drawing_flutter/app/drawing/widgets/tools/category.icon.dart';
 
 class CategoryRail extends StatelessWidget {
   final double gap;
@@ -49,7 +50,7 @@ class CategoryRail extends StatelessWidget {
               imageSize: imageSize,
               backgroundColor: fill,
               onPressed: () => onCategoryTap(category.name),
-              image: Image.asset(category.image),
+              image: CategoryIcon(category: category),
             ),
           ),
         );

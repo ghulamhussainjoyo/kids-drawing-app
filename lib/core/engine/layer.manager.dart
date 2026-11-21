@@ -1,8 +1,9 @@
 import 'dart:ui';
 
+import '../../types/brush.type.dart';
 import '../../types/coloring.artwork.dart';
 import '../../types/drawing.stroke.dart';
-import '../tools/drawing.tool.dart';
+import '../tools/drawing.tool.registry.dart';
 import 'region.engine.dart';
 import 'stroke.dabber.dart';
 import 'stroke.renderer.dart';
@@ -12,6 +13,10 @@ import 'stroke.renderer.dart';
 /// Committed paint lives in one raster image, so a frame costs the same
 /// however many strokes came before. A committed stroke is drawn onto that
 /// image once; undo and redo rebuild it from the stroke list once.
+///
+/// A second, smaller image masks where glitter is still visible (later
+/// non-glitter strokes cut it away), so glitter can shimmer live on top of
+/// the baked paint.
 class LayerManager {
   LayerManager({required this.regionEngine})
     : strokeRenderer = StrokeRenderer();
@@ -22,7 +27,15 @@ class LayerManager {
   /// Committed paint resolution for the whole page.
   static const int paintImagePixels = 2048;
 
+  /// Glitter mask resolution; it only gates glints, so it can be coarser.
+  static const int glitterMaskPixels = 1024;
+
+  static final Paint _maskAdd = Paint()
+    ..colorFilter = const ColorFilter.mode(Color(0xFFFFFFFF), BlendMode.srcIn);
+  static final Paint _maskCut = Paint()..blendMode = BlendMode.dstOut;
+
   Image? _paintImage;
+  Image? _glitterMask;
   int _paintRevision = -1;
   List<int> _bakedStrokeIds = const [];
   Picture? _outlineCache;
@@ -32,19 +45,23 @@ class LayerManager {
   /// [activeDabber] holds the dabs of [active] when it is drawn
   /// incrementally. It may also be the finished dabber of the stroke just
   /// committed, which is then baked without a replay.
+  ///
+  /// With [shimmerSeconds], visible glitter twinkles; leave it null for still
+  /// output such as thumbnails and exports.
   void paint(
     Canvas canvas, {
     required List<DrawingStroke> committed,
     required int revision,
-    required DrawingTool tool,
+    required DrawingToolRegistry tools,
     DrawingStroke? active,
     StrokeDabber? activeDabber,
+    double? shimmerSeconds,
   }) {
     final bounds = Rect.fromLTWH(0, 0, artwork.size, artwork.size);
     canvas.drawRect(bounds, Paint()..color = const Color(0xFFFFFFFF));
 
     if (revision != _paintRevision) {
-      _syncPaint(committed, active == null ? activeDabber : null, tool);
+      _syncPaint(committed, active == null ? activeDabber : null, tools);
       _paintRevision = revision;
     }
     final image = _paintImage;
@@ -57,15 +74,41 @@ class LayerManager {
       );
     }
 
+    StrokeDabber? liveDabber;
     if (active != null) {
-      _paintStroke(canvas, active, activeDabber ?? tool.replay(active), tool);
+      final tool = tools.toolFor(active.brush.type);
+      liveDabber = activeDabber ?? tool.replay(active);
+      _paintStroke(canvas, active, liveDabber, tools);
+    }
+
+    final mask = _glitterMask;
+    final drawingGlitter = active != null && _isGlitter(active);
+    if (shimmerSeconds != null && (mask != null || drawingGlitter)) {
+      // Glints cover committed glitter plus the stroke being drawn, so glitter
+      // shimmers from the moment it is laid down.
+      tools.glitter.paintShimmer(
+        canvas,
+        bounds: bounds,
+        seconds: shimmerSeconds,
+        coverage: (canvas) {
+          _drawImage(canvas, mask, FilterQuality.low);
+          if (active != null && liveDabber != null) {
+            _maskStroke(canvas, active, liveDabber, tools);
+          }
+        },
+      );
     }
 
     canvas.drawPicture(_outlineCache ??= _recordOutlines());
   }
 
+  /// Whether any committed glitter is visible, i.e. whether shimmer has
+  /// anything to draw.
+  bool get hasGlitter => _glitterMask != null;
+
   void dispose() {
     _paintImage?.dispose();
+    _glitterMask?.dispose();
     _outlineCache?.dispose();
   }
 
@@ -73,12 +116,12 @@ class LayerManager {
     Canvas canvas,
     DrawingStroke stroke,
     StrokeDabber dabber,
-    DrawingTool tool,
+    DrawingToolRegistry tools,
   ) {
+    final tool = tools.toolFor(stroke.brush.type);
     if (stroke.regionId == DrawingStroke.freeRegionId) {
       final size = artwork.size;
-      final pagePath = Path()
-        ..addRect(Rect.fromLTWH(0, 0, size, size));
+      final pagePath = Path()..addRect(Rect.fromLTWH(0, 0, size, size));
       strokeRenderer.paint(canvas, dabber, pagePath, tool);
       return;
     }
@@ -89,12 +132,12 @@ class LayerManager {
     strokeRenderer.paint(canvas, dabber, region.path, tool);
   }
 
-  /// Brings the paint image up to [committed]: bakes only the newest stroke
-  /// when it was appended, otherwise replays the whole list.
+  /// Brings the paint image and glitter mask up to [committed]: bakes only
+  /// the newest stroke when it was appended, otherwise replays the whole list.
   void _syncPaint(
     List<DrawingStroke> committed,
     StrokeDabber? justCommitted,
-    DrawingTool tool,
+    DrawingToolRegistry tools,
   ) {
     final ids = [for (final s in committed) s.id];
     final appendedOne =
@@ -104,43 +147,86 @@ class LayerManager {
       final stroke = committed.last;
       final dabber = justCommitted != null && justCommitted.seed == stroke.seed
           ? justCommitted
-          : tool.replay(stroke);
-      _redrawPaint((canvas) {
-        _drawPaintImage(canvas);
-        _paintStroke(canvas, stroke, dabber, tool);
+          : tools.toolFor(stroke.brush.type).replay(stroke);
+      final oldPaint = _paintImage;
+      _paintImage = _bake(paintImagePixels, (canvas) {
+        _drawImage(canvas, oldPaint);
+        _paintStroke(canvas, stroke, dabber, tools);
       });
+      oldPaint?.dispose();
+      final oldMask = _glitterMask;
+      if (oldMask != null || _isGlitter(stroke)) {
+        _glitterMask = _bake(glitterMaskPixels, (canvas) {
+          _drawImage(canvas, oldMask);
+          _maskStroke(canvas, stroke, dabber, tools);
+        });
+        oldMask?.dispose();
+      }
     } else {
-      _redrawPaint((canvas) {
-        for (final stroke in committed) {
-          _paintStroke(canvas, stroke, tool.replay(stroke), tool);
+      final dabbers = [
+        for (final stroke in committed)
+          tools.toolFor(stroke.brush.type).replay(stroke),
+      ];
+      _paintImage?.dispose();
+      _paintImage = _bake(paintImagePixels, (canvas) {
+        for (var i = 0; i < committed.length; i++) {
+          _paintStroke(canvas, committed[i], dabbers[i], tools);
         }
       });
+      _glitterMask?.dispose();
+      _glitterMask = null;
+      final firstGlitter = committed.indexWhere(_isGlitter);
+      if (firstGlitter >= 0) {
+        _glitterMask = _bake(glitterMaskPixels, (canvas) {
+          for (var i = firstGlitter; i < committed.length; i++) {
+            _maskStroke(canvas, committed[i], dabbers[i], tools);
+          }
+        });
+      }
     }
     _bakedStrokeIds = ids;
   }
 
-  void _redrawPaint(void Function(Canvas canvas) draw) {
-    final recorder = PictureRecorder();
-    final canvas = Canvas(recorder);
-    canvas.scale(paintImagePixels / artwork.size);
-    draw(canvas);
-    final picture = recorder.endRecording();
-    final image = picture.toImageSync(paintImagePixels, paintImagePixels);
-    picture.dispose();
-    _paintImage?.dispose();
-    _paintImage = image;
+  /// Glitter strokes add to the mask; any other stroke cuts away what it
+  /// covers, since it hides the glitter beneath it.
+  void _maskStroke(
+    Canvas canvas,
+    DrawingStroke stroke,
+    StrokeDabber dabber,
+    DrawingToolRegistry tools,
+  ) {
+    canvas.saveLayer(null, _isGlitter(stroke) ? _maskAdd : _maskCut);
+    _paintStroke(canvas, stroke, dabber, tools);
+    canvas.restore();
   }
 
-  /// Copies the current paint image pixel for pixel into an artwork-space
-  /// canvas scaled to [paintImagePixels].
-  void _drawPaintImage(Canvas canvas) {
-    final image = _paintImage;
+  static bool _isGlitter(DrawingStroke stroke) =>
+      stroke.brush.type == BrushType.glitter;
+
+  /// Renders [draw], in artwork coordinates, into a square image of [pixels].
+  Image _bake(int pixels, void Function(Canvas canvas) draw) {
+    final recorder = PictureRecorder();
+    final canvas = Canvas(recorder);
+    canvas.scale(pixels / artwork.size);
+    draw(canvas);
+    final picture = recorder.endRecording();
+    final image = picture.toImageSync(pixels, pixels);
+    picture.dispose();
+    return image;
+  }
+
+  /// Copies a baked [image] back onto an artwork-space canvas.
+  void _drawImage(
+    Canvas canvas,
+    Image? image, [
+    FilterQuality quality = FilterQuality.none,
+  ]) {
     if (image == null) return;
     canvas.drawImageRect(
       image,
       Rect.fromLTWH(0, 0, image.width.toDouble(), image.height.toDouble()),
       Rect.fromLTWH(0, 0, artwork.size, artwork.size),
-      Paint()..filterQuality = FilterQuality.none,
+      Paint()..filterQuality = quality,
     );
   }
 

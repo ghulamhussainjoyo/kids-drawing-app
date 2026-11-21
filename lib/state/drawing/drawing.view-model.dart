@@ -7,14 +7,14 @@ import 'package:flutter/foundation.dart';
 import '../../core/engine/layer.manager.dart';
 import '../../core/engine/region.engine.dart';
 import '../../core/engine/stroke.dabber.dart';
-import '../../core/tools/drawing.tool.dart';
-import '../../core/tools/pencil.drawing.tool.dart';
+import '../../core/tools/drawing.tool.registry.dart';
 import '../../core/tools/stationary.tools.dart';
 import '../../data/local/artwork/artwork.thumbnail.baker.dart';
 import '../../data/local/floor/artwork.entity.dart';
 import '../../data/repositories/artwork/catalog.repository.dart';
 import '../../types/brush.config.dart';
 import '../../types/brush.type.dart';
+import '../../types/category.model.dart';
 import '../../types/drawing.stroke.dart';
 import '../../types/paint.color.dart';
 import '../../types/tools/stationary.model.dart';
@@ -36,7 +36,7 @@ class DrawingViewModel extends ChangeNotifier {
   LayerManager? layerManager;
   RegionEngine? regionEngine;
   String selectedCategory = 'pencil';
-  DrawingTool drawingTool = PencilTool();
+  final DrawingToolRegistry tools = DrawingToolRegistry();
 
   static const double minBrushSize = 12;
   static const double maxBrushSize = 56;
@@ -46,7 +46,7 @@ class DrawingViewModel extends ChangeNotifier {
   final List<DrawingStroke> redoStack = [];
   final ValueNotifier<int> activeStrokeTicks = ValueNotifier<int>(0);
 
-  final paintColor = PaintColor(id: 'red', color: Color(0xFFF44336));
+  final paintColor = PaintColor.solid(id: 'red', color: Color(0xFFF44336));
 
   late BrushConfig brushConfig = BrushConfig(
     size: 32,
@@ -65,16 +65,13 @@ class DrawingViewModel extends ChangeNotifier {
 
   int get revision => revisionValue;
   BrushConfig get brush => brushConfig;
-  DrawingTool get tool => drawingTool;
   bool get canRedo => redoStack.isNotEmpty;
   DrawingStroke? get activeStroke => active;
   bool get canUndo => strokesList.isNotEmpty;
   bool get hasCompletedStroke => completedStroke;
   StrokeDabber? get activeDabber => activeDabberField;
   List<DrawingStroke> get strokes => UnmodifiableListView(strokesList);
-  String get categoryImage {
-    return stationaryTools.getCategoryImage(selectedCategory);
-  }
+  CategoryModel get category => stationaryTools.getCategory(selectedCategory);
 
   Future<void> selectArtwork(String artworkKey) async {
     selectedArtworkId = artworkKey;
@@ -116,7 +113,7 @@ class DrawingViewModel extends ChangeNotifier {
   void selectTool(StationaryModel tool) {
     selectedTool = tool;
     brushConfig = brushConfig.copyWith(
-      paintColor: PaintColor(id: tool.id, color: tool.color),
+      paintColor: PaintColor(id: tool.id, colors: tool.colors),
     );
     notifyListeners();
   }
@@ -126,6 +123,7 @@ class DrawingViewModel extends ChangeNotifier {
     final previous = stationaryTools.getToolsByCategory(selectedCategory);
     final next = stationaryTools.getToolsByCategory(name);
     selectedCategory = name;
+    brushConfig = brushConfig.copyWith(type: category.brushType);
     if (!_sameToolIds(previous, next)) {
       selectedTool = null;
     }
@@ -170,10 +168,7 @@ class DrawingViewModel extends ChangeNotifier {
       regionId = region.id;
     } else {
       final size = engine.artwork.size;
-      if (point.dx < 0 ||
-          point.dy < 0 ||
-          point.dx > size ||
-          point.dy > size) {
+      if (point.dx < 0 || point.dy < 0 || point.dx > size || point.dy > size) {
         return false;
       }
       regionId = DrawingStroke.freeRegionId;
@@ -187,7 +182,7 @@ class DrawingViewModel extends ChangeNotifier {
       points: [point],
     );
     active = stroke;
-    activeDabberField = drawingTool.createDabber(stroke)
+    activeDabberField = tools.toolFor(stroke.brush.type).createDabber(stroke)
       ..addPoint(point)
       ..updateTail();
     nextStrokeId++;
@@ -277,7 +272,7 @@ class DrawingViewModel extends ChangeNotifier {
       layerManager: manager,
       strokes: List<DrawingStroke>.from(strokesList),
       revision: revisionValue,
-      tool: drawingTool,
+      tools: tools,
     );
   }
 
@@ -293,7 +288,7 @@ class DrawingViewModel extends ChangeNotifier {
         layerManager: manager,
         strokes: List<DrawingStroke>.from(strokesList),
         revision: revisionValue,
-        tool: drawingTool,
+        tools: tools,
         genre: row.genre,
         artworkKey: row.artworkKey,
       );
@@ -335,7 +330,7 @@ class DrawingViewModel extends ChangeNotifier {
   void dispose() {
     _saveTimer?.cancel();
     layerManager?.dispose();
-    drawingTool.dispose();
+    tools.dispose();
     activeStrokeTicks.dispose();
     super.dispose();
   }
