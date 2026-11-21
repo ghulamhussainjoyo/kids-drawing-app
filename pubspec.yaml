@@ -34,6 +34,8 @@ dev_dependencies:
   build_runner: ^2.4.13
 
 flutter:
+  shaders:
+    - shaders/glitter.frag
 
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
@@ -43,12 +45,15 @@ flutter:
   assets:
     - assets/
     - assets/png/
+    - assets/ui/
+    - assets/svgs/
     - assets/gallery/
     - assets/brushes/
     - assets/pencil/
     - assets/marker/
-    - assets/ui/
-    - assets/svgs/
+    - assets/stationary/glitter/
+    - assets/stationary/pencil/
+    - assets/genre/live_background/
 
   fonts:
     - family: Nunito

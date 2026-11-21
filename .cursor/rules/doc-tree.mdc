@@ -1,0 +1,21 @@
+---
+description: Keep Architecture.md §3 codebase map in sync when lib/ changes
+alwaysApply: true
+---
+
+# Codebase map maintenance
+
+The live annotated file tree is **`docs/Architecture.md` §3** (§3.2 lists every `lib/**/*.dart` file).
+
+Before creating a new class or widget under `lib/`:
+
+1. Read Architecture §3 and §3.5 (reuse index).
+2. Reuse or extend existing types in `core/ui`, `core/engine`, `core/tools`, `data/repositories`, and feature `widgets/` — do not duplicate.
+
+After any task that **adds, moves, renames, or deletes** files under `lib/`:
+
+1. Update the matching bullets in **Architecture.md §3.2**.
+2. Bump **Last updated** at the top of §3.
+3. If the change introduces a primary shared widget, add a row to **§3.5** when appropriate.
+
+Do not maintain a second file tree elsewhere; §3 is the single source of truth.

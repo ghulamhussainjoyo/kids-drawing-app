@@ -8,7 +8,7 @@ import '../../core/engine/layer.manager.dart';
 import '../../core/engine/region.engine.dart';
 import '../../core/engine/stroke.dabber.dart';
 import '../../core/tools/drawing.tool.dart';
-import '../../core/tools/pencil.drawing.tool.dart';
+import '../../core/tools/drawing.tool.kit.dart';
 import '../../core/tools/stationary.tools.dart';
 import '../../data/local/artwork/artwork.thumbnail.baker.dart';
 import '../../data/local/floor/artwork.entity.dart';
@@ -36,7 +36,7 @@ class DrawingViewModel extends ChangeNotifier {
   LayerManager? layerManager;
   RegionEngine? regionEngine;
   String selectedCategory = 'pencil';
-  DrawingTool drawingTool = PencilTool();
+  final DrawingToolKit _toolKit = DrawingToolKit();
 
   static const double minBrushSize = 12;
   static const double maxBrushSize = 56;
@@ -65,7 +65,9 @@ class DrawingViewModel extends ChangeNotifier {
 
   int get revision => revisionValue;
   BrushConfig get brush => brushConfig;
-  DrawingTool get tool => drawingTool;
+  DrawingTool get tool => _toolKit.forCategory(selectedCategory);
+
+  DrawingTool Function(BrushType type) get toolFor => _toolKit.forType;
   bool get canRedo => redoStack.isNotEmpty;
   DrawingStroke? get activeStroke => active;
   bool get canUndo => strokesList.isNotEmpty;
@@ -111,6 +113,7 @@ class DrawingViewModel extends ChangeNotifier {
     clipToRegions = true;
     revisionValue++;
     hasOpenedArtwork = true;
+    await _toolKit.preload();
   }
 
   void selectTool(StationaryModel tool) {
@@ -126,6 +129,7 @@ class DrawingViewModel extends ChangeNotifier {
     final previous = stationaryTools.getToolsByCategory(selectedCategory);
     final next = stationaryTools.getToolsByCategory(name);
     selectedCategory = name;
+    brushConfig = brushConfig.copyWith(type: tool.type);
     if (!_sameToolIds(previous, next)) {
       selectedTool = null;
     }
@@ -170,10 +174,7 @@ class DrawingViewModel extends ChangeNotifier {
       regionId = region.id;
     } else {
       final size = engine.artwork.size;
-      if (point.dx < 0 ||
-          point.dy < 0 ||
-          point.dx > size ||
-          point.dy > size) {
+      if (point.dx < 0 || point.dy < 0 || point.dx > size || point.dy > size) {
         return false;
       }
       regionId = DrawingStroke.freeRegionId;
@@ -182,12 +183,12 @@ class DrawingViewModel extends ChangeNotifier {
     final stroke = DrawingStroke(
       id: nextStrokeId,
       regionId: regionId,
-      brush: brushConfig,
+      brush: brushConfig.copyWith(type: tool.type),
       seed: nextStrokeId,
       points: [point],
     );
     active = stroke;
-    activeDabberField = drawingTool.createDabber(stroke)
+    activeDabberField = tool.createDabber(stroke)
       ..addPoint(point)
       ..updateTail();
     nextStrokeId++;
@@ -277,7 +278,7 @@ class DrawingViewModel extends ChangeNotifier {
       layerManager: manager,
       strokes: List<DrawingStroke>.from(strokesList),
       revision: revisionValue,
-      tool: drawingTool,
+      toolFor: toolFor,
     );
   }
 
@@ -293,7 +294,7 @@ class DrawingViewModel extends ChangeNotifier {
         layerManager: manager,
         strokes: List<DrawingStroke>.from(strokesList),
         revision: revisionValue,
-        tool: drawingTool,
+        toolFor: toolFor,
         genre: row.genre,
         artworkKey: row.artworkKey,
       );
@@ -335,7 +336,7 @@ class DrawingViewModel extends ChangeNotifier {
   void dispose() {
     _saveTimer?.cancel();
     layerManager?.dispose();
-    drawingTool.dispose();
+    _toolKit.dispose();
     activeStrokeTicks.dispose();
     super.dispose();
   }

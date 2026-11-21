@@ -68,12 +68,6 @@ class _DrawingScreen extends State<DrawingScreen> with WidgetsBindingObserver {
     Navigator.of(context).pop();
   }
 
-  double getNotchInset(BuildContext context) {
-    final orientation = NativeDeviceOrientationReader.orientation(context);
-    final notchOnRight = orientation == NativeDeviceOrientation.landscapeRight;
-    return notchOnRight ? MediaQuery.viewPaddingOf(context).right * 0.7 : 0.0;
-  }
-
   @override
   void initState() {
     super.initState();
@@ -110,10 +104,7 @@ class _DrawingScreen extends State<DrawingScreen> with WidgetsBindingObserver {
       },
       child: NativeDeviceOrientationReader(
         builder: (context) {
-          final metrics = ToolsPanelMetrics.of(
-            context,
-            notchInset: getNotchInset(context),
-          );
+          final metrics = ToolsPanelMetrics.of(context);
           return CupertinoPageScaffold(
             backgroundColor: AppColors.pageBackground,
             child: ListenableBuilder(
@@ -172,11 +163,11 @@ class _DrawingScreen extends State<DrawingScreen> with WidgetsBindingObserver {
                     DrawingTools(
                       // Flexible nahi, fixed width
                       metrics: metrics,
-                      onToolSelect: viewModel.selectTool,
-                      onCategoryTap: viewModel.selectCategory,
-                      selectedCategory: viewModel.selectedCategory,
-                      selectedToolId: viewModel.selectedTool?.id,
-                      stationaryTools: viewModel.stationaryTools,
+                      // onToolSelect: viewModel.selectTool,
+                      // onCategoryTap: viewModel.selectCategory,
+                      // selectedCategory: viewModel.selectedCategory,
+                      // selectedToolId: viewModel.selectedTool?.id,
+                      // stationaryTools: viewModel.stationaryTools,
                     ),
                   ],
                 );

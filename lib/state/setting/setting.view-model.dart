@@ -15,6 +15,7 @@ class SettingViewModel extends ChangeNotifier {
   bool _voiceOn = true;
   bool _sfxOn = true;
   bool _vibrationOn = true;
+  bool _liveBackgroundOn = true;
   String _language = 'en_US';
 
   String get gender => _gender;
@@ -26,6 +27,7 @@ class SettingViewModel extends ChangeNotifier {
   bool get voiceOn => _voiceOn;
   bool get sfxOn => _sfxOn;
   bool get vibrationOn => _vibrationOn;
+  bool get liveBackgroundOn => _liveBackgroundOn;
   String get language => _language;
 
   String get pronoun {
@@ -48,6 +50,7 @@ class SettingViewModel extends ChangeNotifier {
     _voiceOn = await _repository.voiceOn();
     _sfxOn = await _repository.sfxOn();
     _vibrationOn = await _repository.vibrationOn();
+    _liveBackgroundOn = await _repository.liveBackgroundOn();
     _language = await _repository.language();
     notifyListeners();
   }
@@ -116,5 +119,11 @@ class SettingViewModel extends ChangeNotifier {
     _language = value;
     notifyListeners();
     await _repository.setLanguage(value);
+  }
+
+  Future<void> setLiveBackgroundOn(bool value) async {
+    _liveBackgroundOn = value;
+    notifyListeners();
+    await _repository.setLiveBackgroundOn(value);
   }
 }

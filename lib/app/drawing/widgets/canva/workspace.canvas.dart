@@ -3,7 +3,9 @@ import 'package:flutter/widgets.dart';
 
 import '../../../../core/engine/burst.engine.dart';
 import '../../../../core/engine/canvas.engine.dart';
+import '../../../../core/engine/layer.manager.dart';
 import '../../../../state/drawing/drawing.view-model.dart';
+import '../../../../types/brush.type.dart';
 import 'canvas.pinch.dart';
 import 'workspace.painter.dart';
 
@@ -37,6 +39,10 @@ class _WorkspaceCanvasState extends State<WorkspaceCanvas>
   late final Ticker burstTicker;
   Duration burstTickerBase = Duration.zero;
 
+  /// Drives the glitter twinkle; runs only while the page has glitter.
+  late final Ticker glitterTicker;
+  double glitterTime = 0;
+
   CanvasViewTransform? settleFrom;
   CanvasViewTransform? settleTo;
 
@@ -54,11 +60,23 @@ class _WorkspaceCanvasState extends State<WorkspaceCanvas>
     settle = AnimationController(vsync: this, duration: settleDuration)
       ..addListener(onSettleTick);
     burstTicker = createTicker(onBurstTick);
+    glitterTicker = createTicker(onGlitterTick);
+    widget.viewModel.layerManager!.twinkle.ensureLoaded();
+    widget.viewModel.addListener(syncGlitterTicker);
+    widget.viewModel.activeStrokeTicks.addListener(syncGlitterTicker);
+    syncGlitterTicker();
   }
 
   @override
   void didUpdateWidget(WorkspaceCanvas oldWidget) {
     super.didUpdateWidget(oldWidget);
+    if (oldWidget.viewModel != widget.viewModel) {
+      oldWidget.viewModel.removeListener(syncGlitterTicker);
+      oldWidget.viewModel.activeStrokeTicks.removeListener(syncGlitterTicker);
+      widget.viewModel.addListener(syncGlitterTicker);
+      widget.viewModel.activeStrokeTicks.addListener(syncGlitterTicker);
+      syncGlitterTicker();
+    }
     if (oldWidget.pageRect != widget.pageRect) {
       settle.stop();
       view = view.withPageRect(widget.pageRect).settled();
@@ -67,8 +85,11 @@ class _WorkspaceCanvasState extends State<WorkspaceCanvas>
 
   @override
   void dispose() {
+    widget.viewModel.removeListener(syncGlitterTicker);
+    widget.viewModel.activeStrokeTicks.removeListener(syncGlitterTicker);
     settle.dispose();
     burstTicker.dispose();
+    glitterTicker.dispose();
     repaintTicks.dispose();
     super.dispose();
   }
@@ -96,6 +117,24 @@ class _WorkspaceCanvasState extends State<WorkspaceCanvas>
     burstEngine.update(burstTickerBase + elapsed);
     repaintTicks.value++;
     if (!burstEngine.isActive) burstTicker.stop();
+  }
+
+  void onGlitterTick(Duration elapsed) {
+    glitterTime = elapsed.inMicroseconds / 1e6;
+    repaintTicks.value++;
+  }
+
+  /// Starts the twinkle clock when committed or active strokes use glitter.
+  void syncGlitterTicker() {
+    final vm = widget.viewModel;
+    final needs =
+        LayerManager.usesGlitter(vm.strokes) ||
+        vm.activeStroke?.brush.type == BrushType.glitter;
+    if (needs && !glitterTicker.isActive) {
+      glitterTicker.start();
+    } else if (!needs && glitterTicker.isActive) {
+      glitterTicker.stop();
+    }
   }
 
   void spawnBurst(List<Offset> points) {
@@ -201,6 +240,7 @@ class _WorkspaceCanvasState extends State<WorkspaceCanvas>
               viewModel: widget.viewModel,
               burstEngine: burstEngine,
               view: () => view,
+              glitterTime: () => glitterTime,
               repaint: Listenable.merge([
                 widget.viewModel,
                 widget.viewModel.activeStrokeTicks,

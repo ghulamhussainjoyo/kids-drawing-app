@@ -1,1 +1,10 @@
-enum BrushType { bucket, crayon, paintbrush, wand, pencil, marker, eraser }
+enum BrushType {
+  bucket,
+  crayon,
+  paintbrush,
+  wand,
+  pencil,
+  marker,
+  glitter,
+  eraser,
+}

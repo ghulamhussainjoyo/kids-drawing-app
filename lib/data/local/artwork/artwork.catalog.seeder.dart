@@ -1,6 +1,6 @@
 import 'package:kids_drawing_flutter/core/engine/layer.manager.dart';
 import 'package:kids_drawing_flutter/core/engine/region.engine.dart';
-import 'package:kids_drawing_flutter/core/tools/pencil.drawing.tool.dart';
+import 'package:kids_drawing_flutter/core/tools/drawing.tool.kit.dart';
 import 'package:kids_drawing_flutter/data/local/artwork/artwork.thumbnail.baker.dart';
 import 'package:kids_drawing_flutter/data/local/artwork/json.artwork.loader.dart';
 import 'package:kids_drawing_flutter/data/local/artwork/strokes.json.codec.dart';
@@ -89,19 +89,19 @@ class ArtworkCatalogSeeder {
     final artwork = artworkLoader.load(templateJson);
     final regionEngine = RegionEngine(artwork);
     final layerManager = LayerManager(regionEngine: regionEngine);
-    final tool = PencilTool();
+    final kit = DrawingToolKit();
     try {
       return await thumbnailBaker.bake(
         layerManager: layerManager,
         strokes: const [],
         revision: 0,
-        tool: tool,
+        toolFor: kit.forType,
         genre: genre,
         artworkKey: artworkKey,
       );
     } finally {
       layerManager.dispose();
-      tool.dispose();
+      kit.dispose();
     }
   }
 }
