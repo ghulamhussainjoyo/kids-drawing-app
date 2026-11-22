@@ -1,10 +1,6 @@
 import 'dart:ui' as ui;
 
-import 'package:flutter/rendering.dart' show Matrix4;
-
 import '../../types/brush.type.dart';
-import '../../types/drawing.stroke.dart';
-import '../engine/dab.buffer.dart';
 import '../engine/dab.tip.dart';
 import '../engine/stroke.dabber.dart';
 import 'drawing.tool.dart';
@@ -29,29 +25,15 @@ class PencilTool extends DrawingTool {
   BrushType get type => BrushType.pencil;
 
   @override
-  StrokeDabber createDabber(DrawingStroke stroke) {
-    return StrokeDabber(
-      tip: pencilTip,
-      width: stroke.brush.size,
-      seed: stroke.seed,
-      colorAt: (distance) =>
-          stroke.brush.paintColor.colorAt(distance, stroke.seed),
-    );
-  }
+  DabTip get tip => pencilTip;
 
   @override
   void paint(ui.Canvas canvas, StrokeDabber dabber) {
-    final bounds = dabber.bounds;
-    if (bounds == null) return;
-    if (dabber.dabs.count + dabber.tail.count == 0) return;
-    final atlasPaint = ui.Paint()..filterQuality = ui.FilterQuality.medium;
+    if (dabber.isEmpty) return;
+    final bounds = dabber.bounds!;
     canvas.saveLayer(bounds, ui.Paint());
-    stamp(canvas, dabber.dabs, atlasPaint);
-    stamp(canvas, dabber.tail, atlasPaint);
-    canvas.drawRect(
-      bounds,
-      paperGrain(dabber.seed)..blendMode = ui.BlendMode.dstIn,
-    );
+    stampDabs(canvas, textures.tips, dabber);
+    canvas.drawRect(bounds, _paperGrain(dabber.seed));
     canvas.restore();
   }
 
@@ -60,36 +42,16 @@ class PencilTool extends DrawingTool {
     textures.dispose();
   }
 
-  void stamp(ui.Canvas canvas, DabBuffer buffer, ui.Paint atlasPaint) {
-    if (buffer.count == 0) return;
-    canvas.drawRawAtlas(
-      textures.tips,
-      buffer.transforms,
-      buffer.rects,
-      buffer.colors,
-      ui.BlendMode.modulate,
-      null,
-      atlasPaint,
-    );
-  }
-
-  ui.Paint paperGrain(int seed) {
-    final tile = PencilTextures.paperTile;
+  /// Keeps the stroke only where the paper grain is (dstIn), so pits show
+  /// through as unpainted specks.
+  ui.Paint _paperGrain(int seed) {
+    const tile = PencilTextures.paperTile;
     final shift = ui.Offset((seed * 37) % tile, (seed * 91) % tile);
-    final matrix = Matrix4.translationValues(shift.dx, shift.dy, 0)
-      ..scaleByDouble(
-        1 / PencilTextures.paperPixelsPerUnit,
-        1 / PencilTextures.paperPixelsPerUnit,
-        1,
-        1,
-      );
-    return ui.Paint()
-      ..shader = ui.ImageShader(
-        textures.paper,
-        ui.TileMode.repeated,
-        ui.TileMode.repeated,
-        matrix.storage,
-        filterQuality: ui.FilterQuality.medium,
-      );
+    return tiledPaint(
+      textures.paper,
+      shift: shift,
+      pixelsPerUnit: PencilTextures.paperPixelsPerUnit,
+      quality: ui.FilterQuality.medium,
+    )..blendMode = ui.BlendMode.dstIn;
   }
 }

@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="250" viewBox="0 0 1280 250">
+  <defs><clipPath id="b"><path d="M196,8 L1256,8 Q1274,8 1274,26 L1274,224 Q1274,242 1256,242 L196,242 Z"/></clipPath><clipPath id="t"><path d="M200,26 L64,90 C34,103 14,112 14,125 C14,138 34,147 64,160 L200,224 Z"/></clipPath>
+    <linearGradient id="shade" x1="0" y1="8" x2="0" y2="242" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#fff" stop-opacity="0.10"/>
+      <stop offset="0.55" stop-color="#fff" stop-opacity="0"/>
+      <stop offset="1" stop-color="#000" stop-opacity="0.22"/>
+    </linearGradient>
+  </defs>
+
+  <!-- tip -->
+  <path d="M200,26 L64,90 C34,103 14,112 14,125 C14,138 34,147 64,160 L200,224 Z" fill="#d3358b"/>
+  <g clip-path="url(#t)">
+    <path d="M200,26 L64,90 C34,103 14,112 14,125 L200,125 Z" fill="#f473b9"/>
+    <path d="M200,58 L60,104 L60,112 L200,72 Z" fill="#fff" opacity="0.35"/>
+  </g>
+  <path d="M200,26 L64,90 C34,103 14,112 14,125 C14,138 34,147 64,160 L200,224 Z" fill="none" stroke="#6c1b47" stroke-width="4" stroke-linejoin="round"/>
+
+  <!-- body -->
+  <path d="M196,8 L1256,8 Q1274,8 1274,26 L1274,224 Q1274,242 1256,242 L196,242 Z" fill="#f03c9e"/>
+  <g clip-path="url(#b)">
+    <rect x="0" y="0" width="1280" height="250" fill="url(#shade)"/>
+    <!-- glossy highlight band -->
+    <rect x="196" y="44" width="1078" height="36" fill="#fff" opacity="0.28"/>
+    <rect x="196" y="44" width="1078" height="5" fill="#fff" opacity="0.25"/>
+    <!-- bottom shade band -->
+    <rect x="196" y="208" width="1078" height="34" fill="#000000" opacity="0.14"/>
+    <!-- wrapper collar near tip -->
+    <rect x="196" y="0" width="52" height="250" fill="#fff" opacity="0.16"/>
+    <rect x="248" y="0" width="4" height="250" fill="#6c1b47" opacity="0.55"/>
+    <!-- wrapper stripes -->
+    <rect x="272" y="0" width="7" height="250" fill="#6c1b47" opacity="0.30"/>
+    <rect x="1178" y="0" width="7" height="250" fill="#6c1b47" opacity="0.30"/>
+    <rect x="1200" y="0" width="7" height="250" fill="#6c1b47" opacity="0.30"/>
+  </g>
+  <path d="M196,8 L1256,8 Q1274,8 1274,26 L1274,224 Q1274,242 1256,242 L196,242 Z" fill="none" stroke="#6c1b47" stroke-width="4" stroke-linejoin="round"/>
+</svg>

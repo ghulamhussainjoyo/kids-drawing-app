@@ -19,6 +19,23 @@ class BurstEngine {
   static const double _fadeOut = 0.4;
   static const double _gravity = 60;
 
+  /// Smallest size a particle pops in from, as a share of its full size.
+  static const double _startScale = 0.3;
+
+  static const int _minCount = 10;
+  static const int _extraCount = 4;
+  static const double _minSpeed = 80;
+  static const double _speedRange = 90;
+  static const double _minSize = 14;
+  static const double _sizeRange = 9;
+  static const double _minStartOffset = 4;
+  static const double _startOffsetRange = 8;
+  static const double _maxSpin = 2;
+  static const double _maxDelay = 0.08;
+
+  /// How unevenly particles are spread around the circle (0 = evenly).
+  static const double _angleJitter = 0.6;
+
   static const List<Color> _colors = [
     Color(0xFFFF4D6D),
     Color(0xFFFF9F1C),
@@ -38,33 +55,18 @@ class BurstEngine {
 
   /// Pops one burst at [origin]. Each burst uses the next shape in turn.
   void spawn(Offset origin, Duration now) {
-    final shape = BurstShape.values[_burstCount++ % BurstShape.values.length];
-    final count = 10 + _random.nextInt(4);
+    final shape = _nextShape();
     final born = _seconds(now);
+    final count = _minCount + _random.nextInt(_extraCount);
     for (var i = 0; i < count; i++) {
-      final angle = (i + _random.nextDouble() * 0.6) / count * math.pi * 2;
-      final speed = 80 + _random.nextDouble() * 90;
-      _particles.add(
-        _Particle(
-          shape: shape,
-          origin: origin + _unit(angle) * (4 + _random.nextDouble() * 8),
-          velocity: _unit(angle) * speed,
-          color: _colors[_random.nextInt(_colors.length)],
-          size: 14 + _random.nextDouble() * 9,
-          rotation: _random.nextDouble() * math.pi * 2,
-          spin: (_random.nextDouble() - 0.5) * 4,
-          born: born + _random.nextDouble() * 0.08,
-        ),
-      );
+      _particles.add(_createParticle(origin, i, count, shape, born));
     }
   }
 
-  void clear() => _particles.clear();
-
-  /// Paints every live particle at [now] and forgets the expired ones.
+  /// Paints every live particle at [now].
   void paint(Canvas canvas, Duration now) {
     final time = _seconds(now);
-    _particles.removeWhere((p) => time - p.born > lifetime);
+    _dropExpired(time);
     final fill = Paint();
     final detail = Paint();
     for (final particle in _particles) {
@@ -74,32 +76,93 @@ class BurstEngine {
     }
   }
 
+  BurstShape _nextShape() {
+    final shape = BurstShape.values[_burstCount % BurstShape.values.length];
+    _burstCount++;
+    return shape;
+  }
+
+  /// Particle [index] of [count], flying out from [origin] in its own slice
+  /// of the circle.
+  _Particle _createParticle(
+    Offset origin,
+    int index,
+    int count,
+    BurstShape shape,
+    double born,
+  ) {
+    final direction = _unit(_angleFor(index, count));
+    return _Particle(
+      shape: shape,
+      origin:
+          origin + direction * _randomIn(_minStartOffset, _startOffsetRange),
+      velocity: direction * _randomIn(_minSpeed, _speedRange),
+      color: _colors[_random.nextInt(_colors.length)],
+      size: _randomIn(_minSize, _sizeRange),
+      rotation: _random.nextDouble() * math.pi * 2,
+      spin: _randomIn(-_maxSpin, _maxSpin * 2),
+      born: born + _random.nextDouble() * _maxDelay,
+    );
+  }
+
+  double _angleFor(int index, int count) {
+    final slice = index + _random.nextDouble() * _angleJitter;
+    return slice / count * math.pi * 2;
+  }
+
+  double _randomIn(double min, double range) {
+    return min + _random.nextDouble() * range;
+  }
+
+  void _dropExpired(double time) {
+    _particles.removeWhere((particle) => time - particle.born > lifetime);
+  }
+
   void _paintParticle(
     Canvas canvas,
-    _Particle p,
+    _Particle particle,
     double age,
     Paint fill,
     Paint detail,
   ) {
-    // Ease-out travel: full speed at birth, at rest by the end of its life.
-    final travel = age - age * age / (2 * lifetime);
-    final position =
-        p.origin + p.velocity * travel + Offset(0, _gravity * age * age / 2);
-    final pop = Curves.easeOutBack.transform(math.min(1, age / _popIn));
-    final opacity = ((lifetime - age) / _fadeOut).clamp(0.0, 1.0);
-    fill.color = p.color.withValues(alpha: opacity);
+    final position = _positionAt(particle, age);
+    final opacity = _opacityAt(age);
+    fill.color = particle.color.withValues(alpha: opacity);
     canvas
       ..save()
       ..translate(position.dx, position.dy)
-      ..rotate(p.rotation + p.spin * age)
-      ..scale(p.size * (0.3 + 0.7 * pop));
-    p.shape.paint(canvas, fill, detail, opacity);
+      ..rotate(particle.rotation + particle.spin * age)
+      ..scale(particle.size * _scaleAt(age));
+    particle.shape.paint(canvas, fill, detail, opacity);
     canvas.restore();
+  }
+
+  /// Ease-out travel (full speed at birth, at rest by the end of its life)
+  /// plus a little gravity.
+  Offset _positionAt(_Particle particle, double age) {
+    final travel = age - age * age / (2 * lifetime);
+    final fall = Offset(0, _gravity * age * age / 2);
+    return particle.origin + particle.velocity * travel + fall;
+  }
+
+  /// Pops in with a small overshoot, then holds its full size.
+  double _scaleAt(double age) {
+    final progress = math.min(1.0, age / _popIn);
+    final pop = Curves.easeOutBack.transform(progress);
+    return _startScale + (1 - _startScale) * pop;
+  }
+
+  /// Fully visible until the last [_fadeOut] seconds, then fades away.
+  double _opacityAt(double age) {
+    final remaining = lifetime - age;
+    return (remaining / _fadeOut).clamp(0.0, 1.0);
   }
 
   static Offset _unit(double angle) => Offset(math.cos(angle), math.sin(angle));
 
-  static double _seconds(Duration d) => d.inMicroseconds / 1e6;
+  static double _seconds(Duration duration) {
+    return duration.inMicroseconds / Duration.microsecondsPerSecond;
+  }
 }
 
 class _Particle {

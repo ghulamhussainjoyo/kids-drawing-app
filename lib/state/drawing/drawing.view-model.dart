@@ -8,13 +8,13 @@ import '../../core/engine/layer.manager.dart';
 import '../../core/engine/region.engine.dart';
 import '../../core/engine/stroke.dabber.dart';
 import '../../core/tools/drawing.tool.dart';
-import '../../core/tools/drawing.tool.kit.dart';
 import '../../core/tools/stationary.tools.dart';
 import '../../data/local/artwork/artwork.thumbnail.baker.dart';
 import '../../data/local/floor/artwork.entity.dart';
 import '../../data/repositories/artwork/catalog.repository.dart';
 import '../../types/brush.config.dart';
 import '../../types/brush.type.dart';
+import '../../types/category.model.dart';
 import '../../types/drawing.stroke.dart';
 import '../../types/paint.color.dart';
 import '../../types/tools/stationary.model.dart';
@@ -36,7 +36,6 @@ class DrawingViewModel extends ChangeNotifier {
   LayerManager? layerManager;
   RegionEngine? regionEngine;
   String selectedCategory = 'pencil';
-  final DrawingToolKit _toolKit = DrawingToolKit();
 
   static const double minBrushSize = 12;
   static const double maxBrushSize = 56;
@@ -65,15 +64,16 @@ class DrawingViewModel extends ChangeNotifier {
 
   int get revision => revisionValue;
   BrushConfig get brush => brushConfig;
-  DrawingTool get tool => _toolKit.forCategory(selectedCategory);
+  DrawingTool get tool => stationaryTools.toolForCategory(selectedCategory);
 
-  DrawingTool Function(BrushType type) get toolFor => _toolKit.forType;
+  DrawingTool Function(BrushType type) get toolFor => stationaryTools.toolFor;
   bool get canRedo => redoStack.isNotEmpty;
   DrawingStroke? get activeStroke => active;
   bool get canUndo => strokesList.isNotEmpty;
   bool get hasCompletedStroke => completedStroke;
   StrokeDabber? get activeDabber => activeDabberField;
   List<DrawingStroke> get strokes => UnmodifiableListView(strokesList);
+  CategoryModel get category => stationaryTools.getCategory(selectedCategory);
   String get categoryImage {
     return stationaryTools.getCategoryImage(selectedCategory);
   }
@@ -108,6 +108,7 @@ class DrawingViewModel extends ChangeNotifier {
     final restored = catalogRepository.loadStrokes(row);
     regionEngine = RegionEngine(page);
     layerManager = LayerManager(regionEngine: regionEngine!);
+    await _preloadTextures(restored);
     strokesList.addAll(restored);
     nextStrokeId = _nextIdAfter(restored);
     clipToRegions = true;
@@ -115,10 +116,13 @@ class DrawingViewModel extends ChangeNotifier {
     hasOpenedArtwork = true;
   }
 
-  void selectTool(StationaryModel tool) {
+  /// Loads the tool's image first, so its first stroke can paint it.
+  Future<void> selectTool(StationaryModel tool) async {
+    await stationaryTools.preload(tool.texture);
     selectedTool = tool;
     brushConfig = brushConfig.copyWith(
       paintColor: PaintColor(id: tool.id, colors: tool.colors),
+      texture: tool.texture,
     );
     notifyListeners();
   }
@@ -164,19 +168,9 @@ class DrawingViewModel extends ChangeNotifier {
     active = null;
     activeDabberField = null;
 
-    late final String regionId;
-    if (clipToRegions) {
-      final region = engine.regionAt(point, pickRadius: pickRadius);
-      if (region == null) {
-        return false;
-      }
-      regionId = region.id;
-    } else {
-      final size = engine.artwork.size;
-      if (point.dx < 0 || point.dy < 0 || point.dx > size || point.dy > size) {
-        return false;
-      }
-      regionId = DrawingStroke.freeRegionId;
+    final regionId = _regionIdFor(engine, point, pickRadius);
+    if (regionId == null) {
+      return false;
     }
 
     final stroke = DrawingStroke(
@@ -193,6 +187,36 @@ class DrawingViewModel extends ChangeNotifier {
     nextStrokeId++;
     activeStrokeTicks.value++;
     return true;
+  }
+
+  /// Region a stroke starting at [point] paints in, or null when it cannot
+  /// start there.
+  String? _regionIdFor(RegionEngine engine, Offset point, double pickRadius) {
+    if (_picksRegion()) {
+      return engine.regionAt(point, pickRadius: pickRadius)?.id;
+    }
+    if (!_isOnPage(engine, point)) return null;
+    return DrawingStroke.freeRegionId;
+  }
+
+  /// Whether the current tool paints inside one region: the bucket always,
+  /// stickers never, every other tool when clip mode is on.
+  bool _picksRegion() {
+    if (tool.paintsOverOutlines) return false;
+    if (tool.fillsRegion) return true;
+    return clipToRegions;
+  }
+
+  bool _isOnPage(RegionEngine engine, Offset point) {
+    final size = engine.artwork.size;
+    return Rect.fromLTWH(0, 0, size, size).contains(point);
+  }
+
+  /// Pattern tiles and stickers used by [strokes], so they bake correctly.
+  Future<void> _preloadTextures(List<DrawingStroke> strokes) async {
+    for (final stroke in strokes) {
+      await stationaryTools.preload(stroke.brush.texture);
+    }
   }
 
   void extendStroke(Offset point) {
@@ -335,7 +359,7 @@ class DrawingViewModel extends ChangeNotifier {
   void dispose() {
     _saveTimer?.cancel();
     layerManager?.dispose();
-    _toolKit.dispose();
+    stationaryTools.dispose();
     activeStrokeTicks.dispose();
     super.dispose();
   }

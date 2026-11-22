@@ -4,6 +4,7 @@ import 'package:kids_drawing_flutter/types/category.model.dart';
 import 'package:kids_drawing_flutter/state/drawing/drawing.view-model.dart';
 import 'package:kids_drawing_flutter/app/drawing/metrics/tools.panel.metrics.dart';
 import 'package:kids_drawing_flutter/app/drawing/widgets/tools/category.rail.dart';
+import 'package:kids_drawing_flutter/app/drawing/widgets/tools/tool.grid.dart';
 
 class DrawingTools extends StatefulWidget {
   final ToolsPanelMetrics metrics;
@@ -40,6 +41,7 @@ class _DrawingToolsState extends State<DrawingTools> {
     final pencils = viewModel.stationaryTools.getToolsByCategory(
       viewModel.selectedCategory,
     );
+    final category = viewModel.category;
 
     return SizedBox(
       width: metrics.totalWidth,
@@ -53,45 +55,60 @@ class _DrawingToolsState extends State<DrawingTools> {
             width: metrics.greenWidth,
             child: const ColoredBox(color: Colors.green),
           ),
-          Positioned.fill(
-            child: ListView.separated(
-              primary: false,
-              clipBehavior: Clip.none,
-              itemCount: pencils.length,
-              separatorBuilder: (_, __) => SizedBox(height: metrics.stickGap),
-              itemBuilder: (context, index) {
-                final pencil = pencils[index];
-                final selected = pencil.id == viewModel.selectedTool?.id;
-                final offsetX = selected
-                    ? metrics.inset - metrics.slide
-                    : metrics.inset;
-                return GestureDetector(
-                  key: ValueKey(pencil.id),
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () => viewModel.selectTool(pencil),
-                  child: SizedBox(
-                    height: metrics.stickHeight,
-                    width: metrics.totalWidth,
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Transform.translate(
-                        offset: Offset(offsetX, 0),
-                        child: Image.asset(
-                          pencil.image,
-                          fit: BoxFit.fitHeight,
-                          width: metrics.stickWidth,
-                          height: metrics.stickHeight,
-                          gaplessPlayback: true,
-                          filterQuality: FilterQuality.high,
-                          alignment: Alignment.centerLeft,
+          if (category.grid)
+            Positioned(
+              left: 0,
+              top: 0,
+              bottom: 0,
+              width: metrics.greenWidth,
+              child: ToolGrid(
+                category: category,
+                tools: pencils,
+                metrics: metrics,
+                selectedId: viewModel.selectedTool?.id,
+                onSelect: viewModel.selectTool,
+              ),
+            ),
+          if (!category.grid)
+            Positioned.fill(
+              child: ListView.separated(
+                primary: false,
+                clipBehavior: Clip.none,
+                itemCount: pencils.length,
+                separatorBuilder: (_, __) => SizedBox(height: metrics.stickGap),
+                itemBuilder: (context, index) {
+                  final pencil = pencils[index];
+                  final selected = pencil.id == viewModel.selectedTool?.id;
+                  final offsetX = selected
+                      ? metrics.inset - metrics.slide
+                      : metrics.inset;
+                  return GestureDetector(
+                    key: ValueKey(pencil.id),
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => viewModel.selectTool(pencil),
+                    child: SizedBox(
+                      height: metrics.stickHeight,
+                      width: metrics.totalWidth,
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Transform.translate(
+                          offset: Offset(offsetX, 0),
+                          child: Image.asset(
+                            pencil.image,
+                            fit: BoxFit.fitHeight,
+                            width: metrics.stickWidth,
+                            height: metrics.stickHeight,
+                            gaplessPlayback: true,
+                            filterQuality: FilterQuality.high,
+                            alignment: Alignment.centerLeft,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
-          ),
           Positioned(
             left: metrics.greenWidth,
             top: 0,

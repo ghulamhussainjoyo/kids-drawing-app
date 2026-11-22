@@ -46,10 +46,17 @@ flutter:
     - assets/svgs/
     - assets/gallery/
     - assets/brushes/
-    - assets/pencil/
-    - assets/marker/
+    - assets/stationary/marker/
     - assets/stationary/glitter/
     - assets/stationary/pencil/
+    - assets/stationary/brush/
+    - assets/stationary/crayon/
+    - assets/stationary/spray/
+    - assets/stationary/watercolor/
+    - assets/stationary/color-balls/
+    - assets/stationary/tape/
+    - assets/stationary/tape/patterns/
+    - assets/stationary/letters/
     - assets/genre/live_background/
 
   fonts:

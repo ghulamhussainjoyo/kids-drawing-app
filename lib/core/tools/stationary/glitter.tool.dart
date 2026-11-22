@@ -1,76 +1,109 @@
 import 'dart:ui';
 
-import 'package:kids_drawing_flutter/types/tools/glitter.model.dart';
 import 'package:kids_drawing_flutter/types/tools/stationary.model.dart';
 
-/// Glitter tubes. Each paint color is sampled from the glitter in its tube
-/// image, so the stroke matches the tube.
+/// Glitter tubes. Colors are sampled from each image.
 class GlitterTools {
   List<StationaryModel> getLists() {
     List<StationaryModel> tools = [
-      GlitterModel(
+      StationaryModel(
         id: '1',
+        name: 'rainbow',
+        imageSize: 48,
+        color: const Color(0xFFE15B21),
+        colors: const [
+          Color(0xFFE15B21),
+          Color(0xFFE1A105),
+          Color(0xFF8BB731),
+          Color(0xFF26B092),
+          Color(0xFF2286D6),
+          Color(0xFF4F40D6),
+        ],
+        image: 'assets/stationary/glitter/glitter_rainbow.png',
+      ),
+      StationaryModel(
+        id: '2',
         name: 'red',
         imageSize: 48,
-        color: const Color(0xFF8D0510),
-        image: 'assets/stationary/glitter/red.png',
+        color: const Color(0xFFD31735),
+        image: 'assets/stationary/glitter/glitter_red.png',
       ),
-      GlitterModel(
-        id: '2',
-        name: 'black',
-        imageSize: 48,
-        color: const Color(0xFF111216),
-        image: 'assets/stationary/glitter/black.png',
-      ),
-      GlitterModel(
+      StationaryModel(
         id: '3',
-        name: 'brown',
+        name: 'orange',
         imageSize: 48,
-        color: const Color(0xFF6C3413),
-        image: 'assets/stationary/glitter/brown.png',
+        color: const Color(0xFFF57C00),
+        image: 'assets/stationary/glitter/glitter_orange.png',
       ),
-      GlitterModel(
+      StationaryModel(
         id: '4',
+        name: 'yellow',
         imageSize: 48,
-        name: 'blue',
-        color: const Color(0xFF0176D1),
-        image: 'assets/stationary/glitter/blue.png',
+        color: const Color(0xFFF2C400),
+        image: 'assets/stationary/glitter/glitter_yellow.png',
       ),
-      GlitterModel(
+      StationaryModel(
         id: '5',
         name: 'green',
         imageSize: 48,
-        color: const Color(0xFF038D23),
-        image: 'assets/stationary/glitter/green.png',
+        color: const Color(0xFF1FA338),
+        image: 'assets/stationary/glitter/glitter_green.png',
       ),
-
-      GlitterModel(
+      StationaryModel(
+        id: '6',
+        name: 'sky-blue',
+        imageSize: 48,
+        color: const Color(0xFF33B1E4),
+        image: 'assets/stationary/glitter/glitter_sky-blue.png',
+      ),
+      StationaryModel(
+        id: '7',
+        name: 'blue',
+        imageSize: 48,
+        color: const Color(0xFF1565D8),
+        image: 'assets/stationary/glitter/glitter_blue.png',
+      ),
+      StationaryModel(
         id: '8',
-        name: 'orange',
+        name: 'violet',
         imageSize: 48,
-        color: const Color(0xFFDF5001),
-        image: 'assets/stationary/glitter/orange.png',
+        color: const Color(0xFF9B3FD6),
+        image: 'assets/stationary/glitter/glitter_violet.png',
       ),
-      GlitterModel(
+      StationaryModel(
         id: '9',
-        name: 'pink',
-        imageSize: 48,
-        color: const Color(0xFFE10F93),
-        image: 'assets/stationary/glitter/pink.png',
-      ),
-      GlitterModel(
-        id: '10',
         name: 'purple',
         imageSize: 48,
-        color: const Color(0xFF780BB1),
-        image: 'assets/stationary/glitter/purple.png',
+        color: const Color(0xFF7A41AF),
+        image: 'assets/stationary/glitter/glitter_purple.png',
       ),
-      GlitterModel(
-        id: '15',
-        name: 'yellow',
+      StationaryModel(
+        id: '10',
+        name: 'pink',
         imageSize: 48,
-        color: const Color(0xFFD9A507),
-        image: 'assets/stationary/glitter/yellow.png',
+        color: const Color(0xFFF03C9E),
+        image: 'assets/stationary/glitter/glitter_pink.png',
+      ),
+      StationaryModel(
+        id: '11',
+        name: 'brown',
+        imageSize: 48,
+        color: const Color(0xFF7E4320),
+        image: 'assets/stationary/glitter/glitter_brown.png',
+      ),
+      StationaryModel(
+        id: '12',
+        name: 'black',
+        imageSize: 48,
+        color: const Color(0xFF2D2F32),
+        image: 'assets/stationary/glitter/glitter_black.png',
+      ),
+      StationaryModel(
+        id: '13',
+        name: 'white',
+        imageSize: 48,
+        color: const Color(0xFFC9CCD4),
+        image: 'assets/stationary/glitter/glitter_white.png',
       ),
     ];
     return tools;

@@ -15,6 +15,9 @@ class PaintColor {
   /// Stroke length, in artwork units, to travel from one color to the next.
   static const double distancePerColor = 120;
 
+  /// How far, in colors, each stroke seed moves the palette's start.
+  static const double seedColorShift = 0.37;
+
   final String id;
   final List<Color> colors;
 
@@ -27,10 +30,18 @@ class PaintColor {
   /// starts so neighbouring strokes do not all begin on the same color.
   Color colorAt(double distance, int seed) {
     if (!isGradient) return color;
-    final count = colors.length;
-    final position = (seed * 0.37 + distance / distancePerColor) % count;
+    final position = _palettePosition(distance, seed);
     final index = position.floor();
-    final next = (index + 1) % count;
+    final next = (index + 1) % colors.length;
     return Color.lerp(colors[index], colors[next], position - index)!;
   }
+
+  /// Where along the looping palette [distance] falls, in colors: 1.5 means
+  /// halfway between the second and third color.
+  double _palettePosition(double distance, int seed) {
+    final start = _paletteStart(seed);
+    return (start + distance / distancePerColor) % colors.length;
+  }
+
+  double _paletteStart(int seed) => seed * seedColorShift;
 }

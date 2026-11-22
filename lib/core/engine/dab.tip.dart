@@ -7,6 +7,7 @@ class DabTip {
     required this.alpha,
     required this.tipScale,
     required this.tapDabs,
+    this.rotationJitter = 0.12,
   });
 
   /// Side of one square tip variant in the atlas image.
@@ -22,4 +23,7 @@ class DabTip {
 
   /// Dabs stamped on the spot for a tap that never moves.
   final int tapDabs;
+
+  /// How far, in radians, a dab may turn away from the stroke direction.
+  final double rotationJitter;
 }

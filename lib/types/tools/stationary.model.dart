@@ -1,6 +1,6 @@
-import 'package:flutter/widgets.dart';
+import 'dart:ui';
 
-abstract class StationaryModel {
+class StationaryModel {
   final String id;
   final String name;
   final double? size;
@@ -8,17 +8,22 @@ abstract class StationaryModel {
   final String image;
   final double imageSize;
 
-  /// Paint colors. One entry paints solid, more blend along the stroke.
   final List<Color> colors;
+
+  /// Image asset the tool paints with: a pattern tile or a sticker.
+  final String? texture;
 
   Color get color => colors.first;
 
-  const StationaryModel({
+  /// Paints [color], or blends through [colors] when given.
+  StationaryModel({
     required this.id,
     required this.name,
-    required this.size,
+    this.size,
     required this.image,
     required this.imageSize,
-    required this.colors,
-  });
+    required Color color,
+    List<Color>? colors,
+    this.texture,
+  }) : colors = colors ?? [color];
 }

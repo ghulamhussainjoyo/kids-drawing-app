@@ -1,11 +1,7 @@
 import 'dart:math' as math;
 import 'dart:ui' as ui;
 
-import 'package:flutter/rendering.dart' show Matrix4;
-
 import '../../types/brush.type.dart';
-import '../../types/drawing.stroke.dart';
-import '../engine/dab.buffer.dart';
 import '../engine/dab.tip.dart';
 import '../engine/stroke.dabber.dart';
 import 'drawing.tool.dart';
@@ -27,39 +23,41 @@ class GlitterTool extends DrawingTool {
     tapDabs: 1,
   );
 
+  /// Seconds for one glint set to fade in and back out.
+  static const double shimmerPeriod = 1.2;
+
+  /// Glint sets fainter than this are skipped for the frame.
+  static const double _minGlintOpacity = 0.02;
+
+  /// Tile offsets per glint set, so sets never line up with each other.
+  static const int _glintSeedBase = 41;
+  static const int _glintSeedStep = 59;
+
+  /// Multipliers that turn a seed into a tile offset, in artwork units.
+  static const int _tileShiftX = 53;
+  static const int _tileShiftY = 29;
+
   @override
   BrushType get type => BrushType.glitter;
 
   @override
-  StrokeDabber createDabber(DrawingStroke stroke) {
-    final paintColor = stroke.brush.paintColor;
-    return StrokeDabber(
-      tip: glitterTip,
-      width: stroke.brush.size,
-      seed: stroke.seed,
-      colorAt: (distance) => paintColor.colorAt(distance, stroke.seed),
-    );
-  }
+  DabTip get tip => glitterTip;
+
+  @override
+  bool get hasShimmer => true;
 
   @override
   void paint(ui.Canvas canvas, StrokeDabber dabber) {
-    final bounds = dabber.bounds;
-    if (bounds == null) return;
-    if (dabber.dabs.count + dabber.tail.count == 0) return;
-    final atlasPaint = ui.Paint()..filterQuality = ui.FilterQuality.medium;
+    if (dabber.isEmpty) return;
+    final bounds = dabber.bounds!;
     canvas.saveLayer(bounds, ui.Paint());
-    _stamp(canvas, dabber.dabs, atlasPaint);
-    _stamp(canvas, dabber.tail, atlasPaint);
+    stampDabs(canvas, textures.tip, dabber);
     canvas.drawRect(bounds, _sparkles(dabber.seed));
     canvas.restore();
   }
 
-  /// Seconds for one glint set to fade in and back out.
-  static const double shimmerPeriod = 1.2;
-
   /// Paints twinkling glints over [bounds], kept only where [coverage]
-  /// draws opaque pixels (the glitter visible on the page). [seconds] drives
-  /// the twinkle.
+  /// draws opaque pixels (the glitter visible on the page).
   @override
   void paintShimmer(
     ui.Canvas canvas, {
@@ -68,62 +66,68 @@ class GlitterTool extends DrawingTool {
     required void Function(ui.Canvas canvas) coverage,
   }) {
     canvas.saveLayer(bounds, ui.Paint());
-    final sets = textures.glints.length;
-    for (var i = 0; i < sets; i++) {
-      final wave = math.sin(math.pi * (seconds / shimmerPeriod + i / sets));
-      final opacity = wave * wave;
-      if (opacity < 0.02) continue;
-      canvas.drawRect(
-        bounds,
-        _tilePaint(textures.glints[i], 41 + i * 59)
-          ..color = ui.Color.fromRGBO(255, 255, 255, opacity),
-      );
-    }
-    canvas.saveLayer(bounds, ui.Paint()..blendMode = ui.BlendMode.dstIn);
-    coverage(canvas);
-    canvas.restore();
+    _drawGlints(canvas, bounds, seconds);
+    _keepOnly(canvas, bounds, coverage);
     canvas.restore();
   }
 
   @override
   void dispose() => textures.dispose();
 
-  void _stamp(ui.Canvas canvas, DabBuffer buffer, ui.Paint atlasPaint) {
-    if (buffer.count == 0) return;
-    canvas.drawRawAtlas(
-      textures.tip,
-      buffer.transforms,
-      buffer.rects,
-      buffer.colors,
-      ui.BlendMode.modulate,
-      null,
-      atlasPaint,
-    );
+  void _drawGlints(ui.Canvas canvas, ui.Rect bounds, double seconds) {
+    for (var set = 0; set < textures.glints.length; set++) {
+      final opacity = _glintOpacity(set, seconds);
+      if (!_isVisible(opacity)) continue;
+      canvas.drawRect(bounds, _glintPaint(set, opacity));
+    }
   }
 
-  /// Flecks drawn only where paint already is (srcATop), anchored to the page
-  /// and shifted per stroke so overlapping strokes don't line up.
-  ui.Paint _sparkles(int seed) =>
-      _tilePaint(textures.sparkles, seed)..blendMode = ui.BlendMode.srcATop;
+  /// Erases everything outside [coverage].
+  void _keepOnly(
+    ui.Canvas canvas,
+    ui.Rect bounds,
+    void Function(ui.Canvas canvas) coverage,
+  ) {
+    canvas.saveLayer(bounds, ui.Paint()..blendMode = ui.BlendMode.dstIn);
+    coverage(canvas);
+    canvas.restore();
+  }
+
+  /// Each set fades in and out on a sine wave, offset from the other sets so
+  /// they take turns.
+  double _glintOpacity(int set, double seconds) {
+    final phase = seconds / shimmerPeriod + set / textures.glints.length;
+    final wave = math.sin(math.pi * phase);
+    return wave * wave;
+  }
+
+  bool _isVisible(double opacity) => opacity >= _minGlintOpacity;
+
+  ui.Paint _glintPaint(int set, double opacity) {
+    final seed = _glintSeedBase + set * _glintSeedStep;
+    return _tilePaint(textures.glints[set], seed)
+      ..color = ui.Color.fromRGBO(255, 255, 255, opacity);
+  }
+
+  /// Flecks drawn only where paint already is (srcATop), shifted per stroke
+  /// so overlapping strokes don't line up.
+  ui.Paint _sparkles(int seed) {
+    return _tilePaint(textures.sparkles, seed)
+      ..blendMode = ui.BlendMode.srcATop;
+  }
 
   /// Repeating texture tile fixed to the page, shifted by [seed].
   ui.Paint _tilePaint(ui.Image tile, int seed) {
     const size = GlitterTextures.sparkleTile;
-    final matrix =
-        Matrix4.translationValues((seed * 53) % size, (seed * 29) % size, 0)
-          ..scaleByDouble(
-            1 / GlitterTextures.sparklePixelsPerUnit,
-            1 / GlitterTextures.sparklePixelsPerUnit,
-            1,
-            1,
-          );
-    return ui.Paint()
-      ..shader = ui.ImageShader(
-        tile,
-        ui.TileMode.repeated,
-        ui.TileMode.repeated,
-        matrix.storage,
-        filterQuality: ui.FilterQuality.none,
-      );
+    final shift = ui.Offset(
+      (seed * _tileShiftX) % size,
+      (seed * _tileShiftY) % size,
+    );
+    return tiledPaint(
+      tile,
+      shift: shift,
+      pixelsPerUnit: GlitterTextures.sparklePixelsPerUnit,
+      quality: ui.FilterQuality.none,
+    );
   }
 }

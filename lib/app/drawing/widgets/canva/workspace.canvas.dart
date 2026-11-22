@@ -40,6 +40,10 @@ class _WorkspaceCanvasState extends State<WorkspaceCanvas>
   final ValueNotifier<double> shimmerClock = ValueNotifier<double>(0);
   late final Ticker shimmerTicker = createTicker(onShimmerTick);
 
+  /// Whether any committed stroke is glitter. Refreshed only when the
+  /// stroke list changes, not on every finger move.
+  bool committedHasGlitter = false;
+
   late CanvasViewTransform view;
   late final AnimationController settle;
 
@@ -59,20 +63,17 @@ class _WorkspaceCanvasState extends State<WorkspaceCanvas>
     );
     settle = AnimationController(vsync: this, duration: settleDuration)
       ..addListener(onSettleTick);
-    widget.viewModel.addListener(syncShimmer);
-    widget.viewModel.activeStrokeTicks.addListener(syncShimmer);
-    syncShimmer();
+    listenTo(widget.viewModel);
+    onStrokesChanged();
   }
 
   @override
   void didUpdateWidget(WorkspaceCanvas oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.viewModel != widget.viewModel) {
-      oldWidget.viewModel.removeListener(syncShimmer);
-      oldWidget.viewModel.activeStrokeTicks.removeListener(syncShimmer);
-      widget.viewModel.addListener(syncShimmer);
-      widget.viewModel.activeStrokeTicks.addListener(syncShimmer);
-      syncShimmer();
+      stopListening(oldWidget.viewModel);
+      listenTo(widget.viewModel);
+      onStrokesChanged();
     }
     if (oldWidget.pageRect != widget.pageRect) {
       settle.stop();
@@ -82,8 +83,7 @@ class _WorkspaceCanvasState extends State<WorkspaceCanvas>
 
   @override
   void dispose() {
-    widget.viewModel.removeListener(syncShimmer);
-    widget.viewModel.activeStrokeTicks.removeListener(syncShimmer);
+    stopListening(widget.viewModel);
     shimmerTicker.dispose();
     shimmerClock.dispose();
     settle.dispose();
@@ -91,19 +91,51 @@ class _WorkspaceCanvasState extends State<WorkspaceCanvas>
     super.dispose();
   }
 
+  void listenTo(DrawingViewModel viewModel) {
+    viewModel.addListener(onStrokesChanged);
+    viewModel.activeStrokeTicks.addListener(onActiveStrokeChanged);
+  }
+
+  void stopListening(DrawingViewModel viewModel) {
+    viewModel.removeListener(onStrokesChanged);
+    viewModel.activeStrokeTicks.removeListener(onActiveStrokeChanged);
+  }
+
+  void onStrokesChanged() {
+    committedHasGlitter = widget.viewModel.strokes.any(isGlitter);
+    updateShimmerTicker();
+  }
+
+  void onActiveStrokeChanged() => updateShimmerTicker();
+
   /// Runs the shimmer only while the page has glitter on it, including a
   /// glitter stroke still being drawn.
-  void syncShimmer() {
-    bool isGlitter(DrawingStroke? stroke) =>
-        stroke?.brush.type == BrushType.glitter;
-    final viewModel = widget.viewModel;
-    final hasGlitter =
-        isGlitter(viewModel.activeStroke) || viewModel.strokes.any(isGlitter);
-    if (hasGlitter && !shimmerTicker.isActive) {
-      shimmerTicker.start();
-    } else if (!hasGlitter && shimmerTicker.isActive) {
-      shimmerTicker.stop();
+  void updateShimmerTicker() {
+    if (pageHasGlitter()) {
+      startShimmer();
+    } else {
+      stopShimmer();
     }
+  }
+
+  bool pageHasGlitter() {
+    if (committedHasGlitter) return true;
+    return isGlitter(widget.viewModel.activeStroke);
+  }
+
+  bool isGlitter(DrawingStroke? stroke) {
+    if (stroke == null) return false;
+    return stroke.brush.type == BrushType.glitter;
+  }
+
+  void startShimmer() {
+    if (shimmerTicker.isActive) return;
+    shimmerTicker.start();
+  }
+
+  void stopShimmer() {
+    if (!shimmerTicker.isActive) return;
+    shimmerTicker.stop();
   }
 
   void onShimmerTick(Duration elapsed) {

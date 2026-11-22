@@ -7,4 +7,8 @@ enum BrushType {
   marker,
   glitter,
   eraser,
+  spray,
+  watercolor,
+  pattern,
+  sticker,
 }

@@ -23,7 +23,7 @@ The UI sends normalized input and commands to the engine. It must not implement 
 
 ## 3. Codebase map (live tree)
 
-**Last updated:** 2026-11-21
+**Last updated:** 2026-11-22
 
 Single source of truth for file locations. Stack: Flutter `CupertinoApp`, Provider MVVM, Floor SQLite catalog, SharedPreferences settings via `LocalStorage` → `SettingsRepository`. User flow: **Splash → Genre → Gallery → Drawing**; settings from Genre via parent gate → `SettingDialog`.
 
@@ -32,7 +32,7 @@ Create a folder only when the first file needs it. Forbidden folder names: `util
 ### 3.1 Placement and imports
 
 - `screen/` under each `lib/app/<feature>/` is the route widget only (`CupertinoPageScaffold`, `CupertinoPageRoute`).
-- Shared drawing logic: `core/engine/`. Each paint engine: one `DrawingTool` in `core/tools/`. Stick catalogs (`PencilTools`, `MarkerTools`, `GlitterTools`) are separate from paint engines.
+- Shared drawing logic: `core/engine/`. Each paint engine: one `DrawingTool` in `core/tools/`. `StationaryTools` owns the stick catalogs (`PencilTools`, `GlitterTools`, …) and the live paint engines; `CategoryModel.brushType` picks a category's engine.
 - **Live composition root:** `lib/main.dart` — `MultiProvider` wires `CatalogRepository`, `SettingsRepository`, `DrawingViewModel`, `GalleryViewModel`, `GenreViewModel`, `SettingViewModel`.
 - Screen imports: its `state/`, own `widgets/`, `core/ui/`, `lib/types/`. Never `data/local` impls or repository impls from screens.
 - `data/` never imports `state/`, `app/`, or Flutter UI libraries.
@@ -59,7 +59,7 @@ Presentation routes and widgets: `lib/app/`. Domain types: `lib/types/`. No `lib
 - `app/drawing/widgets/actions/drawing.canvas.actions.dart` — Undo/redo/erase action cluster for canvas column.
 - `app/drawing/widgets/canva/canvas.pinch.dart` — Pinch/zoom/pan gesture math; updates CanvasViewTransform.
 - `app/drawing/widgets/canva/burst.overlay.dart` — Screen-space burst layer over the canvas; own ticker only while particles live; `spawn(point)` on finger lift.
-- `app/drawing/widgets/canva/workspace.canvas.dart` — Pointer input → ViewModel strokes; `shimmerTicker` (20 fps) while committed or active glitter; hosts WorkspacePainter + BurstOverlay.
+- `app/drawing/widgets/canva/workspace.canvas.dart` — Pointer input → ViewModel strokes; `shimmerTicker` (20 fps) while committed or active glitter (committed flag cached on stroke-list changes); hosts WorkspacePainter + BurstOverlay.
 - `app/drawing/widgets/canva/workspace.painter.dart` — CustomPainter: regions, layers, glitter shimmer (`shimmerSeconds`).
 - `app/drawing/widgets/complete/complete.action.bar.dart` — Top actions on completion screen.
 - `app/drawing/widgets/complete/complete.keep.let.go.bar.dart` — Keep vs Let go pill bar.
@@ -69,6 +69,7 @@ Presentation routes and widgets: `lib/app/`. Domain types: `lib/types/`. No `lib
 - `app/drawing/widgets/controller/controller.tools.dart` — Left column density slider and controller tools.
 - `app/drawing/widgets/tools/category.rail.dart` — Stationary category picker rail (pencil/marker/etc.).
 - `app/drawing/widgets/tools/drawing.tools.dart` — Right tools column: colors, sticks, category integration.
+- `app/drawing/widgets/tools/tool.grid.dart` — ToolGrid: 2-column grid for square items (color balls, letters); tiled categories use RoundedButton.
 - `app/drawing/widgets/tools/size.slider.display.dart` — Custom-painted brush size slider display.
 
 #### `lib/app/gallery/`
@@ -133,10 +134,10 @@ Presentation routes and widgets: `lib/app/`. Domain types: `lib/types/`. No `lib
 - `core/engine/burst.shapes.dart` — BurstShape enum + unit paths (star, flower, heart, butterfly, sparkle).
 - `core/engine/canvas.engine.dart` — CanvasViewTransform zoom/pan/fit math.
 - `core/engine/dab.buffer.dart` — Ring buffer of dab stamps for rendering.
-- `core/engine/dab.tip.dart` — Single dab stamp geometry.
-- `core/engine/layer.manager.dart` — Paints layers; bakes `_paintImage` + `_glitterMask` (where glitter is still visible); shimmer over committed + active glitter via `DrawingTool.paintShimmer`.
-- `core/engine/region.engine.dart` — Region hit-test, clip paths, first-touch region pick.
-- `core/engine/stroke.dabber.dart` — Converts pointer samples to dab sequence.
+- `core/engine/dab.tip.dart` — Single dab stamp geometry; `rotationJitter` (spray turns freely).
+- `core/engine/layer.manager.dart` — Paints layers; bakes `_paintImage` + `_glitterMask` (where glitter is still visible); shimmer over committed + active glitter via `DrawingTool.paintShimmer`. Tools with `paintsOverOutlines` (stickers) are not baked; they draw above the outlines every frame. `fillsRegion` tools (bucket) mask their whole region.
+- `core/engine/region.engine.dart` — Region hit-test, clip paths, first-touch region pick; `background` region = page minus every region (blank paper), picked when no part is near.
+- `core/engine/stroke.dabber.dart` — Converts pointer samples to dab sequence; `isEmpty` when nothing to paint; `texture` and `lastPoint` for image tools.
 - `core/engine/stroke.renderer.dart` — Paints dab buffers and strokes to canvas.
 
 #### `lib/core/storage/`
@@ -146,19 +147,34 @@ Presentation routes and widgets: `lib/app/`. Domain types: `lib/types/`. No `lib
 
 #### `lib/core/tools/`
 
-- `core/tools/drawing.tool.dart` — Abstract DrawingTool paint engine interface; optional `paintShimmer` overlay hook.
-- `core/tools/drawing.tool.kit.dart` — Resolves active DrawingTool from BrushType.
+- `core/tools/drawing.tool.dart` — Abstract DrawingTool paint engine interface; shared `stampDabs` atlas helper; optional `paintShimmer` overlay hook; `fillsRegion` / `paintsOverOutlines` flags.
+- `core/tools/brush.drawing.tool.dart` — BrushTool: opaque paint with bristle streaks along the stroke.
+- `core/tools/bucket.drawing.tool.dart` — BucketTool: one tap fills the tapped region or the background; multi-color balls fill with a gradient.
+- `core/tools/crayon.drawing.tool.dart` — CrayonTool: waxy band, ragged edges, smooth inside.
 - `core/tools/glitter.drawing.tool.dart` — GlitterTool: opaque band + page-fixed sparkle flecks (srcATop); `paintShimmer` fades 3 glint sets.
 - `core/tools/glitter.textures.dart` — Procedural tip, sparkle tile and glint tiles, built once with `toImageSync`.
-- `core/tools/marker.drawing.tool.dart` — MarkerTool paint engine.
-- `core/tools/marker.textures.dart` — Marker tip texture assets.
-- `core/tools/marker.tool.dart` — MarkerTools color stick catalog.
+- `core/tools/marker.drawing.tool.dart` — MarkerTool: crisp, even translucent stroke (opaque dabs in a 72% layer, thin edge fade), so a stroke never darkens itself.
+- `core/tools/pattern.drawing.tool.dart` — PatternTool: opaque band filled with a page-fixed pattern tile (srcIn).
+- `core/tools/marker.textures.dart` — Round solid tips; `softEdge` sets how much of the radius fades (crisp for marker, feathered for watercolor).
 - `core/tools/pencil.drawing.tool.dart` — PencilTool paint engine (primary).
 - `core/tools/pencils.textures.dart` — Pencil tip textures and lanes.
-- `core/tools/stationary.tools.dart` — StationaryTools top-level category catalog.
-- `core/tools/stationary/category.tool.stationary.dart` — CategoryTools images for category rail.
-- `core/tools/stationary/glitter.tool.dart` — GlitterTools stick catalog.
-- `core/tools/stationary/pencil.tool.dart` — PencilTools color stick catalog.
+- `core/tools/spray.drawing.tool.dart` — SprayTool: spatter of mixed-size dots, densest along the path.
+- `core/tools/sticker.drawing.tool.dart` — StickerTool: places the stroke's image at the finger, drawn above outlines; size follows the brush size.
+- `core/tools/texture.library.dart` — TextureLibrary: decodes pattern tiles and sticker images once; `load` before painting.
+- `core/tools/watercolor.drawing.tool.dart` — WatercolorTool: light wash (~37% middle), feathered edge with a darker wet-edge band, fine mottled grain that never punches white holes; normal blend.
+- `core/tools/texture.canvas.dart` — TextureCanvas: renders a procedural texture to an image.
+- `core/tools/stationary.tools.dart` — StationaryTools: catalogs per category plus the live paint engines (created on first use from a `BrushType` map) and the `TextureLibrary`; `toolFor(BrushType)`, `toolForCategory(name)`, `preload(texture)`.
+- `core/tools/stationary/category.tool.stationary.dart` — CategoryTools: rail categories (image, colors, brushType, grid/tiled); `getCategory(name)`.
+- `core/tools/stationary/brush.tool.dart` — BrushTools paint brush catalog.
+- `core/tools/stationary/color.balls.tool.dart` — ColorBallTools color ball catalog (grid).
+- `core/tools/stationary/crayon.tool.dart` — CrayonTools crayon catalog.
+- `core/tools/stationary/glitter.tool.dart` — GlitterTools glitter tube catalog.
+- `core/tools/stationary/letters.tool.dart` — LetterTools A–Z catalog (tiled grid).
+- `core/tools/stationary/marker.tool.dart` — MarkerTools marker catalog.
+- `core/tools/stationary/pencil.tool.dart` — PencilTools color pencil catalog.
+- `core/tools/stationary/spray.tool.dart` — SprayTools spray can catalog.
+- `core/tools/stationary/tape.tool.dart` — TapeTools washi tape catalog.
+- `core/tools/stationary/watercolor.tool.dart` — WatercolorTools watercolor tube catalog.
 
 #### `lib/core/ui/`
 
@@ -202,18 +218,16 @@ Presentation routes and widgets: `lib/app/`. Domain types: `lib/types/`. No `lib
 
 #### `lib/types/`
 
-- `types/brush.config.dart` — BrushConfig snapshot on strokes.
+- `types/brush.config.dart` — BrushConfig snapshot on strokes; `texture` = pattern tile or sticker asset.
 - `types/brush.type.dart` — BrushType enum.
-- `types/category.model.dart` — CategoryModel for tool categories.
+- `types/category.model.dart` — CategoryModel for tool categories; `brushType` engine, `grid`/`tiled` layout.
 - `types/coloring.artwork.dart` — Loaded artwork: regions, paths, metadata.
 - `types/drawing.region.dart` — Closed paintable region model.
 - `types/drawing.stroke.dart` — Stroke points, color, regionId, brush.
 - `types/gellery/gallery.model.dart` — Gallery section model (note folder spelling).
 - `types/genre/genre.model.dart` — Genre carousel item model.
 - `types/paint.color.dart` — Paint colors as a list: one = solid, more = blend along the stroke (`colorAt`).
-- `types/tools/glitter.model.dart` — Glitter stick model.
-- `types/tools/pencil.model.dart` — Pencil stick model.
-- `types/tools/stationary.model.dart` — Base stick model for catalogs; `colors` list, `color` = first.
+- `types/tools/stationary.model.dart` — Stick model for all catalogs; `colors` list, `color` = first; optional `texture`.
 
 #### `lib/utils/`
 
@@ -226,8 +240,7 @@ Presentation routes and widgets: `lib/app/`. Domain types: `lib/types/`. No `lib
 - `assets/brushes/` — Brush category icons (pencil, glitter, paintbrush).
 - `assets/gallery/` — Gallery section hero images.
 - `assets/genre/live_background/` — Parallax layers for animated genre hub background.
-- `assets/marker/`, `assets/pencil/` — Legacy flat marker/pencil stick images.
-- `assets/stationary/pencil/`, `assets/stationary/glitter/` — Stationary stick thumbnails used by catalogs.
+- `assets/stationary/<category>/` — Item images used by catalogs: pencil, marker, glitter, brush, crayon, spray, watercolor, color-balls, tape, letters (PNG used; SVG kept as source). `assets/stationary/tape/patterns/` holds the seamless 512×512 pattern tiles.
 - `assets/png/` — Shared PNGs (e.g. settings puppy).
 - `assets/svgs/` — SVG assets (paw, category backgrounds).
 
@@ -290,7 +303,7 @@ flowchart TD
     DrawingVM["DrawingViewModel"] --> CatalogRepo["CatalogRepository"]
     SettingVM["SettingViewModel"] --> SettingsRepo["SettingsRepository"]
     DrawingVM --> Engine["RegionEngine LayerManager"]
-    DrawingVM --> Tools["DrawingToolKit Pencil Marker Glitter"]
+    DrawingVM --> Tools["StationaryTools Pencil Marker Glitter"]
     Tools --> Engine
     CatalogRepo --> Floor["data/local/floor"]
     SettingsRepo --> Prefs["core/storage LocalStorage"]
