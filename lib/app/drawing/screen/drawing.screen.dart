@@ -21,6 +21,9 @@ class DrawingScreen extends StatefulWidget {
 }
 
 class _DrawingScreen extends State<DrawingScreen> with WidgetsBindingObserver {
+  static const int canvasFlex = 13;
+  static const int controllerFlex = 4;
+
   void openEraseConfirm(DrawingViewModel viewModel) {
     Navigator.of(context).push(
       CupertinoPageRoute<void>(
@@ -68,10 +71,11 @@ class _DrawingScreen extends State<DrawingScreen> with WidgetsBindingObserver {
     Navigator.of(context).pop();
   }
 
-  double getNotchInset(BuildContext context) {
-    final orientation = NativeDeviceOrientationReader.orientation(context);
-    final notchOnRight = orientation == NativeDeviceOrientation.landscapeRight;
-    return notchOnRight ? MediaQuery.viewPaddingOf(context).right * 0.7 : 0.0;
+  bool isCanvasReady(DrawingViewModel viewModel) {
+    if (!viewModel.hasOpenedArtwork || viewModel.layerManager == null) {
+      return false;
+    }
+    return true;
   }
 
   @override
@@ -110,23 +114,19 @@ class _DrawingScreen extends State<DrawingScreen> with WidgetsBindingObserver {
       },
       child: NativeDeviceOrientationReader(
         builder: (context) {
-          final metrics = ToolsPanelMetrics.of(
-            context,
-            notchInset: getNotchInset(context),
-          );
+          final metrics = ToolsPanelMetrics.of(context);
           return CupertinoPageScaffold(
             backgroundColor: AppColors.pageBackground,
             child: ListenableBuilder(
               listenable: viewModel,
               builder: (context, child) {
-                if (!viewModel.hasOpenedArtwork ||
-                    viewModel.layerManager == null) {
+                if (!isCanvasReady(viewModel)) {
                   return const Center(child: CupertinoActivityIndicator());
                 }
                 return Row(
                   children: [
                     Flexible(
-                      flex: 2,
+                      flex: controllerFlex,
                       fit: FlexFit.tight,
                       child: ControllerTools(
                         density: viewModel.density,
@@ -140,43 +140,45 @@ class _DrawingScreen extends State<DrawingScreen> with WidgetsBindingObserver {
                     ),
 
                     Flexible(
-                      flex: 5, // wapas original, Expanded nahi
+                      flex: canvasFlex,
                       fit: FlexFit.tight,
-                      child: Row(
-                        children: [
-                          Expanded(
-                            child: Padding(
-                              padding: EdgeInsets.all(16.0),
-                              child: ColoredBox(
-                                color: AppColors.pageBackground,
-                                child: LayoutBuilder(
-                                  builder: (context, constraints) {
-                                    return WorkspaceCanvas(
-                                      viewModel: viewModel,
-                                      pageRect: getPageRect(constraints),
-                                    );
-                                  },
-                                ),
+                      child: Padding(
+                        padding: EdgeInsets.symmetric(
+                          vertical: 16,
+                          horizontal: 16,
+                        ),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: LayoutBuilder(
+                                builder: (context, constraints) {
+                                  return WorkspaceCanvas(
+                                    viewModel: viewModel,
+                                    pageRect: getPageRect(constraints),
+                                  );
+                                },
                               ),
                             ),
-                          ),
-                          DrawingCanvasActions(
-                            hasPaint: viewModel.strokes.isNotEmpty,
-                            clipToRegions: viewModel.clipToRegions,
-                            onComplete: () => openComplete(viewModel),
-                            onToggleClip: viewModel.toggleClipToRegions,
-                          ),
-                        ],
+                            SizedBox(width: 8),
+
+                            DrawingCanvasActions(
+                              hasPaint: viewModel.strokes.isNotEmpty,
+                              clipToRegions: viewModel.clipToRegions,
+                              onComplete: () => openComplete(viewModel),
+                              onToggleClip: viewModel.toggleClipToRegions,
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                     DrawingTools(
                       // Flexible nahi, fixed width
                       metrics: metrics,
-                      onToolSelect: viewModel.selectTool,
-                      onCategoryTap: viewModel.selectCategory,
-                      selectedCategory: viewModel.selectedCategory,
-                      selectedToolId: viewModel.selectedTool?.id,
-                      stationaryTools: viewModel.stationaryTools,
+                      // onToolSelect: viewModel.selectTool,
+                      // onCategoryTap: viewModel.selectCategory,
+                      // selectedCategory: viewModel.selectedCategory,
+                      // selectedToolId: viewModel.selectedTool?.id,
+                      // stationaryTools: viewModel.stationaryTools,
                     ),
                   ],
                 );

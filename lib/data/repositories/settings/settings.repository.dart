@@ -28,4 +28,7 @@ abstract class SettingsRepository {
 
   Future<String> language();
   Future<void> setLanguage(String value);
+
+  Future<bool> liveBackgroundOn();
+  Future<void> setLiveBackgroundOn(bool value);
 }

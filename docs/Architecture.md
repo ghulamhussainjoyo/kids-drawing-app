@@ -21,84 +21,300 @@
 
 The UI sends normalized input and commands to the engine. It must not implement brush geometry or region clipping.
 
-## 3. Folder structure (MVVM)
+## 3. Codebase map (live tree)
 
-Create a folder only when the first file needs it. Forbidden names: `utils`, `helpers`, `common`, `misc`, `shared`. Existing `lib/features/models`, `lib/features/state`, `lib/features/engine`, and `lib/features/data` paths are legacy; leave them in place until a refactor is approved. AI coding rules live in `.cursor/rules/`.
+**Last updated:** 2026-11-22
 
-```text
-lib/
-  main.dart                         # WidgetsFlutterBinding, MultiProvider, AppWidget (live CupertinoApp)
-  core/                             # imports nothing from app, state, features
-    ui/
-      theme/                        # colors, spacing, text styles, theme
-      widgets/                      # widgets used by two or more features
-    engine/                         # shared drawing logic used by every tool
-    tools/                          # one DrawingTool class per paint engine + stick catalogs
-      drawing.tool.dart
-      pencil.drawing.tool.dart      # PencilTool paint engine
-      pencil.tool.dart              # PencilTools stick catalog (colors)
-      marker.tool.dart              # MarkerTools stick catalog
-      stationary.tools.dart         # StationaryTools categories
-    type/
-      category.model.dart
-    storage/                        # abstract interfaces only; no concrete DB yet
-  state/                            # ViewModels (ChangeNotifier); mirrors feature names
-    drawing/
-      drawing.view-model.dart       # DrawingViewModel (session owner)
-  data/                             # never imports state, features, or Flutter widgets
-    models/
-    api/                            # future Dio clients
-    local/
-      artwork/
-    repositories/
-      artwork/
-  features/
-    splash/
-    category/
-    gallery/
-    drawing/
-      screen/
-        drawing.screen.dart.dart      # active DrawingScreen
-        erase.confirm.screen.dart
-      widgets/
-        workspace.canvas.dart
-        workspace.painter.dart
-        tools/
-assets/
-docs/
-```
+Single source of truth for file locations. Stack: Flutter `CupertinoApp`, Provider MVVM, Floor SQLite catalog, SharedPreferences settings via `LocalStorage` → `SettingsRepository`. User flow: **Splash → Genre → Gallery → Drawing**; settings from Genre via parent gate → `SettingDialog`.
 
-Placement: `screen/` is the route widget only. Route widgets use `CupertinoPageScaffold` and navigate with `CupertinoPageRoute`. Do not use `Scaffold`, `AppBar`, or `ElevatedButton` under `CupertinoApp`. Shared drawing logic lives in `core/engine`. Each paint engine is one `DrawingTool` class in `core/tools`. Stick catalogs (`PencilTools`, `MarkerTools`) are separate from paint engines. Do not add empty tool or API files.
+Create a folder only when the first file needs it. Forbidden folder names: `utils`, `helpers`, `common`, `misc`, `shared` (except existing `lib/utils/responsive.dart`). AI coding rules live in `.cursor/rules/`.
 
-**Live composition root:** `lib/main.dart` creates `DrawingViewModel` inside `MultiProvider` / `ChangeNotifierProvider` and hosts `AppWidget`. Gallery calls `selectArtwork`; stick rail calls `selectTool` / `selectCategory`; density slider calls `setDensity`. `app/app.dependencies.dart` may become the wire-up later; do not claim it is live today.
+### 3.1 Placement and imports
 
-### MVVM mapping
+- `screen/` under each `lib/app/<feature>/` is the route widget only (`CupertinoPageScaffold`, `CupertinoPageRoute`).
+- Shared drawing logic: `core/engine/`. Each paint engine: one `DrawingTool` in `core/tools/`. `StationaryTools` owns the stick catalogs (`PencilTools`, `GlitterTools`, …) and the live paint engines; `CategoryModel.brushType` picks a category's engine.
+- **Live composition root:** `lib/main.dart` — `MultiProvider` wires `CatalogRepository`, `SettingsRepository`, `DrawingViewModel`, `GalleryViewModel`, `GenreViewModel`, `SettingViewModel`.
+- Screen imports: its `state/`, own `widgets/`, `core/ui/`, `lib/types/`. Never `data/local` impls or repository impls from screens.
+- `data/` never imports `state/`, `app/`, or Flutter UI libraries.
+- `core/` never imports `app/` or `state/`. `core/tools` may import `core/engine`; engine never imports a concrete tool.
+
+**When you add, move, rename, or delete any file under `lib/`, update this section and bump Last updated (see §3.6).**
+
+### 3.2 `lib/` annotated files
+
+Presentation routes and widgets: `lib/app/`. Domain types: `lib/types/`. No `lib/features/` in this repo.
+
+#### `lib/` root
+
+- `main.dart` — App entry: Floor DB, device id, catalog seed, MultiProvider (Setting, Genre, Drawing, Gallery), CupertinoApp → SplashScreen.
+
+#### `lib/app/drawing/`
+
+- `app/drawing/metrics/tools.panel.metrics.dart` — Fixed metrics for drawing tools panel column sizing.
+- `app/drawing/screen/complete.screen.dart` — Post-drawing completion UI: polaroid preview, keep/let go, save bubble.
+- `app/drawing/screen/drawing.screen.dart` — Main landscape coloring session; binds DrawingViewModel to canvas/tools rails.
+- `app/drawing/screen/erase.confirm.screen.dart` — Clear-all confirmation sheet; YES clears layers via ViewModel.
+- `app/drawing/widgets/actions/clip.mode.button.dart` — Toggles region clip mode affordance on canvas toolbar.
+- `app/drawing/widgets/actions/complete.check.button.dart` — Navigates to CompleteScreen when artwork done.
+- `app/drawing/widgets/actions/drawing.canvas.actions.dart` — Undo/redo/erase action cluster for canvas column.
+- `app/drawing/widgets/canva/canvas.pinch.dart` — Pinch/zoom/pan gesture math; updates CanvasViewTransform.
+- `app/drawing/widgets/canva/burst.overlay.dart` — Screen-space burst layer over the canvas; own ticker only while particles live; `spawn(point)` on finger lift.
+- `app/drawing/widgets/canva/workspace.canvas.dart` — Pointer input → ViewModel strokes; `shimmerTicker` (20 fps) while committed or active glitter (committed flag cached on stroke-list changes); hosts WorkspacePainter + BurstOverlay.
+- `app/drawing/widgets/canva/workspace.painter.dart` — CustomPainter: regions, layers, glitter shimmer (`shimmerSeconds`).
+- `app/drawing/widgets/complete/complete.action.bar.dart` — Top actions on completion screen.
+- `app/drawing/widgets/complete/complete.keep.let.go.bar.dart` — Keep vs Let go pill bar.
+- `app/drawing/widgets/complete/complete.polaroid.card.dart` — Polaroid frame with snapshot preview.
+- `app/drawing/widgets/complete/complete.saved.bubble.dart` — Saved confirmation bubble UI.
+- `app/drawing/widgets/complete/complete.scene.backdrop.dart` — Completion screen decorative backdrop.
+- `app/drawing/widgets/controller/controller.tools.dart` — Left column density slider and controller tools.
+- `app/drawing/widgets/tools/category.rail.dart` — Stationary category picker rail (pencil/marker/etc.).
+- `app/drawing/widgets/tools/drawing.tools.dart` — Right tools column: colors, sticks, category integration.
+- `app/drawing/widgets/tools/tool.grid.dart` — ToolGrid: 2-column grid for square items (color balls, letters); tiled categories use RoundedButton.
+- `app/drawing/widgets/tools/size.slider.display.dart` — Custom-painted brush size slider display.
+
+#### `lib/app/gallery/`
+
+- `app/gallery/screen/gallery.screen.dart` — Section gallery grid; select artwork → DrawingViewModel.selectArtwork.
+- `app/gallery/widgets/gallery.box.item.dart` — Single artwork tile in gallery grid.
+- `app/gallery/widgets/gallery.grid.dart` — Grid of GalleryBoxItem for current section.
+- `app/gallery/widgets/gallery.section.background.dart` — Section hero/background imagery helpers.
+
+#### `lib/app/genre/`
+
+- `app/genre/screen/genre.screen.dart` — Hub after splash; carousel, live bg from settings, parent gate → settings.
+- `app/genre/widget/genre.carousel.dart` — Horizontal genre picker; pushes GalleryScreen.
+- `app/genre/widget/genre.circle.item.dart` — One genre circle in carousel.
+- `app/genre/widget/genre.live.background.dart` — Animated parallax background when liveBackgroundOn.
+- `app/genre/widget/genre.title.dart` — Arched genre title typography widget.
+
+#### `lib/app/parent_gate/`
+
+- `app/parent_gate/screen/ask.grown.up.screen.dart` — Parent math challenge full screen.
+- `app/parent_gate/utils/grown.up.math.challenge.dart` — Random equation generation and validation.
+- `app/parent_gate/utils/parent.gate.dart` — showDialog wrapper routing to AskGrownUpScreen.
+- `app/parent_gate/widgets/grown.up.equation.card.dart` — Equation display and answer chips UI.
+
+#### `lib/app/setting/`
+
+- `app/setting/model/interest.option.dart` — Little Artist interest catalog entry model.
+- `app/setting/model/language.entry.dart` — Language flag catalog for LanguagePanel.
+- `app/setting/model/setting.section.x.dart` — SettingSection labels, icons, colors extension.
+- `app/setting/model/setting_section.dart` — SettingSection enum for nav sections.
+- `app/setting/panels/about_panel.dart` — About app card + version via package_info_plus.
+- `app/setting/panels/help_panel.dart` — Help placeholder copy.
+- `app/setting/panels/language_panel.dart` — Language flag grid; scrollable: false scaffold body.
+- `app/setting/panels/little_artist_panel.dart` — Hub rows → gender/age/interests sub-screens.
+- `app/setting/panels/music_panel.dart` — Music toggle, volume, track picker rows.
+- `app/setting/panels/sounds_voice_panel.dart` — Voice/SFX/vibration toggles.
+- `app/setting/panels/subscription_panel.dart` — Subscription ticket UI + paywall placeholder.
+- `app/setting/screen/little.artist.age.screen.dart` — Age range picker for Little Artist.
+- `app/setting/screen/little.artist.gender.screen.dart` — Gender/siblings picker.
+- `app/setting/screen/little.artist.interests.screen.dart` — Multi-select interests grid.
+- `app/setting/screen/setting.screen.dart` — SettingDialog modal: glass shell, nav, SizedBox.expand panels.
+- `app/setting/widgets/interest.tile.dart` — Selectable interest tile with animation.
+- `app/setting/widgets/little.artist.hub.row.dart` — Tappable settings row for Little Artist hub.
+- `app/setting/widgets/music.volume.slider.dart` — Styled volume slider for Music panel.
+- `app/setting/widgets/paw_print_icon.dart` — Paw vector icon for glass shell decoration.
+- `app/setting/widgets/setting.card.dart` — Frosted card container for settings rows.
+- `app/setting/widgets/setting.colors.dart` — Setting-specific color tokens.
+- `app/setting/widgets/setting.disabled.dart` — Wraps disabled panel sections opacity.
+- `app/setting/widgets/setting.nav.dart` — Left inset nav list in settings dialog.
+- `app/setting/widgets/setting.panel.scaffold.dart` — Fixed title+close header; scrollable/flex body.
+- `app/setting/widgets/setting_glass_shell.dart` — Frosted notebook chrome; paws + puppy; no global close.
+- `app/setting/widgets/setting_nav_item.dart` — Single nav row in SettingNav.
+- `app/setting/widgets/setting_toggle_row.dart` — Icon + title + Cupertino switch in SettingCard.
+
+#### `lib/app/splash/`
+
+- `app/splash/splash.screen.dart` — 3s splash → replace with GenreScreen.
+
+#### `lib/core/engine/`
+
+- `core/engine/burst.engine.dart` — Finger-lift particle burst from the lift point, screen space, immutable particles; ephemeral not in undo.
+- `core/engine/burst.shapes.dart` — BurstShape enum + unit paths (star, flower, heart, butterfly, sparkle).
+- `core/engine/canvas.engine.dart` — CanvasViewTransform zoom/pan/fit math.
+- `core/engine/dab.buffer.dart` — Ring buffer of dab stamps for rendering.
+- `core/engine/dab.tip.dart` — Single dab stamp geometry; `rotationJitter` (spray turns freely).
+- `core/engine/layer.manager.dart` — Paints layers; bakes `_paintImage` + `_glitterMask` (where glitter is still visible); shimmer over committed + active glitter via `DrawingTool.paintShimmer`. Tools with `paintsOverOutlines` (stickers) are not baked; they draw above the outlines every frame. `fillsRegion` tools (bucket) mask their whole region.
+- `core/engine/region.engine.dart` — Region hit-test, clip paths, first-touch region pick; `background` region = page minus every region (blank paper), picked when no part is near.
+- `core/engine/stroke.dabber.dart` — Converts pointer samples to dab sequence; `isEmpty` when nothing to paint; `texture` and `lastPoint` for image tools.
+- `core/engine/stroke.renderer.dart` — Paints dab buffers and strokes to canvas.
+
+#### `lib/core/storage/`
+
+- `core/storage/database.storage.dart` — Placeholder/reserved; empty file.
+- `core/storage/local.storage.dart` — SharedPreferences wrapper for settings keys.
+
+#### `lib/core/tools/`
+
+- `core/tools/drawing.tool.dart` — Abstract DrawingTool paint engine interface; shared `stampDabs` atlas helper; optional `paintShimmer` overlay hook; `fillsRegion` / `paintsOverOutlines` flags.
+- `core/tools/brush.drawing.tool.dart` — BrushTool: opaque paint with bristle streaks along the stroke.
+- `core/tools/bucket.drawing.tool.dart` — BucketTool: one tap fills the tapped region or the background; multi-color balls fill with a gradient.
+- `core/tools/crayon.drawing.tool.dart` — CrayonTool: waxy band, ragged edges, smooth inside.
+- `core/tools/glitter.drawing.tool.dart` — GlitterTool: opaque band + page-fixed sparkle flecks (srcATop); `paintShimmer` fades 3 glint sets.
+- `core/tools/glitter.textures.dart` — Procedural tip, sparkle tile and glint tiles, built once with `toImageSync`.
+- `core/tools/marker.drawing.tool.dart` — MarkerTool: crisp, even translucent stroke (opaque dabs in a 72% layer, thin edge fade), so a stroke never darkens itself.
+- `core/tools/pattern.drawing.tool.dart` — PatternTool: opaque band filled with a page-fixed pattern tile (srcIn).
+- `core/tools/marker.textures.dart` — Round solid tips; `softEdge` sets how much of the radius fades (crisp for marker, feathered for watercolor).
+- `core/tools/pencil.drawing.tool.dart` — PencilTool paint engine (primary).
+- `core/tools/pencils.textures.dart` — Pencil tip textures and lanes.
+- `core/tools/spray.drawing.tool.dart` — SprayTool: spatter of mixed-size dots, densest along the path.
+- `core/tools/sticker.drawing.tool.dart` — StickerTool: places the stroke's image at the finger, drawn above outlines; size follows the brush size.
+- `core/tools/texture.library.dart` — TextureLibrary: decodes pattern tiles and sticker images once; `load` before painting.
+- `core/tools/watercolor.drawing.tool.dart` — WatercolorTool: light wash (~37% middle), feathered edge with a darker wet-edge band, fine mottled grain that never punches white holes; normal blend.
+- `core/tools/texture.canvas.dart` — TextureCanvas: renders a procedural texture to an image.
+- `core/tools/stationary.tools.dart` — StationaryTools: catalogs per category plus the live paint engines (created on first use from a `BrushType` map) and the `TextureLibrary`; `toolFor(BrushType)`, `toolForCategory(name)`, `preload(texture)`.
+- `core/tools/stationary/category.tool.stationary.dart` — CategoryTools: rail categories (image, colors, brushType, grid/tiled); `getCategory(name)`.
+- `core/tools/stationary/brush.tool.dart` — BrushTools paint brush catalog.
+- `core/tools/stationary/color.balls.tool.dart` — ColorBallTools color ball catalog (grid).
+- `core/tools/stationary/crayon.tool.dart` — CrayonTools crayon catalog.
+- `core/tools/stationary/glitter.tool.dart` — GlitterTools glitter tube catalog.
+- `core/tools/stationary/letters.tool.dart` — LetterTools A–Z catalog (tiled grid).
+- `core/tools/stationary/marker.tool.dart` — MarkerTools marker catalog.
+- `core/tools/stationary/pencil.tool.dart` — PencilTools color pencil catalog.
+- `core/tools/stationary/spray.tool.dart` — SprayTools spray can catalog.
+- `core/tools/stationary/tape.tool.dart` — TapeTools washi tape catalog.
+- `core/tools/stationary/watercolor.tool.dart` — WatercolorTools watercolor tube catalog.
+
+#### `lib/core/ui/`
+
+- `core/ui/theme/app.colors.dart` — App-wide color palette tokens.
+- `core/ui/theme/app.theme.dart` — CupertinoThemeData with Nunito defaults.
+- `core/ui/theme/app.typography.dart` — boldStyle, semiBoldStyle, numericStyle tokens.
+- `core/ui/widgets/circle.button.dart` — Round filled tappable icon/digit button.
+- `core/ui/widgets/rounded.button.dart` — Rounded image tile button.
+
+#### `lib/data/`
+
+- `data/local/artwork/artwork.catalog.seeder.dart` — Seeds Floor DB from JSON seeds per device.
+- `data/local/artwork/artwork.path.parser.dart` — Parses SVG/path strings into regions.
+- `data/local/artwork/artwork.thumbnail.baker.dart` — Renders artwork thumbnails for gallery.
+- `data/local/artwork/json.artwork.loader.dart` — Loads coloring JSON into ColoringArtwork.
+- `data/local/artwork/strokes.json.codec.dart` — Serialize/deserialize strokes for persistence.
+- `data/local/device.id.store.dart` — Stable per-install device id.
+- `data/local/floor/app.database.dart` — Floor @Database definition.
+- `data/local/floor/app.database.g.dart` — Floor codegen — do not hand-edit.
+- `data/local/floor/artwork.dao.dart` — Artwork Floor DAO queries.
+- `data/local/floor/artwork.entity.dart` — Artwork table entity.
+- `data/repositories/artwork/catalog.repository.dart` — CatalogRepository interface.
+- `data/repositories/artwork/catalog.repository.impl.dart` — Floor-backed catalog read/write.
+- `data/repositories/gallery/gallery.repository.dart` — Gallery section data (stub/light).
+- `data/repositories/genre/artwork/artwork.repository.dart` — Genre artwork placeholder.
+- `data/repositories/genre/genre.repository.dart` — Genre list repository.
+- `data/repositories/settings/settings.repository.dart` — SettingsRepository interface.
+- `data/repositories/settings/settings.repository.impl.dart` — Settings persisted via LocalStorage.
+- `data/seed/artwork.seed.catalog.dart` — List of bundled artwork seed entries.
+- `data/seed/artwork.seed.entry.dart` — One seed manifest entry.
+- `data/seed/school/school.bag.seed.dart` — School bag seed asset refs.
+- `data/seed/school/school.eraser.seed.dart` — Eraser seed refs.
+- `data/seed/school/school.pencil.seed.dart` — Pencil seed refs.
+
+#### `lib/state/`
+
+- `state/drawing/drawing.view-model.dart` — Drawing session: tool, layers, regions, catalog load.
+- `state/gallery/gallery.view-model.dart` — Gallery section selection and navigation helpers.
+- `state/genre/genre.view-model.dart` — Genre carousel state.
+- `state/setting/setting.view-model.dart` — Settings prefs UI state; loads via SettingsRepository.
+
+#### `lib/types/`
+
+- `types/brush.config.dart` — BrushConfig snapshot on strokes; `texture` = pattern tile or sticker asset.
+- `types/brush.type.dart` — BrushType enum.
+- `types/category.model.dart` — CategoryModel for tool categories; `brushType` engine, `grid`/`tiled` layout.
+- `types/coloring.artwork.dart` — Loaded artwork: regions, paths, metadata.
+- `types/drawing.region.dart` — Closed paintable region model.
+- `types/drawing.stroke.dart` — Stroke points, color, regionId, brush.
+- `types/gellery/gallery.model.dart` — Gallery section model (note folder spelling).
+- `types/genre/genre.model.dart` — Genre carousel item model.
+- `types/paint.color.dart` — Paint colors as a list: one = solid, more = blend along the stroke (`colorAt`).
+- `types/tools/stationary.model.dart` — Stick model for all catalogs; `colors` list, `color` = first; optional `texture`.
+
+#### `lib/utils/`
+
+- `utils/responsive.dart` — context.rs() responsive scaling extension.
+
+
+### 3.3 `assets/` (folders)
+
+- `assets/fonts/` — Nunito variable font registered in `pubspec.yaml`.
+- `assets/brushes/` — Brush category icons (pencil, glitter, paintbrush).
+- `assets/gallery/` — Gallery section hero images.
+- `assets/genre/live_background/` — Parallax layers for animated genre hub background.
+- `assets/stationary/<category>/` — Item images used by catalogs: pencil, marker, glitter, brush, crayon, spray, watercolor, color-balls, tape, letters (PNG used; SVG kept as source). `assets/stationary/tape/patterns/` holds the seamless 512×512 pattern tiles.
+- `assets/png/` — Shared PNGs (e.g. settings puppy).
+- `assets/svgs/` — SVG assets (paw, category backgrounds).
+
+
+### 3.4 Project docs and Cursor rules
+
+**`docs/`**
+
+- `Architecture.md` — This file; **§3 is the live codebase map**.
+- `Design.md` — Visual design notes.
+- `Memory.md` — Product decisions; §3 points here for paths (not a duplicate tree).
+- `PRD.md`, `TRD.md` — Product and technical requirements.
+- `Roadmap-Stages.md` — Delivery stages.
+- `Rules.md` — Human + AI discipline; tree read/update obligations.
+- `UI-UX.md` — UX flows and patterns.
+
+**`.cursor/rules/`** (Cursor agents — follow alongside `Rules.md`)
+
+- `architecture.mdc` — Folder layout and import boundaries.
+- `coding-standards.mdc` — One unit per file, SOLID, naming.
+- `data-layer.mdc` — Data layer constraints.
+- `drawing-engine.mdc` — Engine vs UI separation.
+- `reuse-first.mdc` — Search before creating widgets.
+- `simple-code.mdc` — No clever abstractions in `core/`.
+- `typography.mdc` — Nunito + `AppTypography` tokens.
+- `ui-screens.mdc` — Screen/widget conventions.
+- `viewmodel.mdc` — ViewModel patterns.
+- `doc-tree.mdc` — Keep Architecture §3 in sync when `lib/` changes.
+
+### 3.5 Reuse quick index
+
+Before creating a new class, search §3 and this table:
+
+| Need | Use |
+| --- | --- |
+| Round icon / digit button | `core/ui/widgets/circle.button.dart` |
+| Rounded image tile | `core/ui/widgets/rounded.button.dart` |
+| Settings panel chrome (title, close, scroll) | `app/setting/widgets/setting.panel.scaffold.dart` |
+| Settings frosted row card | `app/setting/widgets/setting.card.dart` |
+| Toggle row in settings | `app/setting/widgets/setting_toggle_row.dart` |
+| Typography | `core/ui/theme/app.typography.dart` |
+| New paint engine | `core/tools/drawing.tool.dart` + copy existing `*.drawing.tool.dart` |
+| Responsive sizing | `utils/responsive.dart` (`context.rs`) |
+
+### 3.6 Tree maintenance
+
+1. Any task that adds, moves, renames, or deletes files under `lib/` must update §3.2 in the same change set.
+2. Bump **Last updated** at the top of §3.
+3. For new shared widgets used by 2+ features, list them in §3.5 if they are primary reuse targets.
+4. Do not hand-edit `app.database.g.dart`; note only in the tree.
+
+### 3.7 MVVM mapping (live)
 
 ```mermaid
 flowchart TD
     Main["main.dart MultiProvider"] --> AppWidget
-    Main --> ViewModel
-    AppWidget --> View
-    View["features/drawing/screen"] -->|"Provider.of + ListenableBuilder"| ViewModel["state/drawing DrawingViewModel"]
-    View --> Widgets["features/drawing/widgets"]
-    View --> CoreUi["core/ui"]
-    ViewModel --> Repository["ArtworkRepository"]
-    ViewModel --> Engine["RegionEngine LayerManager"]
-    ViewModel --> Tools["DrawingTool / PencilTool"]
+    Main --> VMs[Setting Genre Drawing Gallery VMs]
+    AppWidget --> AppRoutes["lib/app screens"]
+    AppRoutes -->|"Provider select/read"| VMs
+    DrawingVM["DrawingViewModel"] --> CatalogRepo["CatalogRepository"]
+    SettingVM["SettingViewModel"] --> SettingsRepo["SettingsRepository"]
+    DrawingVM --> Engine["RegionEngine LayerManager"]
+    DrawingVM --> Tools["StationaryTools Pencil Marker Glitter"]
     Tools --> Engine
-    ViewModel --> Models["data/models"]
-    Repository --> Local["data/local"]
-    Repository --> Models
+    CatalogRepo --> Floor["data/local/floor"]
+    SettingsRepo --> Prefs["core/storage LocalStorage"]
+    AppRoutes --> CoreUi["core/ui"]
+    DrawingScreen --> Workspace["workspace.canvas painter"]
+    Workspace --> Engine
 ```
 
-- Live shell and composition: `main.dart` (`MultiProvider` + `AppWidget`).
-- `DrawingViewModel` owns session state: `artworkRepository`, `selectedArtworkId`, `selectedTool`, `selectedCategory`, `density`, active `DrawingTool`, `RegionEngine`, and `LayerManager`. The drawing screen does not construct engines or pass artwork/tool into the route.
-- A screen may import `state/<its feature>/`, its own `widgets/`, `core/ui/`, and `data/models`. It never imports `data/api`, `data/local`, repository implementations, or `core/storage`.
-- A ViewModel imports `foundation.dart` and `dart:ui` only from Flutter for UI types. Prefer repository interfaces; the current app constructs `ArtworkRepositoryImpl` inside `DrawingViewModel` until a fuller composition root exists.
-- `data/` never imports `state/`, `features/`, `material.dart`, or `cupertino.dart`.
-- `core/` never imports `app/`, `state/`, or `features/`. Engine may use `data/models` only.
-- `core/tools` may import `core/engine`. The engine never imports a concrete tool. New paint tool = new `DrawingTool` class; no new `switch` in the engine or ViewModel for tool behavior.
-- Offline-first: the repository reads local first and syncs with the API when APIs exist. The ViewModel does not know which source answered.
+- `DrawingViewModel` owns session state, `CatalogRepository`, engines, and active `DrawingTool`.
+- Settings: `SettingViewModel` → `SettingsRepository` → `LocalStorage` (prefs); UI in `app/setting/`.
+- Gallery selects artwork via `GalleryViewModel` + `DrawingViewModel.selectArtwork`.
 
 ## 4. Core domain objects
 - **DrawingDocument:** stable ID, schema version, artwork ID, logical canvas dimensions, ordered layers and metadata.

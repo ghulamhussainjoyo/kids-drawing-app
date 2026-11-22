@@ -19,18 +19,12 @@ class DrawingCanvasActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          CompleteCheckButton(visible: hasPaint, onPressed: onComplete),
-          ClipModeButton(
-            clipToRegions: clipToRegions,
-            onPressed: onToggleClip,
-          ),
-        ],
-      ),
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+      children: [
+        CompleteCheckButton(visible: hasPaint, onPressed: onComplete),
+        ClipModeButton(clipToRegions: clipToRegions, onPressed: onToggleClip),
+      ],
     );
   }
 }

@@ -2,6 +2,8 @@
 
 This is durable project context for contributors and AI coding assistants. Update it when decisions change. Do not turn assumptions into confirmed requirements.
 
+**Last updated:** 2026-11-20
+
 ## 1. Vision
 Build a commercial children's drawing and coloring app for iOS and Android. The differentiator is expressive freehand painting with reliable region-constrained coloring, not only tap-to-fill.
 
@@ -14,14 +16,19 @@ Build a commercial children's drawing and coloring app for iOS and Android. The 
 - User works in Cursor and wants complete, practical file-level implementation guidance.
 - Current pubspec uses Dart constraint `^3.13.7`, Flutter SDK, `cupertino_icons`, `provider`, `native_device_orientation`, `flutter_svg`, `flutter_test` and `flutter_lints`. Drawing still uses Flutter Canvas / CustomPainter (no third-party drawing engine).
 - UI kit is `CupertinoApp` + `CupertinoThemeData` so Android and iOS share the same iOS-style chrome. Route widgets use `CupertinoPageScaffold` and `CupertinoPageRoute`. Do not mix Material `Scaffold` / `AppBar` / `ElevatedButton` under `CupertinoApp`.
-- Splash is the home route. Navigation: Splash → Category → Gallery → Drawing.
+- Splash is the home route. Navigation: Splash → **Genre** → Gallery → Drawing.
 - Drawing session: `MultiProvider` / `ChangeNotifierProvider` in `lib/main.dart` creates one `DrawingViewModel` at app launch. Gallery calls `selectArtwork(title)` then pushes the drawing screen with no artwork argument. Stick rail calls `selectTool` / `selectCategory`. Density slider calls `setDensity`. The drawing screen is View-only (`Provider.of` listen: false + `ListenableBuilder` inside `NativeDeviceOrientationReader`).
 - Live app shell is `AppWidget` in `lib/main.dart`.
-- Active drawing UI is `features/drawing/screen/drawing.screen.dart.dart` with `workspace.canvas.dart` / `workspace.painter.dart`.
-- Paint tool class: `core/tools/pencil.drawing.tool.dart` (`PencilTool`). Stick catalog: `core/tools/pencil.tool.dart` (`PencilTools`). Marker catalog exists; dedicated marker/brush `DrawingTool` paint engines are not built yet (pencil dabs still used).
+- Active drawing UI: `lib/app/drawing/screen/drawing.screen.dart` with `widgets/canva/workspace.canvas.dart` / `workspace.painter.dart`.
+- Paint engines (one `DrawingTool` per pen): `PencilTool`, `MarkerTool`, `GlitterTool` in `core/tools/`. Owned and routed by `StationaryTools` (`toolForCategory` via `CategoryModel.brushType`, `toolFor(BrushType)`); `DrawingViewModel` exposes `tool` and `toolFor` for active category and per-stroke replay.
+- Stick catalogs only (not paint): `PencilTools`, `MarkerTools`, `GlitterTools` + `StationaryTools` / `CategoryTools` in `core/tools/stationary/`. `selectCategory` sets `brushConfig.type`; each stroke persists `brush.type` in JSON (`StrokesJsonCodec`).
+- `LayerManager` bakes all committed paint to `_paintImage` and a coarser `_glitterMask` (glitter adds, later non-glitter strokes cut). Shimmer is drawn live over mask + active glitter stroke through `DrawingTool.paintShimmer`; `WorkspaceCanvas` runs `shimmerTicker` (20 fps) when committed **or** active strokes use glitter (committed-glitter flag cached on stroke-list changes, not rescanned per finger move); `layerManager.paint(..., shimmerSeconds:)`; thumbnails/export pass none (still).
+- Glitter **paint**: opaque round tip (no build-up on overlap) + procedural sparkle tile fixed to the page (srcATop). Stick colors in `GlitterTools` are sampled from each `assets/stationary/glitter/*.png` tube. `PaintColor`/`StationaryModel` hold a `colors` list; several colors blend along the stroke.
+- Genre hub: `GenreLiveBackground` (animated PNG scenery) behind carousel; gated by `liveBackgroundOn` in `SettingsRepository` / `SettingViewModel` (default on). Settings UI toggle for live background not wired yet.
+- Settings: parent gate on genre hub → `SettingDialog`; panels use `SettingPanelScaffold` (fixed header + scroll body). Persistence: `SettingsRepository` in `data/`, `SettingViewModel` in `state/setting/`.
 - Brush size: left density slider → `DrawingViewModel.setDensity` → size `12 + density * 44` for subsequent strokes.
 - Eraser button: full-screen clear-all confirm (NO dismisses, YES calls `clearAll`). Not a stroke eraser brush yet.
-- ViewModel owns `artworkRepository`, `selectedArtworkId`, `selectedTool`, `selectedCategory`, `density`, `drawingTool`, `RegionEngine`, and `LayerManager`. Until gallery has real pages, `selectArtwork` still loads apple-and-books via the repository.
+- `DrawingViewModel` owns catalog access, `selectedArtworkId`, `selectedTool`, `selectedCategory`, `density`, `_toolKit`, `RegionEngine`, and `LayerManager`. Gallery/catalog loads artworks from Floor + JSON seeds via `CatalogRepository`.
 
 ### Coloring behavior (confirmed 2026-11-07 from the reference image and screen recording)
 - No explicit region selection. The closed part under a stroke's first touch clips that whole stroke. Forgiving part pick: a first touch inside a part always picks it, even next to its outline. A first touch on an outline, or on paper beside the art, picks the nearest part within a fingertip radius (22 screen points, converted with the current zoom). Only a touch farther than that from every part paints nothing. Inner detail lines (leaf vein, book page lines, apple shine) are not outlines: a touch on one colors the part it sits in.
@@ -32,34 +39,20 @@ Build a commercial children's drawing and coloring app for iOS and Android. The 
 - Undo appears after the first completed stroke; redo is grey until an undo.
 - Full-screen landscape with system edge gestures deferred.
 - Flutter prototype first build: pencil coloring on apple-and-books, stick color choice, density brush size, undo/redo, pinch zoom/pan, finger-lift burst, Provider MVVM wiring, clear-all erase confirm.
-- Later: sounds (soft drawing sound and tap sound, no music), marker/brush/bucket/crayon/wand paint engines, stroke eraser, save/export, padlocked colors, done/settings. Padlocked colors are out of the first build.
+- Later: sounds (soft drawing sound and tap sound, no music), bucket/crayon/wand/brush paint engines, stroke eraser, full export UX, padlocked colors, settings polish (e.g. live background toggle in UI). Optional: pencil scribble density tuning. Padlocked colors are out of the first build.
 
-## 3. Existing Flutter paths
-```text
-lib/
-  main.dart                         # WidgetsFlutterBinding, MultiProvider, AppWidget (CupertinoApp)
-  core/
-    ui/theme/, ui/widgets/          # AppColors, AppTheme, RoundedButton, CircleButton
-    engine/                         # region, layer, dab, burst, view transform
-    tools/                          # DrawingTool, pencil.drawing.tool, PencilTools catalog, StationaryTools
-    type/category.model.dart
-  state/drawing/drawing.view-model.dart
-  data/
-    models/
-    local/artwork/apple.and.books.local.dart
-    repositories/artwork/
-  features/splash/splash.screen.dart
-  features/category/
-  features/gallery/
-  features/drawing/
-    screen/drawing.screen.dart.dart       # active route
-    screen/erase.confirm.screen.dart
-    widgets/workspace.canvas.dart
-    widgets/workspace.painter.dart
-    widgets/tools/                        # ControllerTools, DrawingTools, CategoryRail
-```
+## 3. Code layout (summary)
 
-`core/engine` and `core/tools` may import `data/models` only (not api, local, or repositories) except the ViewModel may use repository interfaces/impls for artwork load. The engine never imports a concrete tool. Stick catalog `pencil.tool.dart` is not the paint engine.
+**Canonical file map:** [`Architecture.md` §3](Architecture.md#3-codebase-map-live-tree) — every `lib/**/*.dart` file with a one-line description. Update §3 when `lib/` structure changes.
+
+- **Composition:** `lib/main.dart` — Floor DB, catalog seed, `MultiProvider` (`DrawingViewModel`, `GalleryViewModel`, `GenreViewModel`, `SettingViewModel`), `CupertinoApp` → `SplashScreen`.
+- **Presentation:** `lib/app/` — `splash`, `genre`, `gallery`, `drawing`, `setting`, `parent_gate` (screens + feature widgets).
+- **State:** `lib/state/<feature>/` — ViewModels only.
+- **Engine & tools:** `lib/core/engine/`, `lib/core/tools/` (`stationary.tools.dart`, `*.drawing.tool.dart`, textures, stationary catalogs). Engine does not import concrete tools.
+- **Data:** `lib/data/` — Floor, JSON artwork loaders, repository interfaces/impls (including settings).
+- **Types:** `lib/types/` — domain models (strokes, regions, artwork, gallery, genre, stationary).
+
+`core/engine` does not import concrete tools. ViewModels use repository abstractions wired in `main.dart`.
 
 ## 4. Requested capabilities
 Pencil, marker, crayon, paintbrush, watercolor, airbrush/spray and eraser; smooth finger/stylus input; pressure/tilt where available; region selection and clipping; separate paint and outline layers; undo/redo; zoom/pan; stickers/backgrounds; high-resolution PNG export; offline-first operation.
@@ -85,12 +78,21 @@ At least 60 FPS on agreed baseline devices, 120 FPS where supported, aim under 2
 
 ## 9. Current status
 - Flutter setup and app launch: complete.
-- App shell: `CupertinoApp` via `AppWidget` in `lib/main.dart` with `MultiProvider` → `DrawingViewModel`.
-- Navigation: Splash → Category → Gallery → `DrawingScreen`.
-- Pencil coloring on apple-and-books (vector paths in `lib/data/local/artwork/apple.and.books.local.dart`): implemented. Density brush size, stick colors, undo/redo, pinch/burst, clear-all erase confirm: implemented. Not yet measured on devices.
-- Code layout follows MVVM folders (`core/`, `state/`, `data/`, `features/`). Live composition is `main.dart` MultiProvider (not `app.dependencies.dart`).
-- Marker/brush paint engines, sounds, save and export: not implemented.
-- Framework benchmark: not started.
+- App shell: `CupertinoApp` via `AppWidget` in `lib/main.dart` with `MultiProvider` (`SettingViewModel`, `GenreViewModel`, `DrawingViewModel`, `GalleryViewModel`).
+- Navigation: Splash → Genre → Gallery → Drawing; settings modal from Genre (parent gate).
+- Pencil, marker, glitter: implemented (`StationaryTools` engines, category rail, per-stroke `toolFor`). Pencil look unchanged from original tuned engine; marker semi-opaque dabs; glitter opaque sparkle band with live shimmer (while drawing and after).
+- Color-balls and letters show in a 2-column `ToolGrid` (`CategoryModel.grid` / `tiled`).
+- Engines for every category (2026-11-22), tuned against the reference video: crayon (waxy, ragged edges, smooth inside), brush (opaque, bristle streaks), marker (crisp even translucent stroke), watercolor (light wash, wet edge, fine grain), spray (dot spatter), bucket (color balls; tap fills a region or the whole background, gradient for multi-color balls), pattern (tape; page-fixed designer tile), sticker (letters; above outlines, follows the finger until lift, size = brush size × 4.5).
+- Crayon has no paper grain: the user wants it smooth inside, with no white specks (2026-11-22).
+- Marker and watercolor are matched to the user's reference screenshots (`~/Downloads/marker-color-usage-ss.png`, `water-color-pen-ss.png`), measured by pixel: marker ~72% alpha, normal blend, 2-3 px crisp edge, flat inside; watercolor ~38% in the middle, normal blend, soft ~15-20 px edge with a darker band just inside, fine tonal grain (sd ~5, no white holes). Checked in the simulator 2026-11-22: marker orange on white #F7A047 with a 2 px edge (dab spacing 0.06 keeps the edge smooth); watercolor middle ~37% with grain sd ~4 and a darker band inside the edge. Opacity alone did not fix the dull look: the wide blurry tip rim and the missing grain mattered as much.
+- Blank paper is a `background` region, so clip-mode strokes and bucket fills work there. The bucket ignores clip mode; stickers are never clipped.
+- Pattern tiles and stickers are image assets loaded by `TextureLibrary` before use (`selectTool` awaits it; reopening an artwork preloads its strokes' textures).
+- Glitter animation: 3 glint tile sets fading in turn (1.2 s period), masked to visible glitter. Shader twinkle (`glitter.frag`) was replaced 2026-11-21. Burst rewritten 2026-11-21: pops from the lift point in screen space.
+- Code style (user preference, 2026-11-21): small named functions with early returns; no ternaries or `&&`/`||` chains in new code; magic numbers as named constants. Tools share `DrawingTool.stampDabs` + `StrokeDabber.isEmpty` instead of copying stamp code.
+- Genre live background: implemented; `liveBackgroundOn` pref only (no settings panel toggle yet).
+- Region coloring, density, stick colors, undo/redo, pinch/burst, clear-all confirm, stroke persistence + thumbnail bake (`saveProgress`, `ArtworkThumbnailBaker`): implemented. Device FPS/latency not measured.
+- Code layout: MVVM (`lib/app/`, `core/`, `state/`, `data/`, `types/`). Live composition is `main.dart` `MultiProvider` (not `app.dependencies.dart`).
+- Not implemented: sounds, bucket/crayon/wand/brush engines, stroke eraser, padlocked colors, full export/share product flow, framework benchmark (Flutter vs RN + Skia).
 
 ## 10. AI/developer working rules
-Read the project docs before substantial changes. Inspect files before overwriting. Follow `docs/Architecture.md` and `.cursor/rules/`. Provide complete code, not references to code never supplied. Avoid unnecessary dependencies. Work in runnable milestones. Do not claim performance targets are met without measurements. Keep both prototypes behaviorally aligned. Record decisions and unresolved questions here.
+Read the project docs before substantial changes. **Start with `Architecture.md` §3** for file locations and reuse. Inspect files before overwriting. Follow `docs/Architecture.md` and `.cursor/rules/` (including `doc-tree.mdc`). Update §3 when `lib/` structure changes in the same task. Provide complete code, not references to code never supplied. Avoid unnecessary dependencies. Work in runnable milestones. Do not claim performance targets are met without measurements. Keep both prototypes behaviorally aligned. Record decisions and unresolved questions here. Claude: see root [`CLAUDE.md`](../CLAUDE.md).

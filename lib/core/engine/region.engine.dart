@@ -5,14 +5,25 @@ import '../../types/coloring.artwork.dart';
 import '../../types/drawing.region.dart';
 
 /// Resolves which region a stroke belongs to, from its first touch only.
+///
+/// Besides the artwork's regions there is a [background] region: the blank
+/// paper around the art, so it can be painted and filled too.
 class RegionEngine {
   RegionEngine(this.artwork)
     : _regionsById = {for (final r in artwork.regions) r.id: r},
-      _edgeSamples = _sampleEdges(artwork);
+      _edgeSamples = _sampleEdges(artwork),
+      background = _buildBackground(artwork) {
+    _regionsById[backgroundId] = background;
+  }
+
+  static const String backgroundId = 'background';
 
   final ColoringArtwork artwork;
   final Map<String, DrawingRegion> _regionsById;
   final List<_EdgeSample> _edgeSamples;
+
+  /// The page with every region cut out.
+  final DrawingRegion background;
 
   static const double _sampleSpacing = 2;
   static const int _ringPoints = 12;
@@ -24,12 +35,26 @@ class RegionEngine {
   /// A point inside a region picks the front-most one, even right next to an
   /// outline. Otherwise (on an outline, or on paper beside the art) the
   /// region nearest to [point] within [pickRadius] is picked, so parts
-  /// smaller than a fingertip still take color. Null means blank paper.
+  /// smaller than a fingertip still take color. Blank paper away from every
+  /// part is the [background]; null means the point is off the page.
   /// Detail lines (leaf vein, page lines) sit inside a region and belong to it.
   DrawingRegion? regionAt(Offset point, {double pickRadius = 0}) {
     final inside = _frontMostAt(point);
-    if (inside != null || pickRadius <= 0) return inside;
+    if (inside != null) return inside;
+    final nearest = _nearestWithin(point, pickRadius);
+    if (nearest != null) return nearest;
+    return _backgroundAt(point);
+  }
 
+  DrawingRegion? _backgroundAt(Offset point) {
+    final page = Rect.fromLTWH(0, 0, artwork.size, artwork.size);
+    if (!page.contains(point)) return null;
+    return background;
+  }
+
+  /// The region nearest to [point] within [pickRadius], if any.
+  DrawingRegion? _nearestWithin(Offset point, double pickRadius) {
+    if (pickRadius <= 0) return null;
     DrawingRegion? nearest;
     var nearestDistance = double.infinity;
 
@@ -67,6 +92,15 @@ class RegionEngine {
       if (region.path.contains(point)) return region;
     }
     return null;
+  }
+
+  static DrawingRegion _buildBackground(ColoringArtwork artwork) {
+    var page = Path()
+      ..addRect(Rect.fromLTWH(0, 0, artwork.size, artwork.size));
+    for (final region in artwork.regions) {
+      page = Path.combine(PathOperation.difference, page, region.path);
+    }
+    return DrawingRegion(id: backgroundId, name: backgroundId, path: page);
   }
 
   static List<_EdgeSample> _sampleEdges(ColoringArtwork artwork) {

@@ -4,9 +4,10 @@ These rules apply to developers and AI coding assistants.
 
 ## 1. Before coding
 1. Read `Memory.md`, `PRD.md`, `TRD.md`, `Architecture.md`, `Design.md` and `UI-UX.md`.
-2. Inspect the repository and files before editing.
-3. Confirm real paths/imports; do not assume proposed folders exist.
-4. Check installed Flutter/Dart versions and `pubspec.yaml` before dependencies.
+2. Read **`Architecture.md` §3** (codebase map) and search for existing widgets, repositories, and tools before adding new classes.
+3. Inspect the repository and files before editing.
+4. Confirm real paths/imports; do not assume proposed folders exist (live UI is `lib/app/`, not `lib/features/`).
+5. Check installed Flutter/Dart versions and `pubspec.yaml` before dependencies.
 
 ## 2. Implementation discipline
 - Work in small, runnable milestones.
@@ -50,6 +51,8 @@ Before adding a package, state the requirement it solves, why SDK APIs are insuf
 
 ## 8. Documentation
 Update `Memory.md` when a decision is confirmed. Keep assumptions and open questions labeled. Record benchmark results with device, OS, build mode and scenario.
+
+When any task adds, moves, renames, or deletes files under `lib/`, update **`Architecture.md` §3`** in the same change set and bump the **Last updated** date in §3.
 
 ## 9. Framework decision
 Flutter is first to prototype, not the predetermined production choice. Build equivalent React Native + Skia scope and select only after controlled real-device tests.

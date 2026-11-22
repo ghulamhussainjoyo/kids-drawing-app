@@ -20,12 +20,16 @@ class StrokeDabber {
     required this.width,
     required this.seed,
     required this.colorAt,
+    this.texture,
   }) : _spacing = math.max(width * tip.spacing, 0.5);
 
   final DabTip tip;
   final double width;
   final int seed;
   final Color Function(double distance) colorAt;
+
+  /// Image asset the stroke paints with, for tools that need one.
+  final String? texture;
 
   final double _spacing;
   final DabBuffer dabs = DabBuffer();
@@ -40,6 +44,18 @@ class StrokeDabber {
   Rect? get bounds => _bounds;
 
   int get pointCount => _points.length;
+
+  /// Where the finger is now, or was when the stroke ended.
+  Offset? get lastPoint {
+    if (_points.isEmpty) return null;
+    return _points.last;
+  }
+
+  /// Whether there is nothing to paint yet.
+  bool get isEmpty {
+    if (_bounds == null) return true;
+    return dabs.count + tail.count == 0;
+  }
 
   void addPoint(Offset point) {
     assert(!_finished);
@@ -110,7 +126,7 @@ class StrokeDabber {
     int index,
   ) {
     final scale = width * tip.tipScale / tip.pixels * (0.92 + _hash(index, 1) * 0.16);
-    final rotation = angle + (_hash(index, 2) - 0.5) * 0.12;
+    final rotation = angle + (_hash(index, 2) - 0.5) * tip.rotationJitter;
     final x = position.dx + (_hash(index, 3) - 0.5) * width * 0.03;
     final y = position.dy + (_hash(index, 4) - 0.5) * width * 0.03;
     final variant = (_hash(index, 5) * tip.variants).floor().clamp(0, tip.variants - 1);

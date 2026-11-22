@@ -1,0 +1,31 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="250" viewBox="0 0 1280 250">
+  <defs><clipPath id="b"><path d="M300,20 L1258,20 Q1276,20 1276,38 L1276,212 Q1276,230 1258,230 L300,230 C270,212 274,186 300,170 C266,150 266,100 300,80 C274,64 270,38 300,20 Z"/></clipPath><clipPath id="w"><path d="M312,20 L312,230 L96,152 L96,98 Z"/></clipPath><clipPath id="l"><path d="M98,98 L30,118 Q16,125 30,132 L98,152 Z"/></clipPath></defs>
+  <!-- sharpened wood -->
+  <path d="M312,20 L312,230 L96,152 L96,98 Z" fill="#f0c98e"/>
+  <g clip-path="url(#w)">
+    <path d="M300,0 L300,80 L96,108 L96,0 Z" fill="#f8deb2"/>
+    <path d="M300,250 L300,170 L96,144 L96,250 Z" fill="#d9a865"/>
+    <path d="M270,60 Q200,90 120,104" fill="none" stroke="#c48a4a" stroke-width="3" opacity="0.5"/>
+    <path d="M268,190 Q200,160 120,146" fill="none" stroke="#c48a4a" stroke-width="3" opacity="0.5"/>
+  </g>
+  <path d="M312,20 L312,230 L96,152 L96,98 Z" fill="none" stroke="#8a5a2a" stroke-width="4" stroke-linejoin="round"/>
+
+  <!-- coloured lead -->
+  <path d="M98,98 L30,118 Q16,125 30,132 L98,152 Z" fill="#f03c9e"/>
+  <g clip-path="url(#l)"><path d="M98,98 L30,118 Q16,125 30,125 L98,125 Z" fill="#f580c0"/></g>
+  <path d="M98,98 L30,118 Q16,125 30,132 L98,152 Z" fill="none" stroke="#6c1b47" stroke-width="4" stroke-linejoin="round"/>
+  <path d="M66,103 Q67.98,110.02 75,112 Q67.98,113.98 66,121 Q64.02,113.98 57,112 Q64.02,110.02 66,103 Z" fill="#fff" opacity="0.95"/>
+  <!-- body: three facets -->
+  <path d="M300,20 L1258,20 Q1276,20 1276,38 L1276,212 Q1276,230 1258,230 L300,230 C270,212 274,186 300,170 C266,150 266,100 300,80 C274,64 270,38 300,20 Z" fill="#f03c9e"/>
+  <g clip-path="url(#b)">
+    <rect x="0" y="0" width="1280" height="80" fill="#f46db6"/>
+    <rect x="0" y="170" width="1280" height="80" fill="#c53182"/>
+    
+    <rect x="0" y="78" width="1280" height="3" fill="#6c1b47" opacity="0.45"/>
+    <rect x="0" y="169" width="1280" height="3" fill="#6c1b47" opacity="0.45"/>
+    <rect x="300" y="36" width="980" height="16" rx="8" fill="#fff" opacity="0.35"/>
+    <rect x="300" y="112" width="980" height="8" rx="4" fill="#fff" opacity="0.18"/>
+  </g>
+  <path d="M300,20 L1258,20 Q1276,20 1276,38 L1276,212 Q1276,230 1258,230 L300,230 C270,212 274,186 300,170 C266,150 266,100 300,80 C274,64 270,38 300,20 Z" fill="none" stroke="#6c1b47" stroke-width="4" stroke-linejoin="round"/>
+
+</svg>

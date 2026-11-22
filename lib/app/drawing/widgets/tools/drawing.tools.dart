@@ -1,28 +1,14 @@
 import 'package:flutter/material.dart';
-import 'package:kids_drawing_flutter/app/drawing/metrics/tools.panel.metrics.dart';
-import 'package:kids_drawing_flutter/core/tools/stationary.tools.dart';
+import 'package:provider/provider.dart';
 import 'package:kids_drawing_flutter/types/category.model.dart';
-import 'package:kids_drawing_flutter/types/tools/stationary.model.dart';
+import 'package:kids_drawing_flutter/state/drawing/drawing.view-model.dart';
+import 'package:kids_drawing_flutter/app/drawing/metrics/tools.panel.metrics.dart';
 import 'package:kids_drawing_flutter/app/drawing/widgets/tools/category.rail.dart';
+import 'package:kids_drawing_flutter/app/drawing/widgets/tools/tool.grid.dart';
 
 class DrawingTools extends StatefulWidget {
   final ToolsPanelMetrics metrics;
-  final String selectedCategory;
-  final String? selectedToolId;
-  final StationaryTools stationaryTools;
-  final ValueChanged<String> onCategoryTap;
-  final ValueChanged<StationaryModel> onToolSelect;
-
-  const DrawingTools({
-    super.key,
-    required this.metrics,
-    required this.onToolSelect,
-    required this.onCategoryTap,
-    required this.selectedCategory,
-    required this.selectedToolId,
-    required this.stationaryTools,
-  });
-
+  const DrawingTools({super.key, required this.metrics});
   @override
   State<DrawingTools> createState() => _DrawingToolsState();
 }
@@ -33,23 +19,32 @@ class _DrawingToolsState extends State<DrawingTools> {
   @override
   void initState() {
     super.initState();
-    categories = widget.stationaryTools.getCategoryList();
+    final viewModel = context.read<DrawingViewModel>();
+    categories = viewModel.stationaryTools.getCategoryList();
   }
 
-  List<StationaryModel> get pencils =>
-      widget.stationaryTools.getToolsByCategory(widget.selectedCategory);
+  // List<StationaryModel> get pencils =>{
+  //   final selectedCategory = context.read<DrawingViewModel>().selectedCategory;
+  //   return context.read<DrawingViewModel>().stationaryTools.getToolsByCategory(selectedCategory);
+  // }
+  // widget.stationaryTools.getToolsByCategory(widget.selectedCategory);
 
   void onCategoryTap(String name) {
-    if (name == widget.selectedCategory) return;
-    widget.onCategoryTap(name);
+    if (name == context.read<DrawingViewModel>().selectedCategory) return;
+    context.read<DrawingViewModel>().selectCategory(name);
   }
 
   @override
   Widget build(BuildContext context) {
-    final m = widget.metrics;
+    final metrics = widget.metrics;
+    final viewModel = Provider.of<DrawingViewModel>(context);
+    final pencils = viewModel.stationaryTools.getToolsByCategory(
+      viewModel.selectedCategory,
+    );
+    final category = viewModel.category;
 
     return SizedBox(
-      width: m.totalWidth,
+      width: metrics.totalWidth,
       child: Stack(
         clipBehavior: Clip.none,
         children: [
@@ -57,67 +52,84 @@ class _DrawingToolsState extends State<DrawingTools> {
             left: 0,
             top: 0,
             bottom: 0,
-            width: m.greenWidth,
+            width: metrics.greenWidth,
             child: const ColoredBox(color: Colors.green),
           ),
-          Positioned.fill(
-            child: ListView.separated(
-              primary: false,
-              clipBehavior: Clip.none,
-              itemCount: pencils.length,
-              separatorBuilder: (_, __) => SizedBox(height: m.stickGap),
-              itemBuilder: (context, index) {
-                final pencil = pencils[index];
-                final selected = pencil.id == widget.selectedToolId;
-                final offsetX = selected ? m.inset - m.slide : m.inset;
-                return GestureDetector(
-                  key: ValueKey(pencil.id),
-                  behavior: HitTestBehavior.opaque,
-                  onTap: () => widget.onToolSelect(pencil),
-                  child: SizedBox(
-                    height: m.stickHeight,
-                    width: m.totalWidth,
-                    child: Align(
-                      alignment: Alignment.centerLeft,
-                      child: Transform.translate(
-                        offset: Offset(offsetX, 0),
-                        child: Image.asset(
-                          pencil.image,
-                          fit: BoxFit.fitHeight,
-                          width: m.stickWidth,
-                          height: m.stickHeight,
-                          gaplessPlayback: true,
-                          filterQuality: FilterQuality.high,
-                          alignment: Alignment.centerLeft,
+          if (category.grid)
+            Positioned(
+              left: 0,
+              top: 0,
+              bottom: 0,
+              width: metrics.greenWidth,
+              child: ToolGrid(
+                category: category,
+                tools: pencils,
+                metrics: metrics,
+                selectedId: viewModel.selectedTool?.id,
+                onSelect: viewModel.selectTool,
+              ),
+            ),
+          if (!category.grid)
+            Positioned.fill(
+              child: ListView.separated(
+                primary: false,
+                clipBehavior: Clip.none,
+                itemCount: pencils.length,
+                separatorBuilder: (_, __) => SizedBox(height: metrics.stickGap),
+                itemBuilder: (context, index) {
+                  final pencil = pencils[index];
+                  final selected = pencil.id == viewModel.selectedTool?.id;
+                  final offsetX = selected
+                      ? metrics.inset - metrics.slide
+                      : metrics.inset;
+                  return GestureDetector(
+                    key: ValueKey(pencil.id),
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => viewModel.selectTool(pencil),
+                    child: SizedBox(
+                      height: metrics.stickHeight,
+                      width: metrics.totalWidth,
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: Transform.translate(
+                          offset: Offset(offsetX, 0),
+                          child: Image.asset(
+                            pencil.image,
+                            fit: BoxFit.fitHeight,
+                            width: metrics.stickWidth,
+                            height: metrics.stickHeight,
+                            gaplessPlayback: true,
+                            filterQuality: FilterQuality.high,
+                            alignment: Alignment.centerLeft,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                );
-              },
+                  );
+                },
+              ),
             ),
-          ),
           Positioned(
-            left: m.greenWidth,
+            left: metrics.greenWidth,
             top: 0,
             bottom: 0,
-            width: m.railWidth,
+            width: metrics.railWidth,
             child: ColoredBox(
               color: Colors.red,
               // Rail hamesha fixed width, notch sirf extra red jagah banata hai
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: SizedBox(
-                  width: m.contentWidth,
+                  width: metrics.contentWidth,
                   child: CategoryRail(
-                    gap: m.gap,
-                    imageSize: m.imageSize,
-                    buttonSize: m.buttonSize,
+                    gap: metrics.gap,
+                    imageSize: metrics.imageSize,
+                    buttonSize: metrics.buttonSize,
                     categories: categories,
                     onCategoryTap: onCategoryTap,
-                    verticalPadding: m.verticalPadding,
-                    horizontalPadding: m.horizontalPadding,
-                    selectedCategory: widget.selectedCategory,
+                    verticalPadding: metrics.verticalPadding,
+                    horizontalPadding: metrics.horizontalPadding,
+                    selectedCategory: viewModel.selectedCategory,
                   ),
                 ),
               ),

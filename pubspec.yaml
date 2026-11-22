@@ -34,7 +34,6 @@ dev_dependencies:
   build_runner: ^2.4.13
 
 flutter:
-
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.
@@ -43,12 +42,22 @@ flutter:
   assets:
     - assets/
     - assets/png/
-    - assets/gallery/
-    - assets/brushes/
-    - assets/pencil/
-    - assets/marker/
     - assets/ui/
     - assets/svgs/
+    - assets/gallery/
+    - assets/brushes/
+    - assets/stationary/marker/
+    - assets/stationary/glitter/
+    - assets/stationary/pencil/
+    - assets/stationary/brush/
+    - assets/stationary/crayon/
+    - assets/stationary/spray/
+    - assets/stationary/watercolor/
+    - assets/stationary/color-balls/
+    - assets/stationary/tape/
+    - assets/stationary/tape/patterns/
+    - assets/stationary/letters/
+    - assets/genre/live_background/
 
   fonts:
     - family: Nunito

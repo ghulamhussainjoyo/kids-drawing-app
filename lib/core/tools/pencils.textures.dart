@@ -1,6 +1,8 @@
 import 'dart:math';
 import 'dart:ui' as ui;
 
+import 'texture.canvas.dart';
+
 /// Tip atlas and paper grain images for the pencil.
 class PencilTextures {
   PencilTextures()
@@ -23,63 +25,54 @@ class PencilTextures {
   /// Soft round tips with streaks along the stroke direction, as atlas variants.
   static ui.Image buildTips() {
     final random = Random(11);
-    final recorder = ui.PictureRecorder();
-    final canvas = ui.Canvas(recorder);
     const size = tipPixels;
     const radius = size / 2;
     final lanes = _sharedLanes(random, size);
-
-    for (var variant = 0; variant < tipVariants; variant++) {
-      final originX = variant * size;
-      final center = ui.Offset(originX + radius, radius);
-      final cell = ui.Rect.fromLTWH(originX, 0, size, size);
-      canvas.save();
-      canvas.clipRect(cell);
-      canvas.saveLayer(cell, ui.Paint());
-      _drawTipBase(canvas, center, radius);
-      _drawLaneStreaks(canvas, lanes, center, originX, size, random);
-      _drawExtraStreaks(canvas, center, size, random);
-      _drawPits(canvas, originX, size, random);
-      canvas.restore();
-      canvas.restore();
-    }
-
-    final picture = recorder.endRecording();
-    final image = picture.toImageSync((size * tipVariants).toInt(), size.toInt());
-    picture.dispose();
-    return image;
+    return TextureCanvas.render(size * tipVariants, size, (canvas) {
+      for (var variant = 0; variant < tipVariants; variant++) {
+        final originX = variant * size;
+        final center = ui.Offset(originX + radius, radius);
+        final cell = ui.Rect.fromLTWH(originX, 0, size, size);
+        canvas.save();
+        canvas.clipRect(cell);
+        canvas.saveLayer(cell, ui.Paint());
+        _drawTipBase(canvas, center, radius);
+        _drawLaneStreaks(canvas, lanes, center, originX, size, random);
+        _drawExtraStreaks(canvas, center, size, random);
+        _drawPits(canvas, originX, size, random);
+        canvas.restore();
+        canvas.restore();
+      }
+    });
   }
 
   /// Opaque paper with fine pits. Fixed in artwork space so grain stays put.
   static ui.Image buildPaper() {
     final random = Random(7);
-    final recorder = ui.PictureRecorder();
-    final canvas = ui.Canvas(recorder);
     const pixels = paperTile * paperPixelsPerUnit;
-    canvas.drawRect(
-      const ui.Rect.fromLTWH(0, 0, pixels, pixels),
-      ui.Paint()..color = const ui.Color(0xFFFFFFFF),
-    );
-    final pit = ui.Paint()..blendMode = ui.BlendMode.dstOut;
-    for (var i = 0; i < 5200; i++) {
-      pit.color = ui.Color.fromRGBO(0, 0, 0, 0.12 + random.nextDouble() * 0.38);
-      final center = ui.Offset(
-        random.nextDouble() * pixels,
-        random.nextDouble() * pixels,
+    return TextureCanvas.render(pixels, pixels, (canvas) {
+      canvas.drawRect(
+        const ui.Rect.fromLTWH(0, 0, pixels, pixels),
+        ui.Paint()..color = const ui.Color(0xFFFFFFFF),
       );
-      canvas.drawOval(
-        ui.Rect.fromCenter(
-          center: center,
-          width: 0.8 + random.nextDouble() * 2.2,
-          height: 0.8 + random.nextDouble() * 2.2,
-        ),
-        pit,
-      );
-    }
-    final picture = recorder.endRecording();
-    final image = picture.toImageSync(pixels.toInt(), pixels.toInt());
-    picture.dispose();
-    return image;
+      final pit = ui.Paint()..blendMode = ui.BlendMode.dstOut;
+      for (var i = 0; i < 5200; i++) {
+        final alpha = 0.12 + random.nextDouble() * 0.38;
+        pit.color = ui.Color.fromRGBO(0, 0, 0, alpha);
+        final center = ui.Offset(
+          random.nextDouble() * pixels,
+          random.nextDouble() * pixels,
+        );
+        canvas.drawOval(
+          ui.Rect.fromCenter(
+            center: center,
+            width: 0.8 + random.nextDouble() * 2.2,
+            height: 0.8 + random.nextDouble() * 2.2,
+          ),
+          pit,
+        );
+      }
+    });
   }
 
   static void _drawTipBase(ui.Canvas canvas, ui.Offset center, double radius) {

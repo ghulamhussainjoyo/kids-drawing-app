@@ -61,115 +61,118 @@ class _ControllerToolsState extends State<ControllerTools> {
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        final buttonSize = (constraints.maxWidth * 0.38).clamp(36.0, 48.0);
-        final badgeSize = (constraints.maxWidth * 0.38).clamp(40.0, 56.0);
         final undoColor = getUndoColor(widget.onUndo);
         final redoColor = getRedoColor(widget.onRedo);
+        final buttonSize = (constraints.maxWidth * 0.38).clamp(32.0, 48.0);
+        final badgeSize = (constraints.maxWidth * 0.38).clamp(40.0, 56.0);
 
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
-          child: Column(
-            children: [
-              Row(
-                spacing: 12,
-                children: [
-                  Expanded(
-                    child: Center(
-                      child: CircleButton(
-                        size: buttonSize,
-                        color: AppColors.purple,
-                        onPressed: widget.onBack,
-                        image: const Icon(
-                          Icons.arrow_back_rounded,
-                          color: Color(0xFFFFFFFF),
-                        ),
-                      ),
-                    ),
-                  ),
-                  Expanded(
-                    child: Center(
-                      child: CircleButton(
-                        size: buttonSize,
-                        color: AppColors.purple,
-                        onPressed: widget.onEraser,
-                        image: const Icon(
-                          Icons.cleaning_services,
-                          color: Color(0xFFFFFFFF),
-                        ),
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              Expanded(
-                child: Column(
+        return ColoredBox(
+          color: const Color(0x3300FF00),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 16),
+            child: Column(
+              children: [
+                Row(
+                  spacing: 8,
                   children: [
-                    const SizedBox(height: 16),
-                    ClipOval(
-                      child: SizedBox(
-                        width: badgeSize,
-                        height: badgeSize,
-                        child: ColoredBox(
-                          color: AppColors.lavender,
-                          child: Image.asset(
-                            widget.selectedCategoryImage,
-                            fit: BoxFit.cover,
+                    Expanded(
+                      child: Center(
+                        child: CircleButton(
+                          size: buttonSize,
+                          color: AppColors.purple,
+                          onPressed: widget.onBack,
+                          image: const Icon(
+                            Icons.arrow_back_rounded,
+                            color: Color(0xFFFFFFFF),
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 16),
                     Expanded(
-                      child: LayoutBuilder(
-                        builder: (context, sliderConstraints) {
-                          final sliderWidth = (constraints.maxWidth * 0.42)
-                              .clamp(40.0, 64.0);
-                          return Center(
-                            child: SizeSliderDisplay(
-                              width: sliderWidth,
-                              height: sliderConstraints.maxHeight,
-                              value: density,
-                              onChanged: onDensityDrag,
-                            ),
-                          );
-                        },
+                      child: Center(
+                        child: CircleButton(
+                          size: buttonSize,
+                          color: AppColors.purple,
+                          onPressed: widget.onEraser,
+                          image: const Icon(
+                            Icons.cleaning_services,
+                            color: Color(0xFFFFFFFF),
+                          ),
+                        ),
                       ),
                     ),
                   ],
                 ),
-              ),
-              Row(
-                spacing: 12,
-                children: [
-                  Expanded(
-                    child: Center(
-                      child: CircleButton(
-                        size: buttonSize,
-                        color: undoColor,
-                        onPressed: widget.onUndo,
-                        image: const Icon(
-                          Icons.undo_rounded,
-                          color: Color(0xFFFFFFFF),
+                Expanded(
+                  child: Column(
+                    children: [
+                      const SizedBox(height: 16),
+                      ClipOval(
+                        child: SizedBox(
+                          width: badgeSize,
+                          height: badgeSize,
+                          child: ColoredBox(
+                            color: AppColors.lavender,
+                            child: Image.asset(
+                              widget.selectedCategoryImage,
+                              fit: BoxFit.cover,
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                      Expanded(
+                        child: LayoutBuilder(
+                          builder: (context, sliderConstraints) {
+                            final sliderWidth = (constraints.maxWidth * 0.42)
+                                .clamp(40.0, 64.0);
+                            return Center(
+                              child: SizeSliderDisplay(
+                                width: sliderWidth,
+                                height: sliderConstraints.maxHeight,
+                                value: density,
+                                onChanged: onDensityDrag,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                Row(
+                  spacing: 8,
+                  children: [
+                    Expanded(
+                      child: Center(
+                        child: CircleButton(
+                          size: buttonSize,
+                          color: undoColor,
+                          onPressed: widget.onUndo,
+                          image: const Icon(
+                            Icons.undo_rounded,
+                            color: Color(0xFFFFFFFF),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  Expanded(
-                    child: Center(
-                      child: CircleButton(
-                        size: buttonSize,
-                        color: redoColor,
-                        onPressed: widget.onRedo,
-                        image: const Icon(
-                          Icons.redo_rounded,
-                          color: Color(0xFFFFFFFF),
+                    Expanded(
+                      child: Center(
+                        child: CircleButton(
+                          size: buttonSize,
+                          color: redoColor,
+                          onPressed: widget.onRedo,
+                          image: const Icon(
+                            Icons.redo_rounded,
+                            color: Color(0xFFFFFFFF),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ],
+                  ],
+                ),
+              ],
+            ),
           ),
         );
       },

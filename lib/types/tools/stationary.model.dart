@@ -1,19 +1,29 @@
-import 'package:flutter/cupertino.dart';
+import 'dart:ui';
 
-abstract class StationaryModel {
+class StationaryModel {
   final String id;
   final String name;
   final double? size;
+
   final String image;
   final double imageSize;
-  final Color color;
 
-  const StationaryModel({
+  final List<Color> colors;
+
+  /// Image asset the tool paints with: a pattern tile or a sticker.
+  final String? texture;
+
+  Color get color => colors.first;
+
+  /// Paints [color], or blends through [colors] when given.
+  StationaryModel({
     required this.id,
     required this.name,
-    required this.size,
+    this.size,
     required this.image,
     required this.imageSize,
-    required this.color,
-  });
+    required Color color,
+    List<Color>? colors,
+    this.texture,
+  }) : colors = colors ?? [color];
 }

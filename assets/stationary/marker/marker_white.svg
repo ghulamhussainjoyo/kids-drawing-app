@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="250" viewBox="0 0 1280 250">
+  <defs><clipPath id="b"><path d="M240,20 L1256,20 Q1278,20 1278,42 L1278,208 Q1278,230 1256,230 L240,230 Q226,230 226,216 L226,34 Q226,20 240,20 Z"/></clipPath><clipPath id="t"><path d="M82,92 L32,104 Q8,110 8,125 Q8,140 32,146 L82,158 Z"/></clipPath><clipPath id="c"><path d="M78,86 L160,46 L160,204 L78,164 Z"/></clipPath><clipPath id="k"><path d="M158,34 L232,34 L232,216 L158,216 Q148,216 148,206 L148,44 Q148,34 158,34 Z"/></clipPath></defs>
+
+  <!-- body -->
+  <path d="M240,20 L1256,20 Q1278,20 1278,42 L1278,208 Q1278,230 1256,230 L240,230 Q226,230 226,216 L226,34 Q226,20 240,20 Z" fill="#efeee6"/>
+  <g clip-path="url(#b)">
+    <rect x="226" y="40" width="1054" height="30" fill="#fff" opacity="0.32"/>
+    <rect x="226" y="40" width="1054" height="5" fill="#fff" opacity="0.4"/>
+    <rect x="226" y="194" width="1054" height="40" fill="#000" opacity="0.18"/>
+  </g>
+  <path d="M240,20 L1256,20 Q1278,20 1278,42 L1278,208 Q1278,230 1256,230 L240,230 Q226,230 226,216 L226,34 Q226,20 240,20 Z" fill="none" stroke="#8c8a80" stroke-width="4" stroke-linejoin="round"/>
+
+  <!-- white collar with coloured ring -->
+  <path d="M158,34 L232,34 L232,216 L158,216 Q148,216 148,206 L148,44 Q148,34 158,34 Z" fill="#f4f6f9"/>
+  <g clip-path="url(#k)">
+    <rect x="148" y="48" width="84" height="22" fill="#fff"/>
+    <rect x="148" y="184" width="84" height="32" fill="#cfd5dd"/>
+    <rect x="186" y="34" width="22" height="182" fill="#efeee6"/>
+    <rect x="186" y="48" width="22" height="22" fill="#fff" opacity="0.35"/>
+    <rect x="186" y="184" width="22" height="32" fill="#000" opacity="0.15"/>
+  </g>
+  <path d="M158,34 L232,34 L232,216 L158,216 Q148,216 148,206 L148,44 Q148,34 158,34 Z" fill="none" stroke="#56606c" stroke-width="4" stroke-linejoin="round"/>
+
+  <!-- white cone -->
+  <path d="M78,86 L160,46 L160,204 L78,164 Z" fill="#f4f6f9"/>
+  <g clip-path="url(#c)">
+    <path d="M78,86 L160,46 L160,82 L78,108 Z" fill="#fff"/>
+    <path d="M78,164 L160,204 L160,174 L78,146 Z" fill="#cfd5dd"/>
+  </g>
+  <path d="M78,86 L160,46 L160,204 L78,164 Z" fill="none" stroke="#56606c" stroke-width="4" stroke-linejoin="round"/>
+
+  <!-- felt tip -->
+  <path d="M82,92 L32,104 Q8,110 8,125 Q8,140 32,146 L82,158 Z" fill="#efeee6"/>
+  <g clip-path="url(#t)">
+    <path d="M82,92 L32,104 Q8,110 8,125 L82,125 Z" fill="#fff" opacity="0.35"/>
+    <path d="M82,158 L32,146 L32,138 L82,146 Z" fill="#000" opacity="0.15"/>
+  </g>
+  <path d="M82,92 L32,104 Q8,110 8,125 Q8,140 32,146 L82,158 Z" fill="none" stroke="#8c8a80" stroke-width="4" stroke-linejoin="round"/>
+</svg>

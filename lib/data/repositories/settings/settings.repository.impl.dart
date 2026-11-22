@@ -12,6 +12,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
   static const _kSfxOn = 'setting_sfx_on';
   static const _kVibrationOn = 'setting_vibration_on';
   static const _kLanguage = 'setting_language';
+  static const _kLiveBackgroundOn = 'setting_live_background_on';
 
   final LocalStorage _localStorage;
 
@@ -115,5 +116,15 @@ class SettingsRepositoryImpl implements SettingsRepository {
   @override
   Future<void> setLanguage(String value) async {
     await _localStorage.setString(_kLanguage, value);
+  }
+
+  @override
+  Future<bool> liveBackgroundOn() async {
+    return _localStorage.getBool(_kLiveBackgroundOn) ?? true;
+  }
+
+  @override
+  Future<void> setLiveBackgroundOn(bool value) async {
+    await _localStorage.setBool(_kLiveBackgroundOn, value);
   }
 }

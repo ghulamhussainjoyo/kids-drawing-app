@@ -1,4 +1,5 @@
 import 'package:flutter/widgets.dart';
+import 'package:native_device_orientation/native_device_orientation.dart';
 
 @immutable
 class ToolsPanelMetrics {
@@ -13,11 +14,8 @@ class ToolsPanelMetrics {
   final double stickWidth;
   final double stickHeight;
   final double stickGap;
-
   final double contentWidth;
-
   final double notchInset;
-
   final double railWidth;
   final double totalWidth;
 
@@ -34,22 +32,23 @@ class ToolsPanelMetrics {
     required this.stickHeight,
     required this.stickGap,
     required this.contentWidth,
-    required this.notchInset,
+    required this.notchInset, // wapas lagao
     required this.railWidth,
     required this.totalWidth,
   });
 
-  factory ToolsPanelMetrics.of(
-    BuildContext context, {
-    required double notchInset,
-  }) {
-    // Sab kuch shortestSide se: same device pe rotate karne se size nahi badalta
-    final shortest = MediaQuery.sizeOf(context).shortestSide;
+  static double _getNotchInset(BuildContext context) {
+    final orientation = NativeDeviceOrientationReader.orientation(context);
+    final notchOnRight = orientation == NativeDeviceOrientation.landscapeRight;
+    return notchOnRight ? MediaQuery.viewPaddingOf(context).right * 0.7 : 0.0;
+  }
 
+  factory ToolsPanelMetrics.of(BuildContext context) {
     const buttonFactor = 0.12;
     const verticalFactor = 0.5;
     const gapFactor = 0.25;
-    const stickAspect = 4.5;
+    //@DOC: stick ko patla/mota karne ke liye ye value badlo
+    const stickAspect = 3.5;
     const insetFactor = 0.08;
     const slideFactor = 0.14;
     const greenFactor = 0.28;
@@ -57,6 +56,9 @@ class ToolsPanelMetrics {
     const stickGapFactor = 0.16;
     const tuckExtraFactor = 0.15;
     const horizontalFactor = 0.25;
+
+    final shortest = MediaQuery.sizeOf(context).shortestSide;
+    final notch = _getNotchInset(context); // ek hi baar
 
     final buttonSize = shortest * buttonFactor;
     final horizontalPadding = buttonSize * horizontalFactor;
@@ -67,7 +69,7 @@ class ToolsPanelMetrics {
     final stickWidth = greenWidth - inset + tuck;
     final stickHeight = stickWidth / stickAspect;
     final contentWidth = buttonSize + horizontalPadding * 2;
-    final railWidth = contentWidth + notchInset;
+    final railWidth = contentWidth + notch;
 
     return ToolsPanelMetrics._(
       buttonSize: buttonSize,
@@ -82,7 +84,7 @@ class ToolsPanelMetrics {
       stickHeight: stickHeight,
       stickGap: stickHeight * stickGapFactor,
       contentWidth: contentWidth,
-      notchInset: notchInset,
+      notchInset: notch,
       railWidth: railWidth,
       totalWidth: greenWidth + railWidth,
     );
