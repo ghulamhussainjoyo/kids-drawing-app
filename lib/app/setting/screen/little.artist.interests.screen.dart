@@ -1,8 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:kids_drawing_flutter/app/setting/model/interest.option.dart';
 import 'package:kids_drawing_flutter/app/setting/widgets/interest.tile.dart';
+import 'package:kids_drawing_flutter/core/ui/button/pill.button.dart';
+import 'package:kids_drawing_flutter/core/ui/button/press.sound.dart';
 import 'package:kids_drawing_flutter/core/ui/theme/app.colors.dart';
-import 'package:kids_drawing_flutter/core/ui/theme/app.typography.dart';
 import 'package:kids_drawing_flutter/state/setting/setting.view-model.dart';
 import 'package:kids_drawing_flutter/utils/responsive.dart';
 import 'package:provider/provider.dart';
@@ -46,17 +47,13 @@ class LittleArtistInterestsScreen extends StatelessWidget {
               const Spacer(),
               SizedBox(
                 width: double.infinity,
-                child: CupertinoButton(
+                child: PillButton(
+                  label: 'CONTINUE',
                   color: AppColors.purple,
-                  borderRadius: BorderRadius.circular(context.rs(28)),
+                  fontSize: context.rs(16),
+                  radius: context.rs(28),
+                  sound: PressSound.exit,
                   onPressed: () => Navigator.of(context).pop(),
-                  child: Text(
-                    'CONTINUE',
-                    style: AppTypography.boldStyle(
-                      fontSize: context.rs(16),
-                      color: const Color(0xFFFFFFFF),
-                    ),
-                  ),
                 ),
               ),
               SizedBox(height: context.rs(12)),

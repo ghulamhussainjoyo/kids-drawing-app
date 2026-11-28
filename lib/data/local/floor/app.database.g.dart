@@ -74,13 +74,19 @@ class _$AppDatabase extends AppDatabase {
 
   ArtworkDao? _artworkDaoInstance;
 
+  LanguageDao? _languageDaoInstance;
+
+  GenreDao? _genreDaoInstance;
+
+  TranslationDao? _translationDaoInstance;
+
   Future<sqflite.Database> open(
     String path,
     List<Migration> migrations, [
     Callback? callback,
   ]) async {
     final databaseOptions = sqflite.OpenDatabaseOptions(
-      version: 1,
+      version: 3,
       onConfigure: (database) async {
         await database.execute('PRAGMA foreign_keys = ON');
         await callback?.onConfigure?.call(database);
@@ -96,9 +102,19 @@ class _$AppDatabase extends AppDatabase {
       },
       onCreate: (database, version) async {
         await database.execute(
-            'CREATE TABLE IF NOT EXISTS `artworks` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `deviceId` TEXT NOT NULL, `userId` TEXT, `artworkKey` TEXT NOT NULL, `genre` TEXT NOT NULL, `title` TEXT NOT NULL, `templateJson` TEXT NOT NULL, `isPremium` INTEGER NOT NULL, `strokesJson` TEXT NOT NULL, `thumbnailPath` TEXT, `thumbnailUrl` TEXT, `revision` INTEGER NOT NULL, `dirty` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL)');
+            'CREATE TABLE IF NOT EXISTS `artworks` (`id` INTEGER PRIMARY KEY AUTOINCREMENT, `deviceId` TEXT NOT NULL, `userId` TEXT, `artworkKey` TEXT NOT NULL, `genre` TEXT NOT NULL, `title` TEXT NOT NULL, `templateJson` TEXT NOT NULL, `voice` TEXT, `isPremium` INTEGER NOT NULL, `strokesJson` TEXT NOT NULL, `thumbnailPath` TEXT, `thumbnailUrl` TEXT, `revision` INTEGER NOT NULL, `dirty` INTEGER NOT NULL, `updatedAt` INTEGER NOT NULL, `sortOrder` INTEGER NOT NULL, `status` TEXT NOT NULL, `source` TEXT NOT NULL, `remoteUpdatedAt` INTEGER)');
+        await database.execute(
+            'CREATE TABLE IF NOT EXISTS `catalog_languages` (`code` TEXT NOT NULL, `englishName` TEXT NOT NULL, `nativeName` TEXT NOT NULL, `direction` TEXT NOT NULL, `isActive` INTEGER NOT NULL, `sortOrder` INTEGER NOT NULL, `remoteUpdatedAt` INTEGER NOT NULL, PRIMARY KEY (`code`))');
+        await database.execute(
+            'CREATE TABLE IF NOT EXISTS `catalog_genres` (`slug` TEXT NOT NULL, `localImagePath` TEXT, `remoteImagePath` TEXT, `titleFillColors` TEXT NOT NULL, `titleOutlineColor` TEXT, `ambience` TEXT NOT NULL, `sortOrder` INTEGER NOT NULL, `status` TEXT NOT NULL, `source` TEXT NOT NULL, `remoteUpdatedAt` INTEGER NOT NULL, PRIMARY KEY (`slug`))');
+        await database.execute(
+            'CREATE TABLE IF NOT EXISTS `catalog_translations` (`id` TEXT NOT NULL, `genreSlug` TEXT, `artworkSlug` TEXT, `languageCode` TEXT NOT NULL, `field` TEXT NOT NULL, `position` INTEGER NOT NULL, `text` TEXT NOT NULL, `audioPath` TEXT, `audioSha256` TEXT, `remoteUpdatedAt` INTEGER NOT NULL, PRIMARY KEY (`id`))');
         await database.execute(
             'CREATE UNIQUE INDEX `index_artworks_deviceId_artworkKey` ON `artworks` (`deviceId`, `artworkKey`)');
+        await database.execute(
+            'CREATE INDEX `index_catalog_translations_genreSlug_languageCode_field_position` ON `catalog_translations` (`genreSlug`, `languageCode`, `field`, `position`)');
+        await database.execute(
+            'CREATE INDEX `index_catalog_translations_artworkSlug_languageCode_field_position` ON `catalog_translations` (`artworkSlug`, `languageCode`, `field`, `position`)');
 
         await callback?.onCreate?.call(database, version);
       },
@@ -109,6 +125,22 @@ class _$AppDatabase extends AppDatabase {
   @override
   ArtworkDao get artworkDao {
     return _artworkDaoInstance ??= _$ArtworkDao(database, changeListener);
+  }
+
+  @override
+  LanguageDao get languageDao {
+    return _languageDaoInstance ??= _$LanguageDao(database, changeListener);
+  }
+
+  @override
+  GenreDao get genreDao {
+    return _genreDaoInstance ??= _$GenreDao(database, changeListener);
+  }
+
+  @override
+  TranslationDao get translationDao {
+    return _translationDaoInstance ??=
+        _$TranslationDao(database, changeListener);
   }
 }
 
@@ -128,13 +160,18 @@ class _$ArtworkDao extends ArtworkDao {
                   'genre': item.genre,
                   'title': item.title,
                   'templateJson': item.templateJson,
+                  'voice': item.voice,
                   'isPremium': item.isPremium ? 1 : 0,
                   'strokesJson': item.strokesJson,
                   'thumbnailPath': item.thumbnailPath,
                   'thumbnailUrl': item.thumbnailUrl,
                   'revision': item.revision,
                   'dirty': item.dirty ? 1 : 0,
-                  'updatedAt': item.updatedAt
+                  'updatedAt': item.updatedAt,
+                  'sortOrder': item.sortOrder,
+                  'status': item.status,
+                  'source': item.source,
+                  'remoteUpdatedAt': item.remoteUpdatedAt
                 }),
         _artworkEntityUpdateAdapter = UpdateAdapter(
             database,
@@ -148,13 +185,18 @@ class _$ArtworkDao extends ArtworkDao {
                   'genre': item.genre,
                   'title': item.title,
                   'templateJson': item.templateJson,
+                  'voice': item.voice,
                   'isPremium': item.isPremium ? 1 : 0,
                   'strokesJson': item.strokesJson,
                   'thumbnailPath': item.thumbnailPath,
                   'thumbnailUrl': item.thumbnailUrl,
                   'revision': item.revision,
                   'dirty': item.dirty ? 1 : 0,
-                  'updatedAt': item.updatedAt
+                  'updatedAt': item.updatedAt,
+                  'sortOrder': item.sortOrder,
+                  'status': item.status,
+                  'source': item.source,
+                  'remoteUpdatedAt': item.remoteUpdatedAt
                 });
 
   final sqflite.DatabaseExecutor database;
@@ -173,8 +215,8 @@ class _$ArtworkDao extends ArtworkDao {
     String genre,
   ) async {
     return _queryAdapter.queryList(
-        'SELECT * FROM artworks WHERE deviceId = ?1 AND genre = ?2 ORDER BY title ASC',
-        mapper: (Map<String, Object?> row) => ArtworkEntity(id: row['id'] as int?, deviceId: row['deviceId'] as String, userId: row['userId'] as String?, artworkKey: row['artworkKey'] as String, genre: row['genre'] as String, title: row['title'] as String, templateJson: row['templateJson'] as String, isPremium: (row['isPremium'] as int) != 0, strokesJson: row['strokesJson'] as String, thumbnailPath: row['thumbnailPath'] as String?, thumbnailUrl: row['thumbnailUrl'] as String?, revision: row['revision'] as int, dirty: (row['dirty'] as int) != 0, updatedAt: row['updatedAt'] as int),
+        'SELECT * FROM artworks WHERE deviceId = ?1 AND genre = ?2 AND status = \'published\' ORDER BY sortOrder ASC, title ASC',
+        mapper: (Map<String, Object?> row) => ArtworkEntity(id: row['id'] as int?, deviceId: row['deviceId'] as String, userId: row['userId'] as String?, artworkKey: row['artworkKey'] as String, genre: row['genre'] as String, title: row['title'] as String, templateJson: row['templateJson'] as String, voice: row['voice'] as String?, isPremium: (row['isPremium'] as int) != 0, strokesJson: row['strokesJson'] as String, thumbnailPath: row['thumbnailPath'] as String?, thumbnailUrl: row['thumbnailUrl'] as String?, revision: row['revision'] as int, dirty: (row['dirty'] as int) != 0, updatedAt: row['updatedAt'] as int, sortOrder: row['sortOrder'] as int, status: row['status'] as String, source: row['source'] as String, remoteUpdatedAt: row['remoteUpdatedAt'] as int?),
         arguments: [deviceId, genre]);
   }
 
@@ -185,7 +227,7 @@ class _$ArtworkDao extends ArtworkDao {
   ) async {
     return _queryAdapter.query(
         'SELECT * FROM artworks WHERE deviceId = ?1 AND artworkKey = ?2 LIMIT 1',
-        mapper: (Map<String, Object?> row) => ArtworkEntity(id: row['id'] as int?, deviceId: row['deviceId'] as String, userId: row['userId'] as String?, artworkKey: row['artworkKey'] as String, genre: row['genre'] as String, title: row['title'] as String, templateJson: row['templateJson'] as String, isPremium: (row['isPremium'] as int) != 0, strokesJson: row['strokesJson'] as String, thumbnailPath: row['thumbnailPath'] as String?, thumbnailUrl: row['thumbnailUrl'] as String?, revision: row['revision'] as int, dirty: (row['dirty'] as int) != 0, updatedAt: row['updatedAt'] as int),
+        mapper: (Map<String, Object?> row) => ArtworkEntity(id: row['id'] as int?, deviceId: row['deviceId'] as String, userId: row['userId'] as String?, artworkKey: row['artworkKey'] as String, genre: row['genre'] as String, title: row['title'] as String, templateJson: row['templateJson'] as String, voice: row['voice'] as String?, isPremium: (row['isPremium'] as int) != 0, strokesJson: row['strokesJson'] as String, thumbnailPath: row['thumbnailPath'] as String?, thumbnailUrl: row['thumbnailUrl'] as String?, revision: row['revision'] as int, dirty: (row['dirty'] as int) != 0, updatedAt: row['updatedAt'] as int, sortOrder: row['sortOrder'] as int, status: row['status'] as String, source: row['source'] as String, remoteUpdatedAt: row['remoteUpdatedAt'] as int?),
         arguments: [deviceId, artworkKey]);
   }
 
@@ -200,13 +242,18 @@ class _$ArtworkDao extends ArtworkDao {
             genre: row['genre'] as String,
             title: row['title'] as String,
             templateJson: row['templateJson'] as String,
+            voice: row['voice'] as String?,
             isPremium: (row['isPremium'] as int) != 0,
             strokesJson: row['strokesJson'] as String,
             thumbnailPath: row['thumbnailPath'] as String?,
             thumbnailUrl: row['thumbnailUrl'] as String?,
             revision: row['revision'] as int,
             dirty: (row['dirty'] as int) != 0,
-            updatedAt: row['updatedAt'] as int),
+            updatedAt: row['updatedAt'] as int,
+            sortOrder: row['sortOrder'] as int,
+            status: row['status'] as String,
+            source: row['source'] as String,
+            remoteUpdatedAt: row['remoteUpdatedAt'] as int?),
         arguments: [deviceId]);
   }
 
@@ -220,5 +267,278 @@ class _$ArtworkDao extends ArtworkDao {
   Future<int> updateArtwork(ArtworkEntity artwork) {
     return _artworkEntityUpdateAdapter.updateAndReturnChangedRows(
         artwork, OnConflictStrategy.abort);
+  }
+}
+
+class _$LanguageDao extends LanguageDao {
+  _$LanguageDao(
+    this.database,
+    this.changeListener,
+  )   : _queryAdapter = QueryAdapter(database),
+        _languageEntityInsertionAdapter = InsertionAdapter(
+            database,
+            'catalog_languages',
+            (LanguageEntity item) => <String, Object?>{
+                  'code': item.code,
+                  'englishName': item.englishName,
+                  'nativeName': item.nativeName,
+                  'direction': item.direction,
+                  'isActive': item.isActive ? 1 : 0,
+                  'sortOrder': item.sortOrder,
+                  'remoteUpdatedAt': item.remoteUpdatedAt
+                });
+
+  final sqflite.DatabaseExecutor database;
+
+  final StreamController<String> changeListener;
+
+  final QueryAdapter _queryAdapter;
+
+  final InsertionAdapter<LanguageEntity> _languageEntityInsertionAdapter;
+
+  @override
+  Future<List<LanguageEntity>> listActive() async {
+    return _queryAdapter.queryList(
+        'SELECT * FROM catalog_languages WHERE isActive = 1 ORDER BY sortOrder ASC',
+        mapper: (Map<String, Object?> row) => LanguageEntity(
+            code: row['code'] as String,
+            englishName: row['englishName'] as String,
+            nativeName: row['nativeName'] as String,
+            direction: row['direction'] as String,
+            isActive: (row['isActive'] as int) != 0,
+            sortOrder: row['sortOrder'] as int,
+            remoteUpdatedAt: row['remoteUpdatedAt'] as int));
+  }
+
+  @override
+  Future<LanguageEntity?> findByCode(String code) async {
+    return _queryAdapter.query(
+        'SELECT * FROM catalog_languages WHERE code = ?1 LIMIT 1',
+        mapper: (Map<String, Object?> row) => LanguageEntity(
+            code: row['code'] as String,
+            englishName: row['englishName'] as String,
+            nativeName: row['nativeName'] as String,
+            direction: row['direction'] as String,
+            isActive: (row['isActive'] as int) != 0,
+            sortOrder: row['sortOrder'] as int,
+            remoteUpdatedAt: row['remoteUpdatedAt'] as int),
+        arguments: [code]);
+  }
+
+  @override
+  Future<int?> count() async {
+    return _queryAdapter.query('SELECT COUNT(*) FROM catalog_languages',
+        mapper: (Map<String, Object?> row) => row.values.first as int);
+  }
+
+  @override
+  Future<void> upsert(LanguageEntity language) async {
+    await _languageEntityInsertionAdapter.insert(
+        language, OnConflictStrategy.replace);
+  }
+
+  @override
+  Future<void> upsertAll(List<LanguageEntity> languages) async {
+    await _languageEntityInsertionAdapter.insertList(
+        languages, OnConflictStrategy.replace);
+  }
+}
+
+class _$GenreDao extends GenreDao {
+  _$GenreDao(
+    this.database,
+    this.changeListener,
+  )   : _queryAdapter = QueryAdapter(database),
+        _genreEntityInsertionAdapter = InsertionAdapter(
+            database,
+            'catalog_genres',
+            (GenreEntity item) => <String, Object?>{
+                  'slug': item.slug,
+                  'localImagePath': item.localImagePath,
+                  'remoteImagePath': item.remoteImagePath,
+                  'titleFillColors': item.titleFillColors,
+                  'titleOutlineColor': item.titleOutlineColor,
+                  'ambience': item.ambience,
+                  'sortOrder': item.sortOrder,
+                  'status': item.status,
+                  'source': item.source,
+                  'remoteUpdatedAt': item.remoteUpdatedAt
+                });
+
+  final sqflite.DatabaseExecutor database;
+
+  final StreamController<String> changeListener;
+
+  final QueryAdapter _queryAdapter;
+
+  final InsertionAdapter<GenreEntity> _genreEntityInsertionAdapter;
+
+  @override
+  Future<List<GenreEntity>> listPublished() async {
+    return _queryAdapter.queryList(
+        'SELECT * FROM catalog_genres WHERE status = \'published\' ORDER BY sortOrder ASC',
+        mapper: (Map<String, Object?> row) => GenreEntity(
+            slug: row['slug'] as String,
+            localImagePath: row['localImagePath'] as String?,
+            remoteImagePath: row['remoteImagePath'] as String?,
+            titleFillColors: row['titleFillColors'] as String,
+            titleOutlineColor: row['titleOutlineColor'] as String?,
+            ambience: row['ambience'] as String,
+            sortOrder: row['sortOrder'] as int,
+            status: row['status'] as String,
+            source: row['source'] as String,
+            remoteUpdatedAt: row['remoteUpdatedAt'] as int));
+  }
+
+  @override
+  Future<GenreEntity?> findBySlug(String slug) async {
+    return _queryAdapter.query(
+        'SELECT * FROM catalog_genres WHERE slug = ?1 LIMIT 1',
+        mapper: (Map<String, Object?> row) => GenreEntity(
+            slug: row['slug'] as String,
+            localImagePath: row['localImagePath'] as String?,
+            remoteImagePath: row['remoteImagePath'] as String?,
+            titleFillColors: row['titleFillColors'] as String,
+            titleOutlineColor: row['titleOutlineColor'] as String?,
+            ambience: row['ambience'] as String,
+            sortOrder: row['sortOrder'] as int,
+            status: row['status'] as String,
+            source: row['source'] as String,
+            remoteUpdatedAt: row['remoteUpdatedAt'] as int),
+        arguments: [slug]);
+  }
+
+  @override
+  Future<int?> count() async {
+    return _queryAdapter.query('SELECT COUNT(*) FROM catalog_genres',
+        mapper: (Map<String, Object?> row) => row.values.first as int);
+  }
+
+  @override
+  Future<void> upsert(GenreEntity genre) async {
+    await _genreEntityInsertionAdapter.insert(
+        genre, OnConflictStrategy.replace);
+  }
+
+  @override
+  Future<void> upsertAll(List<GenreEntity> genres) async {
+    await _genreEntityInsertionAdapter.insertList(
+        genres, OnConflictStrategy.replace);
+  }
+}
+
+class _$TranslationDao extends TranslationDao {
+  _$TranslationDao(
+    this.database,
+    this.changeListener,
+  )   : _queryAdapter = QueryAdapter(database),
+        _translationEntityInsertionAdapter = InsertionAdapter(
+            database,
+            'catalog_translations',
+            (TranslationEntity item) => <String, Object?>{
+                  'id': item.id,
+                  'genreSlug': item.genreSlug,
+                  'artworkSlug': item.artworkSlug,
+                  'languageCode': item.languageCode,
+                  'field': item.field,
+                  'position': item.position,
+                  'text': item.text,
+                  'audioPath': item.audioPath,
+                  'audioSha256': item.audioSha256,
+                  'remoteUpdatedAt': item.remoteUpdatedAt
+                });
+
+  final sqflite.DatabaseExecutor database;
+
+  final StreamController<String> changeListener;
+
+  final QueryAdapter _queryAdapter;
+
+  final InsertionAdapter<TranslationEntity> _translationEntityInsertionAdapter;
+
+  @override
+  Future<List<TranslationEntity>> forGenre(
+    String genreSlug,
+    String lang,
+  ) async {
+    return _queryAdapter.queryList(
+        'SELECT * FROM catalog_translations WHERE genreSlug = ?1 AND languageCode = ?2 ORDER BY field ASC, position ASC',
+        mapper: (Map<String, Object?> row) => TranslationEntity(id: row['id'] as String, genreSlug: row['genreSlug'] as String?, artworkSlug: row['artworkSlug'] as String?, languageCode: row['languageCode'] as String, field: row['field'] as String, position: row['position'] as int, text: row['text'] as String, audioPath: row['audioPath'] as String?, audioSha256: row['audioSha256'] as String?, remoteUpdatedAt: row['remoteUpdatedAt'] as int),
+        arguments: [genreSlug, lang]);
+  }
+
+  @override
+  Future<List<TranslationEntity>> forArtwork(
+    String artworkSlug,
+    String lang,
+  ) async {
+    return _queryAdapter.queryList(
+        'SELECT * FROM catalog_translations WHERE artworkSlug = ?1 AND languageCode = ?2 ORDER BY field ASC, position ASC',
+        mapper: (Map<String, Object?> row) => TranslationEntity(id: row['id'] as String, genreSlug: row['genreSlug'] as String?, artworkSlug: row['artworkSlug'] as String?, languageCode: row['languageCode'] as String, field: row['field'] as String, position: row['position'] as int, text: row['text'] as String, audioPath: row['audioPath'] as String?, audioSha256: row['audioSha256'] as String?, remoteUpdatedAt: row['remoteUpdatedAt'] as int),
+        arguments: [artworkSlug, lang]);
+  }
+
+  @override
+  Future<TranslationEntity?> genreTitle(
+    String genreSlug,
+    String lang,
+  ) async {
+    return _queryAdapter.query(
+        'SELECT * FROM catalog_translations WHERE genreSlug = ?1 AND languageCode = ?2 AND field = \'title\' AND position = 0 LIMIT 1',
+        mapper: (Map<String, Object?> row) => TranslationEntity(id: row['id'] as String, genreSlug: row['genreSlug'] as String?, artworkSlug: row['artworkSlug'] as String?, languageCode: row['languageCode'] as String, field: row['field'] as String, position: row['position'] as int, text: row['text'] as String, audioPath: row['audioPath'] as String?, audioSha256: row['audioSha256'] as String?, remoteUpdatedAt: row['remoteUpdatedAt'] as int),
+        arguments: [genreSlug, lang]);
+  }
+
+  @override
+  Future<TranslationEntity?> artworkTitle(
+    String artworkSlug,
+    String lang,
+  ) async {
+    return _queryAdapter.query(
+        'SELECT * FROM catalog_translations WHERE artworkSlug = ?1 AND languageCode = ?2 AND field = \'title\' AND position = 0 LIMIT 1',
+        mapper: (Map<String, Object?> row) => TranslationEntity(id: row['id'] as String, genreSlug: row['genreSlug'] as String?, artworkSlug: row['artworkSlug'] as String?, languageCode: row['languageCode'] as String, field: row['field'] as String, position: row['position'] as int, text: row['text'] as String, audioPath: row['audioPath'] as String?, audioSha256: row['audioSha256'] as String?, remoteUpdatedAt: row['remoteUpdatedAt'] as int),
+        arguments: [artworkSlug, lang]);
+  }
+
+  @override
+  Future<List<TranslationEntity>> genreVoicePool(
+    String genreSlug,
+    String lang,
+  ) async {
+    return _queryAdapter.queryList(
+        'SELECT * FROM catalog_translations WHERE genreSlug = ?1 AND languageCode = ?2 AND field = \'voice\' ORDER BY position ASC',
+        mapper: (Map<String, Object?> row) => TranslationEntity(id: row['id'] as String, genreSlug: row['genreSlug'] as String?, artworkSlug: row['artworkSlug'] as String?, languageCode: row['languageCode'] as String, field: row['field'] as String, position: row['position'] as int, text: row['text'] as String, audioPath: row['audioPath'] as String?, audioSha256: row['audioSha256'] as String?, remoteUpdatedAt: row['remoteUpdatedAt'] as int),
+        arguments: [genreSlug, lang]);
+  }
+
+  @override
+  Future<List<TranslationEntity>> artworkVoicePool(
+    String artworkSlug,
+    String lang,
+  ) async {
+    return _queryAdapter.queryList(
+        'SELECT * FROM catalog_translations WHERE artworkSlug = ?1 AND languageCode = ?2 AND field = \'voice\' ORDER BY position ASC',
+        mapper: (Map<String, Object?> row) => TranslationEntity(id: row['id'] as String, genreSlug: row['genreSlug'] as String?, artworkSlug: row['artworkSlug'] as String?, languageCode: row['languageCode'] as String, field: row['field'] as String, position: row['position'] as int, text: row['text'] as String, audioPath: row['audioPath'] as String?, audioSha256: row['audioSha256'] as String?, remoteUpdatedAt: row['remoteUpdatedAt'] as int),
+        arguments: [artworkSlug, lang]);
+  }
+
+  @override
+  Future<List<TranslationEntity>> withAudioInLanguage(String lang) async {
+    return _queryAdapter.queryList(
+        'SELECT * FROM catalog_translations WHERE languageCode = ?1 AND audioPath IS NOT NULL AND audioPath != \'\'',
+        mapper: (Map<String, Object?> row) => TranslationEntity(id: row['id'] as String, genreSlug: row['genreSlug'] as String?, artworkSlug: row['artworkSlug'] as String?, languageCode: row['languageCode'] as String, field: row['field'] as String, position: row['position'] as int, text: row['text'] as String, audioPath: row['audioPath'] as String?, audioSha256: row['audioSha256'] as String?, remoteUpdatedAt: row['remoteUpdatedAt'] as int),
+        arguments: [lang]);
+  }
+
+  @override
+  Future<void> upsert(TranslationEntity translation) async {
+    await _translationEntityInsertionAdapter.insert(
+        translation, OnConflictStrategy.replace);
+  }
+
+  @override
+  Future<void> upsertAll(List<TranslationEntity> translations) async {
+    await _translationEntityInsertionAdapter.insertList(
+        translations, OnConflictStrategy.replace);
   }
 }

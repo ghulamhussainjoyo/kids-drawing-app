@@ -1,9 +1,10 @@
 import 'package:flutter/cupertino.dart';
 import 'package:kids_drawing_flutter/app/parent_gate/utils/grown.up.math.challenge.dart';
 import 'package:kids_drawing_flutter/app/parent_gate/widgets/grown.up.equation.card.dart';
+import 'package:kids_drawing_flutter/core/ui/button/press.sound.dart';
 import 'package:kids_drawing_flutter/core/ui/theme/app.colors.dart';
 import 'package:kids_drawing_flutter/core/ui/theme/app.typography.dart';
-import 'package:kids_drawing_flutter/core/ui/widgets/circle.button.dart';
+import 'package:kids_drawing_flutter/core/ui/button/circle.button.dart';
 
 /// Full-screen parental gate. Pops `true` on correct answer, `false` on X.
 class AskGrownUpScreen extends StatefulWidget {
@@ -50,6 +51,7 @@ class _AskGrownUpScreenState extends State<AskGrownUpScreen> {
                 size: 24,
                 color: AppColors.purple,
                 onPressed: closeGate,
+                sound: PressSound.exit,
                 image: const Icon(
                   CupertinoIcons.xmark,
                   color: Color(0xFFFFFFFF),

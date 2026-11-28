@@ -1,0 +1,14 @@
+{
+  "enabledPlugins": {
+    "ponytail@ponytail": true,
+    "swift-lsp@claude-plugins-official": true
+  },
+  "env": {
+    "ANTHROPIC_BASE_URL": "http://localhost:20128",
+    "ANTHROPIC_AUTH_TOKEN": "sk-7dc5edff775e0c29-33f3aa-283145a1",
+    "ANTHROPIC_MODEL": "cursor-combo",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "cursor-combo",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "cursor-combo",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "cursor-combo"
+  }
+}

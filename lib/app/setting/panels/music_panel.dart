@@ -4,6 +4,7 @@ import 'package:kids_drawing_flutter/app/setting/widgets/setting.card.dart';
 import 'package:kids_drawing_flutter/app/setting/widgets/setting.disabled.dart';
 import 'package:kids_drawing_flutter/app/setting/widgets/setting.panel.scaffold.dart';
 import 'package:kids_drawing_flutter/app/setting/widgets/setting_toggle_row.dart';
+import 'package:kids_drawing_flutter/core/ui/button/press.button.dart';
 import 'package:kids_drawing_flutter/core/ui/theme/app.colors.dart';
 import 'package:kids_drawing_flutter/core/ui/theme/app.typography.dart';
 import 'package:kids_drawing_flutter/state/setting/setting.view-model.dart';
@@ -14,6 +15,7 @@ class MusicPanel extends StatelessWidget {
   const MusicPanel({super.key});
 
   static const tracks = [
+    (id: 'puppy_playtime', label: 'Puppy Playtime', color: Color(0xFF8B5CF6)),
     (id: 'sunshine_skip', label: 'Sunshine Skip', color: Color(0xFFF59E0B)),
     (id: 'bubble_pop', label: 'Bubble Pop Parade', color: Color(0xFFEF4444)),
     (
@@ -141,9 +143,8 @@ class _TrackRow extends StatelessWidget {
       button: true,
       selected: selected,
       label: label,
-      child: GestureDetector(
-        behavior: HitTestBehavior.opaque,
-        onTap: onTap,
+      child: PressButton(
+        onPressed: onTap,
         child: SettingCard(
           selected: selected,
           child: Row(

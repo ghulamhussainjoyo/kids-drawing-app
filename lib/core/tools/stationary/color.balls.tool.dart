@@ -108,6 +108,7 @@ class ColorBallTools {
       StationaryModel(
         id: '14',
         name: 'pastel-rainbow',
+        voice: 'Pastel rainbow',
         imageSize: 48,
         color: const Color(0xFFE6F5BC),
         colors: const [
@@ -121,6 +122,7 @@ class ColorBallTools {
       StationaryModel(
         id: '15',
         name: 'vivid-rainbow',
+        voice: 'Bright rainbow',
         imageSize: 48,
         color: const Color(0xFFFFE40A),
         colors: const [
@@ -137,6 +139,7 @@ class ColorBallTools {
       StationaryModel(
         id: '16',
         name: 'sunset',
+        voice: 'Sunset colors',
         imageSize: 48,
         color: const Color(0xFFEF3B69),
         colors: const [
@@ -150,30 +153,25 @@ class ColorBallTools {
       StationaryModel(
         id: '17',
         name: 'ocean',
+        voice: 'Ocean colors',
         imageSize: 48,
         color: const Color(0xFF317DEF),
-        colors: const [
-          Color(0xFF317DEF),
-          Color(0xFF4799FE),
-          Color(0xFF5BAEFC),
-        ],
+        colors: const [Color(0xFF317DEF), Color(0xFF4799FE), Color(0xFF5BAEFC)],
         image: 'assets/stationary/color-balls/ball_ocean.png',
       ),
       StationaryModel(
         id: '18',
         name: 'galaxy',
+        voice: 'Galaxy colors',
         imageSize: 48,
         color: const Color(0xFF452B86),
-        colors: const [
-          Color(0xFF452B86),
-          Color(0xFF5F42A5),
-          Color(0xFF6848B1),
-        ],
+        colors: const [Color(0xFF452B86), Color(0xFF5F42A5), Color(0xFF6848B1)],
         image: 'assets/stationary/color-balls/ball_galaxy.png',
       ),
       StationaryModel(
         id: '19',
         name: 'pearl',
+        voice: 'Pearl shine',
         imageSize: 48,
         color: const Color(0xFFD8D7F6),
         image: 'assets/stationary/color-balls/ball_pearl.png',
@@ -181,13 +179,10 @@ class ColorBallTools {
       StationaryModel(
         id: '20',
         name: 'candy',
+        voice: 'Candy colors',
         imageSize: 48,
         color: const Color(0xFFFF92BC),
-        colors: const [
-          Color(0xFFFF92BC),
-          Color(0xFFFFA9CA),
-          Color(0xFFF0ABB2),
-        ],
+        colors: const [Color(0xFFFF92BC), Color(0xFFFFA9CA), Color(0xFFF0ABB2)],
         image: 'assets/stationary/color-balls/ball_candy.png',
       ),
     ];

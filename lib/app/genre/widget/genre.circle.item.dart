@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:kids_drawing_flutter/app/genre/widget/genre.title.dart';
+import 'package:kids_drawing_flutter/core/ui/button/press.button.dart';
 import 'package:kids_drawing_flutter/types/genre/genre.model.dart';
 
 class GenreCircleItem extends StatelessWidget {
@@ -31,9 +32,8 @@ class GenreCircleItem extends StatelessWidget {
         final title = GenreTitle(genre: genre, circleSize: circleSize);
         final titleScale = title.hideScale(closeness);
         return Center(
-          child: GestureDetector(
-            onTap: () => onPressed(genre),
-            behavior: HitTestBehavior.opaque,
+          child: PressButton(
+            onPressed: () => onPressed(genre),
             child: Transform.scale(
               scale: scale,
               child: Padding(
@@ -48,8 +48,8 @@ class GenreCircleItem extends StatelessWidget {
                       child: title,
                     ),
                     ClipOval(
-                      child: Image.asset(
-                        genre.image,
+                      child: Image(
+                        image: genre.imageProvider,
                         width: circleSize,
                         height: circleSize,
                         fit: BoxFit.cover,

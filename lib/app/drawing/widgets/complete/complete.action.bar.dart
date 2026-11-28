@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
+import 'package:kids_drawing_flutter/core/ui/button/press.sound.dart';
 import 'package:kids_drawing_flutter/core/ui/theme/app.colors.dart';
-import 'package:kids_drawing_flutter/core/ui/widgets/circle.button.dart';
+import 'package:kids_drawing_flutter/core/ui/button/circle.button.dart';
 
 /// Left (download/share) and right (delete/edit) action groups.
 class CompleteActionBar extends StatelessWidget {
@@ -63,6 +64,7 @@ class CompleteActionBar extends StatelessWidget {
                 size: 48,
                 color: AppColors.done,
                 onPressed: onEdit,
+                sound: PressSound.exit,
                 image: const Icon(
                   CupertinoIcons.pencil,
                   color: Color(0xFFFFFFFF),

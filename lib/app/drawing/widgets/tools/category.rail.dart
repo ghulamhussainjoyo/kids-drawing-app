@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:kids_drawing_flutter/types/category.model.dart';
-import 'package:kids_drawing_flutter/core/ui/widgets/rounded.button.dart';
+import 'package:kids_drawing_flutter/core/ui/button/rounded.button.dart';
 
 class CategoryRail extends StatelessWidget {
   final double gap;

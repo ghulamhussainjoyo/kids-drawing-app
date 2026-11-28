@@ -1,6 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:kids_drawing_flutter/core/ui/theme/app.colors.dart';
-import 'package:kids_drawing_flutter/core/ui/widgets/circle.button.dart';
+import 'package:kids_drawing_flutter/core/ui/button/circle.button.dart';
 
 /// Purple toggle: section clip on vs free paint.
 class ClipModeButton extends StatelessWidget {

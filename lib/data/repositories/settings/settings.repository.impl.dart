@@ -60,7 +60,7 @@ class SettingsRepositoryImpl implements SettingsRepository {
 
   @override
   Future<String> selectedTrack() async {
-    return _localStorage.getString(_kTrack) ?? 'confetti_party';
+    return _localStorage.getString(_kTrack) ?? 'puppy_playtime';
   }
 
   @override

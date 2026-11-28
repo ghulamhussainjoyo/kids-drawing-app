@@ -52,10 +52,7 @@ class _GalleryScreenState extends State<GalleryScreen> {
   }
 
   List<String> _catalogSectionIds() {
-    final genres = Provider.of<GenreViewModel>(
-      context,
-      listen: false,
-    ).getGenres();
+    final genres = Provider.of<GenreViewModel>(context, listen: false).genres;
     final ids = <String>[];
     for (final genre in genres) {
       if (genre.id == coloringArtsId) {

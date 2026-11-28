@@ -19,6 +19,17 @@ class CategoryModel {
   /// Puts each grid item on a rounded tile.
   final bool tiled;
 
+  /// What the voice can say when this category is picked. One is chosen at
+  /// random, so a child who picks the pencil twenty times hears variety.
+  final List<String> voice;
+
+  /// Clip in `assets/sounds/draw/` played while a stroke is drawn.
+  final String drawSound;
+
+  /// Whether [drawSound] loops for the length of the stroke. One-tap tools
+  /// (bucket fill, stickers) get a single sound instead.
+  final bool loopSound;
+
   const CategoryModel({
     required this.name,
     required this.image,
@@ -27,6 +38,9 @@ class CategoryModel {
     required this.mutedColor,
     required this.activeColor,
     required this.brushType,
+    required this.voice,
+    required this.drawSound,
+    this.loopSound = true,
     this.grid = false,
     this.tiled = false,
   });

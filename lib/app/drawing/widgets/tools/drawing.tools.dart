@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:kids_drawing_flutter/core/ui/button/press.button.dart';
 import 'package:provider/provider.dart';
 import 'package:kids_drawing_flutter/types/category.model.dart';
 import 'package:kids_drawing_flutter/state/drawing/drawing.view-model.dart';
@@ -82,10 +83,9 @@ class _DrawingToolsState extends State<DrawingTools> {
                   final offsetX = selected
                       ? metrics.inset - metrics.slide
                       : metrics.inset;
-                  return GestureDetector(
+                  return PressButton(
                     key: ValueKey(pencil.id),
-                    behavior: HitTestBehavior.opaque,
-                    onTap: () => viewModel.selectTool(pencil),
+                    onPressed: () => viewModel.selectTool(pencil),
                     child: SizedBox(
                       height: metrics.stickHeight,
                       width: metrics.totalWidth,

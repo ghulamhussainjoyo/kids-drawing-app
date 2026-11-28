@@ -1,0 +1,838 @@
+{
+  "language": "en",
+  "lines": [
+    {
+      "text": "A pencil for drawing and writing.",
+      "file": "a_pencil_for_drawing_and_writing_611dafb1.mp3",
+      "keys": [
+        "artwork.pencil"
+      ]
+    },
+    {
+      "text": "A school bag, ready for books!",
+      "file": "a_school_bag_ready_for_books_a7551a9f.mp3",
+      "keys": [
+        "artwork.school_bag"
+      ]
+    },
+    {
+      "text": "An eraser, it rubs mistakes away.",
+      "file": "an_eraser_it_rubs_mistakes_away_98f7c0ec.mp3",
+      "keys": [
+        "artwork.eraser"
+      ]
+    },
+    {
+      "text": "Animal friends! Let's color them together!",
+      "file": "animal_friends_let_s_color_them_together_10502346.mp3",
+      "keys": [
+        "genre.animals.0"
+      ]
+    },
+    {
+      "text": "Back to school! Grab your crayons!",
+      "file": "back_to_school_grab_your_crayons_5b56cedd.mp3",
+      "keys": [
+        "genre.school.1"
+      ]
+    },
+    {
+      "text": "Bear tape",
+      "file": "bear_tape_f5c23659.mp3",
+      "keys": [
+        "tool.tape.bears"
+      ]
+    },
+    {
+      "text": "Beep beep! Choose a ride!",
+      "file": "beep_beep_choose_a_ride_7d5005f9.mp3",
+      "keys": [
+        "genre.transport.1"
+      ]
+    },
+    {
+      "text": "black",
+      "file": "black_568f4ba4.mp3",
+      "keys": [
+        "tool.brush.black",
+        "tool.color-balls.black",
+        "tool.crayon.black",
+        "tool.glitter.black",
+        "tool.marker.black",
+        "tool.pencil.black",
+        "tool.spray.black",
+        "tool.watercolor.black"
+      ]
+    },
+    {
+      "text": "blue",
+      "file": "blue_82fbf5cd.mp3",
+      "keys": [
+        "tool.brush.blue",
+        "tool.color-balls.blue",
+        "tool.crayon.blue",
+        "tool.glitter.blue",
+        "tool.marker.blue",
+        "tool.pencil.blue",
+        "tool.spray.blue",
+        "tool.watercolor.blue"
+      ]
+    },
+    {
+      "text": "Boop! All colored in!",
+      "file": "boop_all_colored_in_f1b3837f.mp3",
+      "keys": [
+        "category.color-balls.2"
+      ]
+    },
+    {
+      "text": "Bright rainbow",
+      "file": "bright_rainbow_219e1b53.mp3",
+      "keys": [
+        "tool.color-balls.vivid-rainbow"
+      ]
+    },
+    {
+      "text": "brown",
+      "file": "brown_30be372f.mp3",
+      "keys": [
+        "tool.brush.brown",
+        "tool.color-balls.brown",
+        "tool.crayon.brown",
+        "tool.glitter.brown",
+        "tool.marker.brown",
+        "tool.pencil.brown",
+        "tool.spray.brown",
+        "tool.watercolor.brown"
+      ]
+    },
+    {
+      "text": "Brushy brush! Let's paint!",
+      "file": "brushy_brush_let_s_paint_25f37c75.mp3",
+      "keys": [
+        "category.brush.1"
+      ]
+    },
+    {
+      "text": "Bunny tape",
+      "file": "bunny_tape_e441296d.mp3",
+      "keys": [
+        "tool.tape.bunnies"
+      ]
+    },
+    {
+      "text": "Candy colors",
+      "file": "candy_colors_b1b2a87a.mp3",
+      "keys": [
+        "tool.color-balls.candy"
+      ]
+    },
+    {
+      "text": "Cars, trains and planes! Let's color and go!",
+      "file": "cars_trains_and_planes_let_s_color_and_go_f3f17166.mp3",
+      "keys": [
+        "genre.transport.0"
+      ]
+    },
+    {
+      "text": "Cat tape",
+      "file": "cat_tape_137597e5.mp3",
+      "keys": [
+        "tool.tape.cats"
+      ]
+    },
+    {
+      "text": "Chick tape",
+      "file": "chick_tape_c80514d1.mp3",
+      "keys": [
+        "tool.tape.chicks"
+      ]
+    },
+    {
+      "text": "Color balls! Tap and fill!",
+      "file": "color_balls_tap_and_fill_cb3708cd.mp3",
+      "keys": [
+        "category.color-balls.0"
+      ]
+    },
+    {
+      "text": "Crayon time! Color it up!",
+      "file": "crayon_time_color_it_up_856dd5a9.mp3",
+      "keys": [
+        "category.crayon.1"
+      ]
+    },
+    {
+      "text": "Crayons! Yay!",
+      "file": "crayons_yay_4a293569.mp3",
+      "keys": [
+        "category.crayon.0"
+      ]
+    },
+    {
+      "text": "Dip, swish, beautiful!",
+      "file": "dip_swish_beautiful_cb753f82.mp3",
+      "keys": [
+        "category.brush.2"
+      ]
+    },
+    {
+      "text": "Dog tape",
+      "file": "dog_tape_64d93cdb.mp3",
+      "keys": [
+        "tool.tape.dogs"
+      ]
+    },
+    {
+      "text": "Every season is pretty! Pick one!",
+      "file": "every_season_is_pretty_pick_one_f5cb1724.mp3",
+      "keys": [
+        "genre.seasons.1"
+      ]
+    },
+    {
+      "text": "Galaxy colors",
+      "file": "galaxy_colors_d975be63.mp3",
+      "keys": [
+        "tool.color-balls.galaxy"
+      ]
+    },
+    {
+      "text": "Glitter! Sparkle sparkle!",
+      "file": "glitter_sparkle_sparkle_87ef0e14.mp3",
+      "keys": [
+        "category.glitter.0"
+      ]
+    },
+    {
+      "text": "green",
+      "file": "green_011decbc.mp3",
+      "keys": [
+        "tool.brush.green",
+        "tool.color-balls.green",
+        "tool.crayon.green",
+        "tool.glitter.green",
+        "tool.marker.green",
+        "tool.pencil.green",
+        "tool.spray.green",
+        "tool.watercolor.green"
+      ]
+    },
+    {
+      "text": "Hello animals! Who shall we color?",
+      "file": "hello_animals_who_shall_we_color_cbf1d68f.mp3",
+      "keys": [
+        "genre.animals.1"
+      ]
+    },
+    {
+      "text": "La la la! Let's make it colorful!",
+      "file": "la_la_la_let_s_make_it_colorful_61719196.mp3",
+      "keys": [
+        "genre.music.1"
+      ]
+    },
+    {
+      "text": "Leopard tape",
+      "file": "leopard_tape_0b86e80e.mp3",
+      "keys": [
+        "tool.tape.leopard"
+      ]
+    },
+    {
+      "text": "Let's make it dreamy!",
+      "file": "let_s_make_it_dreamy_80423e4a.mp3",
+      "keys": [
+        "category.watercolor.2"
+      ]
+    },
+    {
+      "text": "Let's make it twinkle!",
+      "file": "let_s_make_it_twinkle_64b60e2e.mp3",
+      "keys": [
+        "category.glitter.2"
+      ]
+    },
+    {
+      "text": "Let's stamp a letter!",
+      "file": "let_s_stamp_a_letter_cee9627b.mp3",
+      "keys": [
+        "category.letters.1"
+      ]
+    },
+    {
+      "text": "Letter A",
+      "file": "letter_a_c21ead52.mp3",
+      "keys": [
+        "tool.letters.A"
+      ]
+    },
+    {
+      "text": "Letter B",
+      "file": "letter_b_c11eabbf.mp3",
+      "keys": [
+        "tool.letters.B"
+      ]
+    },
+    {
+      "text": "Letter C",
+      "file": "letter_c_c01eaa2c.mp3",
+      "keys": [
+        "tool.letters.C"
+      ]
+    },
+    {
+      "text": "Letter D",
+      "file": "letter_d_bf1ea899.mp3",
+      "keys": [
+        "tool.letters.D"
+      ]
+    },
+    {
+      "text": "Letter E",
+      "file": "letter_e_be1ea706.mp3",
+      "keys": [
+        "tool.letters.E"
+      ]
+    },
+    {
+      "text": "Letter F",
+      "file": "letter_f_bd1ea573.mp3",
+      "keys": [
+        "tool.letters.F"
+      ]
+    },
+    {
+      "text": "Letter G",
+      "file": "letter_g_bc1ea3e0.mp3",
+      "keys": [
+        "tool.letters.G"
+      ]
+    },
+    {
+      "text": "Letter H",
+      "file": "letter_h_cb1ebb7d.mp3",
+      "keys": [
+        "tool.letters.H"
+      ]
+    },
+    {
+      "text": "Letter I",
+      "file": "letter_i_ca1eb9ea.mp3",
+      "keys": [
+        "tool.letters.I"
+      ]
+    },
+    {
+      "text": "Letter J",
+      "file": "letter_j_c91eb857.mp3",
+      "keys": [
+        "tool.letters.J"
+      ]
+    },
+    {
+      "text": "Letter K",
+      "file": "letter_k_c81eb6c4.mp3",
+      "keys": [
+        "tool.letters.K"
+      ]
+    },
+    {
+      "text": "Letter L",
+      "file": "letter_l_c71eb531.mp3",
+      "keys": [
+        "tool.letters.L"
+      ]
+    },
+    {
+      "text": "Letter M",
+      "file": "letter_m_c61eb39e.mp3",
+      "keys": [
+        "tool.letters.M"
+      ]
+    },
+    {
+      "text": "Letter N",
+      "file": "letter_n_c51eb20b.mp3",
+      "keys": [
+        "tool.letters.N"
+      ]
+    },
+    {
+      "text": "Letter O",
+      "file": "letter_o_c41eb078.mp3",
+      "keys": [
+        "tool.letters.O"
+      ]
+    },
+    {
+      "text": "Letter P",
+      "file": "letter_p_d31ec815.mp3",
+      "keys": [
+        "tool.letters.P"
+      ]
+    },
+    {
+      "text": "Letter Q",
+      "file": "letter_q_d21ec682.mp3",
+      "keys": [
+        "tool.letters.Q"
+      ]
+    },
+    {
+      "text": "Letter R",
+      "file": "letter_r_d11ec4ef.mp3",
+      "keys": [
+        "tool.letters.R"
+      ]
+    },
+    {
+      "text": "Letter S",
+      "file": "letter_s_d01ec35c.mp3",
+      "keys": [
+        "tool.letters.S"
+      ]
+    },
+    {
+      "text": "Letter T",
+      "file": "letter_t_cf1ec1c9.mp3",
+      "keys": [
+        "tool.letters.T"
+      ]
+    },
+    {
+      "text": "Letter U",
+      "file": "letter_u_ce1ec036.mp3",
+      "keys": [
+        "tool.letters.U"
+      ]
+    },
+    {
+      "text": "Letter V",
+      "file": "letter_v_cd1ebea3.mp3",
+      "keys": [
+        "tool.letters.V"
+      ]
+    },
+    {
+      "text": "Letter W",
+      "file": "letter_w_cc1ebd10.mp3",
+      "keys": [
+        "tool.letters.W"
+      ]
+    },
+    {
+      "text": "Letter X",
+      "file": "letter_x_db1ed4ad.mp3",
+      "keys": [
+        "tool.letters.X"
+      ]
+    },
+    {
+      "text": "Letter Y",
+      "file": "letter_y_da1ed31a.mp3",
+      "keys": [
+        "tool.letters.Y"
+      ]
+    },
+    {
+      "text": "Letter Z",
+      "file": "letter_z_d91ed187.mp3",
+      "keys": [
+        "tool.letters.Z"
+      ]
+    },
+    {
+      "text": "Letters! A, B, C!",
+      "file": "letters_a_b_c_77bc57ec.mp3",
+      "keys": [
+        "category.letters.0"
+      ]
+    },
+    {
+      "text": "Look at all your pictures!",
+      "file": "look_at_all_your_pictures_5c34a3ed.mp3",
+      "keys": [
+        "genre.coloring-arts.1"
+      ]
+    },
+    {
+      "text": "Markers! Big bold colors!",
+      "file": "markers_big_bold_colors_0a3056ab.mp3",
+      "keys": [
+        "category.marker.0"
+      ]
+    },
+    {
+      "text": "Music time! Let's color the songs!",
+      "file": "music_time_let_s_color_the_songs_b8d02b7c.mp3",
+      "keys": [
+        "genre.music.0"
+      ]
+    },
+    {
+      "text": "Ocean colors",
+      "file": "ocean_colors_2c4325e3.mp3",
+      "keys": [
+        "tool.color-balls.ocean"
+      ]
+    },
+    {
+      "text": "Ooh, soft and watery!",
+      "file": "ooh_soft_and_watery_5b3540c1.mp3",
+      "keys": [
+        "category.watercolor.1"
+      ]
+    },
+    {
+      "text": "Ooh, the pencil! Let's make lines!",
+      "file": "ooh_the_pencil_let_s_make_lines_eaacccd7.mp3",
+      "keys": [
+        "category.pencil.2"
+      ]
+    },
+    {
+      "text": "Oooh, shiny!",
+      "file": "oooh_shiny_ab16a476.mp3",
+      "keys": [
+        "category.glitter.1"
+      ]
+    },
+    {
+      "text": "orange",
+      "file": "orange_45b473eb.mp3",
+      "keys": [
+        "tool.brush.orange",
+        "tool.color-balls.orange",
+        "tool.crayon.orange",
+        "tool.glitter.orange",
+        "tool.marker.orange",
+        "tool.pencil.orange",
+        "tool.spray.orange",
+        "tool.watercolor.orange"
+      ]
+    },
+    {
+      "text": "Paint brush! Swish swish!",
+      "file": "paint_brush_swish_swish_86be2841.mp3",
+      "keys": [
+        "category.brush.0"
+      ]
+    },
+    {
+      "text": "Panda tape",
+      "file": "panda_tape_ac64f871.mp3",
+      "keys": [
+        "tool.tape.pandas"
+      ]
+    },
+    {
+      "text": "Pastel rainbow",
+      "file": "pastel_rainbow_9890b776.mp3",
+      "keys": [
+        "tool.color-balls.pastel-rainbow"
+      ]
+    },
+    {
+      "text": "Paw tape",
+      "file": "paw_tape_450af9a5.mp3",
+      "keys": [
+        "tool.tape.paws"
+      ]
+    },
+    {
+      "text": "Pearl shine",
+      "file": "pearl_shine_7eb3c0e8.mp3",
+      "keys": [
+        "tool.color-balls.pearl"
+      ]
+    },
+    {
+      "text": "Pencil power! Ready, set, draw!",
+      "file": "pencil_power_ready_set_draw_663820b2.mp3",
+      "keys": [
+        "category.pencil.1"
+      ]
+    },
+    {
+      "text": "Pencil time! Scribble scribble!",
+      "file": "pencil_time_scribble_scribble_489fd8af.mp3",
+      "keys": [
+        "category.pencil.0"
+      ]
+    },
+    {
+      "text": "Penguin tape",
+      "file": "penguin_tape_bf34ee8d.mp3",
+      "keys": [
+        "tool.tape.penguins"
+      ]
+    },
+    {
+      "text": "pink",
+      "file": "pink_225e036d.mp3",
+      "keys": [
+        "tool.brush.pink",
+        "tool.color-balls.pink",
+        "tool.crayon.pink",
+        "tool.glitter.pink",
+        "tool.marker.pink",
+        "tool.pencil.pink",
+        "tool.spray.pink",
+        "tool.watercolor.pink"
+      ]
+    },
+    {
+      "text": "Plop! Fill it up!",
+      "file": "plop_fill_it_up_28c006eb.mp3",
+      "keys": [
+        "category.color-balls.1"
+      ]
+    },
+    {
+      "text": "Pop! Marker time!",
+      "file": "pop_marker_time_ef7f5ffb.mp3",
+      "keys": [
+        "category.marker.1"
+      ]
+    },
+    {
+      "text": "Press it on!",
+      "file": "press_it_on_5f4f079d.mp3",
+      "keys": [
+        "category.tape.2"
+      ]
+    },
+    {
+      "text": "Princess time! Let's color the castle!",
+      "file": "princess_time_let_s_color_the_castle_0997ab12.mp3",
+      "keys": [
+        "genre.princes.0"
+      ]
+    },
+    {
+      "text": "purple",
+      "file": "purple_9a6e02ff.mp3",
+      "keys": [
+        "tool.brush.purple",
+        "tool.color-balls.purple",
+        "tool.crayon.purple",
+        "tool.glitter.purple",
+        "tool.marker.purple",
+        "tool.pencil.purple",
+        "tool.spray.purple",
+        "tool.watercolor.purple"
+      ]
+    },
+    {
+      "text": "rainbow",
+      "file": "rainbow_2b6ce2a9.mp3",
+      "keys": [
+        "tool.brush.rainbow",
+        "tool.color-balls.rainbow",
+        "tool.crayon.rainbow",
+        "tool.glitter.rainbow",
+        "tool.marker.rainbow",
+        "tool.pencil.rainbow",
+        "tool.spray.rainbow",
+        "tool.watercolor.rainbow"
+      ]
+    },
+    {
+      "text": "Rainbow tape",
+      "file": "rainbow_tape_22d305fb.mp3",
+      "keys": [
+        "tool.tape.rainbow"
+      ]
+    },
+    {
+      "text": "red",
+      "file": "red_40f480dc.mp3",
+      "keys": [
+        "tool.brush.red",
+        "tool.color-balls.red",
+        "tool.crayon.red",
+        "tool.glitter.red",
+        "tool.marker.red",
+        "tool.pencil.red",
+        "tool.spray.red",
+        "tool.watercolor.red"
+      ]
+    },
+    {
+      "text": "School time! Let's color and learn!",
+      "file": "school_time_let_s_color_and_learn_9f863dfd.mp3",
+      "keys": [
+        "genre.school.0"
+      ]
+    },
+    {
+      "text": "Scribble it big!",
+      "file": "scribble_it_big_8e0a1df3.mp3",
+      "keys": [
+        "category.crayon.2"
+      ]
+    },
+    {
+      "text": "Shh shh! Spray it!",
+      "file": "shh_shh_spray_it_2a0e2d23.mp3",
+      "keys": [
+        "category.spray.1"
+      ]
+    },
+    {
+      "text": "sky blue",
+      "file": "sky_blue_84319b32.mp3",
+      "keys": [
+        "tool.brush.sky-blue",
+        "tool.color-balls.sky-blue",
+        "tool.crayon.sky-blue",
+        "tool.glitter.sky-blue",
+        "tool.marker.sky-blue",
+        "tool.pencil.sky-blue",
+        "tool.spray.sky-blue",
+        "tool.watercolor.sky-blue"
+      ]
+    },
+    {
+      "text": "So juicy! Pick a fruit!",
+      "file": "so_juicy_pick_a_fruit_f9178d39.mp3",
+      "keys": [
+        "genre.fruit-garden.1"
+      ]
+    },
+    {
+      "text": "Sparkles and crowns! Let's go!",
+      "file": "sparkles_and_crowns_let_s_go_a3b33ef6.mp3",
+      "keys": [
+        "genre.princes.1"
+      ]
+    },
+    {
+      "text": "Spell something fun!",
+      "file": "spell_something_fun_7b43f157.mp3",
+      "keys": [
+        "category.letters.2"
+      ]
+    },
+    {
+      "text": "Spray can! Psssshh!",
+      "file": "spray_can_psssshh_7dfe9866.mp3",
+      "keys": [
+        "category.spray.0"
+      ]
+    },
+    {
+      "text": "Sunset colors",
+      "file": "sunset_colors_47daad51.mp3",
+      "keys": [
+        "tool.color-balls.sunset"
+      ]
+    },
+    {
+      "text": "Sunshine, snow and rainbows! Let's color the seasons!",
+      "file": "sunshine_snow_and_rainbows_let_s_color_the_seaso_da710020.mp3",
+      "keys": [
+        "genre.seasons.0"
+      ]
+    },
+    {
+      "text": "Tape time! Pretty patterns!",
+      "file": "tape_time_pretty_patterns_026f9be9.mp3",
+      "keys": [
+        "category.tape.1"
+      ]
+    },
+    {
+      "text": "violet",
+      "file": "violet_7b6d57f2.mp3",
+      "keys": [
+        "tool.brush.violet",
+        "tool.color-balls.violet",
+        "tool.crayon.violet",
+        "tool.glitter.violet",
+        "tool.marker.violet",
+        "tool.pencil.violet",
+        "tool.spray.violet",
+        "tool.watercolor.violet"
+      ]
+    },
+    {
+      "text": "Washi tape! Stick stick stick!",
+      "file": "washi_tape_stick_stick_stick_f7870195.mp3",
+      "keys": [
+        "category.tape.0"
+      ]
+    },
+    {
+      "text": "Watercolors! Splish splash!",
+      "file": "watercolors_splish_splash_3bc4ce30.mp3",
+      "keys": [
+        "category.watercolor.0"
+      ]
+    },
+    {
+      "text": "white",
+      "file": "white_de020766.mp3",
+      "keys": [
+        "tool.brush.white",
+        "tool.color-balls.white",
+        "tool.crayon.white",
+        "tool.glitter.white",
+        "tool.marker.white",
+        "tool.pencil.white",
+        "tool.spray.white",
+        "tool.watercolor.white"
+      ]
+    },
+    {
+      "text": "Whoosh! Color everywhere!",
+      "file": "whoosh_color_everywhere_7de5eaf8.mp3",
+      "keys": [
+        "category.spray.2"
+      ]
+    },
+    {
+      "text": "Woohoo, let's color it in!",
+      "file": "woohoo_let_s_color_it_in_d41469a1.mp3",
+      "keys": [
+        "category.marker.2"
+      ]
+    },
+    {
+      "text": "yellow",
+      "file": "yellow_05bf6449.mp3",
+      "keys": [
+        "tool.brush.yellow",
+        "tool.color-balls.yellow",
+        "tool.crayon.yellow",
+        "tool.glitter.yellow",
+        "tool.marker.yellow",
+        "tool.pencil.yellow",
+        "tool.spray.yellow",
+        "tool.watercolor.yellow"
+      ]
+    },
+    {
+      "text": "Your coloring arts! Let's see what you made!",
+      "file": "your_coloring_arts_let_s_see_what_you_made_28d08ecb.mp3",
+      "keys": [
+        "genre.coloring-arts.0"
+      ]
+    },
+    {
+      "text": "Yummy fruit garden! Let's color something sweet!",
+      "file": "yummy_fruit_garden_let_s_color_something_sweet_6ab26229.mp3",
+      "keys": [
+        "genre.fruit-garden.0"
+      ]
+    },
+    {
+      "text": "Zebra tape",
+      "file": "zebra_tape_4f2ffdbd.mp3",
+      "keys": [
+        "tool.tape.zebra"
+      ]
+    }
+  ]
+}

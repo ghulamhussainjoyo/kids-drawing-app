@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:kids_drawing_flutter/core/ui/button/press.sound.dart';
 import 'package:kids_drawing_flutter/core/ui/theme/app.colors.dart';
-import 'package:kids_drawing_flutter/core/ui/widgets/circle.button.dart';
+import 'package:kids_drawing_flutter/core/ui/button/circle.button.dart';
 import 'package:kids_drawing_flutter/app/drawing/widgets/tools/size.slider.display.dart';
 
 class ControllerTools extends StatefulWidget {
@@ -81,6 +82,7 @@ class _ControllerToolsState extends State<ControllerTools> {
                           size: buttonSize,
                           color: AppColors.purple,
                           onPressed: widget.onBack,
+                          sound: PressSound.exit,
                           image: const Icon(
                             Icons.arrow_back_rounded,
                             color: Color(0xFFFFFFFF),

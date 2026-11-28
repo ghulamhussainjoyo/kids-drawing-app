@@ -10,8 +10,9 @@ import 'package:kids_drawing_flutter/app/drawing/widgets/complete/complete.polar
 import 'package:kids_drawing_flutter/app/drawing/widgets/complete/complete.saved.bubble.dart';
 import 'package:kids_drawing_flutter/app/drawing/widgets/complete/complete.scene.backdrop.dart';
 import 'package:kids_drawing_flutter/app/parent_gate/utils/parent.gate.dart';
+import 'package:kids_drawing_flutter/core/ui/button/press.sound.dart';
 import 'package:kids_drawing_flutter/core/ui/theme/app.colors.dart';
-import 'package:kids_drawing_flutter/core/ui/widgets/circle.button.dart';
+import 'package:kids_drawing_flutter/core/ui/button/circle.button.dart';
 import 'package:kids_drawing_flutter/state/drawing/drawing.view-model.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
@@ -226,6 +227,7 @@ class _CompleteScreenState extends State<CompleteScreen> {
                     size: 48,
                     color: AppColors.purple,
                     onPressed: goHome,
+                    sound: PressSound.exit,
                     image: const Icon(
                       CupertinoIcons.house_fill,
                       color: Color(0xFFFFFFFF),

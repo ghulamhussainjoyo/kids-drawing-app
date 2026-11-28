@@ -1,4 +1,5 @@
 import 'package:flutter/cupertino.dart';
+import 'package:kids_drawing_flutter/core/ui/button/press.button.dart';
 import 'package:kids_drawing_flutter/core/ui/theme/app.colors.dart';
 import 'package:kids_drawing_flutter/core/ui/theme/app.typography.dart';
 import 'package:kids_drawing_flutter/utils/responsive.dart';
@@ -21,8 +22,8 @@ class SettingNavItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.symmetric(vertical: context.rs(3)),
-      child: GestureDetector(
-        onTap: onTap,
+      child: PressButton(
+        onPressed: onTap,
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 150),
           padding: EdgeInsets.symmetric(

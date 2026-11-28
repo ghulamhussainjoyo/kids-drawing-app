@@ -7,6 +7,7 @@ class SchoolEraserSeed {
     artworkKey: 'eraser',
     genre: 'school',
     title: 'Eraser',
+    voice: "An eraser, it rubs mistakes away.",
     isPremium: true,
     templateJson: _templateJson,
   );

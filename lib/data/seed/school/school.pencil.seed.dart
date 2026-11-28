@@ -7,6 +7,7 @@ class SchoolPencilSeed {
     artworkKey: 'pencil',
     genre: 'school',
     title: 'Pencil',
+    voice: "A pencil for drawing and writing.",
     isPremium: false,
     templateJson: _templateJson,
   );

@@ -1,17 +1,34 @@
 import 'package:flutter/cupertino.dart';
-import 'package:flutter/material.dart';
+import 'package:flutter/material.dart' show showDialog;
 import 'package:kids_drawing_flutter/app/genre/widget/genre.carousel.dart';
 import 'package:kids_drawing_flutter/app/genre/widget/genre.live.background.dart';
 import 'package:kids_drawing_flutter/app/parent_gate/utils/parent.gate.dart';
 import 'package:kids_drawing_flutter/app/setting/screen/setting.screen.dart';
+import 'package:kids_drawing_flutter/core/ui/button/press.button.dart';
+import 'package:kids_drawing_flutter/core/ui/theme/app.colors.dart';
+import 'package:kids_drawing_flutter/core/audio/app.sound.dart';
 import 'package:kids_drawing_flutter/core/ui/theme/app.typography.dart';
+import 'package:kids_drawing_flutter/state/genre/genre.view-model.dart';
 import 'package:kids_drawing_flutter/state/setting/setting.view-model.dart';
 import 'package:provider/provider.dart';
 
-class GenreScreen extends StatelessWidget {
+class GenreScreen extends StatefulWidget {
   const GenreScreen({super.key});
-  double getHorizontalPadding(double width) {
-    return width < 360 ? 16.0 : 24.0;
+  @override
+  State<GenreScreen> createState() => _GenreScreenState();
+}
+
+class _GenreScreenState extends State<GenreScreen> {
+  @override
+  void initState() {
+    super.initState();
+    _loadGenres();
+  }
+
+  void _loadGenres() {
+    final lang = context.read<SettingViewModel>().language;
+    context.read<GenreViewModel>().loadGenres(lang);
+    context.read<AppSound>().unmute();
   }
 
   @override
@@ -26,6 +43,16 @@ class GenreScreen extends StatelessWidget {
               return GenreLiveBackground(animated: liveOn);
             },
           ),
+          Selector<SettingViewModel, String>(
+            selector: (_, vm) => vm.language,
+            builder: (context, lang, child) {
+              WidgetsBinding.instance.addPostFrameCallback((_) {
+                context.read<GenreViewModel>().loadGenres(lang);
+              });
+              return child!;
+            },
+            child: const SizedBox.shrink(),
+          ),
           const Positioned.fill(
             child: IgnorePointer(
               child: ColoredBox(color: Color.fromRGBO(0, 0, 0, 0.15)),
@@ -34,32 +61,26 @@ class GenreScreen extends StatelessWidget {
           LayoutBuilder(
             builder: (context, constraints) {
               return Padding(
-                padding: EdgeInsets.symmetric(
-                  // vertical: 12,
-                  // horizontal: getHorizontalPadding(constraints.maxWidth),
-                ),
+                padding: EdgeInsets.symmetric(),
                 child: Stack(
                   children: [
-                    // Carousel area
                     Positioned(
-                      // Room for the arched title above the focused circle.
                       top: 50,
                       left: 0,
                       right: 0,
                       bottom: 40,
                       child: GenreCarousel(),
                     ),
-
-                    // Top controls
                     Positioned(
                       top: 0,
                       left: 0,
                       right: 0,
                       child: Row(
                         children: [
-                          CupertinoButton(
+                          PressButton(
                             onPressed: () async {
-                              final granted = await ParentGate.request(context);
+                              final granted =
+                                  await ParentGate.request(context);
                               if (!context.mounted || !granted) return;
                               showDialog<void>(
                                 context: context,
@@ -68,8 +89,14 @@ class GenreScreen extends StatelessWidget {
                                 builder: (_) => const SettingDialog(),
                               );
                             },
-                            padding: EdgeInsets.zero,
-                            child: const Icon(CupertinoIcons.settings),
+                            child: const SizedBox(
+                              width: 44,
+                              height: 44,
+                              child: Icon(
+                                CupertinoIcons.settings,
+                                color: AppColors.purple,
+                              ),
+                            ),
                           ),
                           const Spacer(),
                           CupertinoButton(
@@ -86,7 +113,6 @@ class GenreScreen extends StatelessWidget {
                         ],
                       ),
                     ),
-                    // Bottom controls
                     Positioned(
                       bottom: 0,
                       left: 0,

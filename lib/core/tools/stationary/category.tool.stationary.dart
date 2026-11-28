@@ -29,6 +29,12 @@ class CategoryTools {
         // light green
         mutedColor: Color(0xFFB2E6E6),
         activeColor: Color(0xFF5EC8C8),
+        voice: [
+          'Pencil time! Scribble scribble!',
+          'Pencil power! Ready, set, draw!',
+          "Ooh, the pencil! Let's make lines!",
+        ],
+        drawSound: 'pencil',
       ),
       CategoryModel(
         name: 'marker',
@@ -39,6 +45,12 @@ class CategoryTools {
         // light orange
         mutedColor: Color(0xFFFFE0B2),
         activeColor: Color(0xFFFFAB2E),
+        voice: [
+          'Markers! Big bold colors!',
+          'Pop! Marker time!',
+          "Woohoo, let's color it in!",
+        ],
+        drawSound: 'marker',
       ),
       CategoryModel(
         size: 48,
@@ -49,6 +61,12 @@ class CategoryTools {
         // light blue
         mutedColor: Color(0xFFB3E5FC),
         activeColor: Color(0xFF1976D2),
+        voice: [
+          'Glitter! Sparkle sparkle!',
+          'Oooh, shiny!',
+          "Let's make it twinkle!",
+        ],
+        drawSound: 'glitter',
       ),
       CategoryModel(
         name: 'brush',
@@ -59,6 +77,12 @@ class CategoryTools {
         // light teal
         mutedColor: Color(0xFFB2EBE4),
         activeColor: Color(0xFF26B5A6),
+        voice: [
+          'Paint brush! Swish swish!',
+          "Brushy brush! Let's paint!",
+          'Dip, swish, beautiful!',
+        ],
+        drawSound: 'brush',
       ),
       CategoryModel(
         name: 'crayon',
@@ -69,6 +93,12 @@ class CategoryTools {
         // light yellow
         mutedColor: Color(0xFFFFF1B8),
         activeColor: Color(0xFFF2C400),
+        voice: [
+          'Crayons! Yay!',
+          'Crayon time! Color it up!',
+          'Scribble it big!',
+        ],
+        drawSound: 'crayon',
       ),
       CategoryModel(
         name: 'spray',
@@ -79,6 +109,12 @@ class CategoryTools {
         // light pink
         mutedColor: Color(0xFFFFD0E8),
         activeColor: Color(0xFFF03C9E),
+        voice: [
+          'Spray can! Psssshh!',
+          'Shh shh! Spray it!',
+          'Whoosh! Color everywhere!',
+        ],
+        drawSound: 'spray',
       ),
       CategoryModel(
         name: 'watercolor',
@@ -89,6 +125,12 @@ class CategoryTools {
         // light sky blue
         mutedColor: Color(0xFFC8ECFA),
         activeColor: Color(0xFF33B1E4),
+        voice: [
+          'Watercolors! Splish splash!',
+          'Ooh, soft and watery!',
+          "Let's make it dreamy!",
+        ],
+        drawSound: 'watercolor',
       ),
       CategoryModel(
         name: 'color-balls',
@@ -100,6 +142,13 @@ class CategoryTools {
         // light purple
         mutedColor: Color(0xFFE3D0F5),
         activeColor: Color(0xFF9B3FD6),
+        voice: [
+          'Color balls! Tap and fill!',
+          'Plop! Fill it up!',
+          'Boop! All colored in!',
+        ],
+        drawSound: 'bucket',
+        loopSound: false,
       ),
       CategoryModel(
         name: 'tape',
@@ -110,6 +159,12 @@ class CategoryTools {
         // light lilac
         mutedColor: Color(0xFFE6DDF8),
         activeColor: Color(0xFFAB8EE6),
+        voice: [
+          'Washi tape! Stick stick stick!',
+          'Tape time! Pretty patterns!',
+          'Press it on!',
+        ],
+        drawSound: 'tape',
       ),
       CategoryModel(
         name: 'letters',
@@ -122,6 +177,13 @@ class CategoryTools {
         // light peach
         mutedColor: Color(0xFFFFE0C2),
         activeColor: Color(0xFFFF8A00),
+        voice: [
+          'Letters! A, B, C!',
+          "Let's stamp a letter!",
+          'Spell something fun!',
+        ],
+        drawSound: 'stamp',
+        loopSound: false,
       ),
     ];
     return stationaryCategory;

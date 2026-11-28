@@ -6,6 +6,8 @@ import '../../../core/engine/canvas.engine.dart';
 import '../../../core/ui/theme/app.colors.dart';
 import '../../../state/drawing/drawing.view-model.dart';
 import '../widgets/canva/workspace.painter.dart';
+import 'package:kids_drawing_flutter/core/ui/button/pill.button.dart';
+import 'package:kids_drawing_flutter/core/ui/button/press.sound.dart';
 
 class EraseConfirmScreen extends StatelessWidget {
   const EraseConfirmScreen({super.key, required this.viewModel});
@@ -67,19 +69,22 @@ class EraseConfirmScreen extends StatelessWidget {
                     Row(
                       children: [
                         Expanded(
-                          child: CupertinoButton(
+                          child: PillButton(
+                            label: 'NO',
+                            textColor: AppColors.purple,
+                            sound: PressSound.exit,
                             onPressed: () => Navigator.of(context).pop(),
-                            child: const Text('NO'),
                           ),
                         ),
                         Expanded(
-                          child: CupertinoButton(
+                          child: PillButton(
+                            label: 'YES',
                             color: AppColors.done,
+                            sound: PressSound.exit,
                             onPressed: () {
                               viewModel.clearAll();
                               Navigator.of(context).pop();
                             },
-                            child: const Text('YES'),
                           ),
                         ),
                       ],

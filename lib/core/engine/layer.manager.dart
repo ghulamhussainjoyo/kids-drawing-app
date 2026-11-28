@@ -433,19 +433,30 @@ class LayerManager {
   Picture _recordOutlines() {
     final recorder = PictureRecorder();
     final canvas = Canvas(recorder);
-    final outline = Paint()
-      ..color = _outline
-      ..style = PaintingStyle.stroke
-      ..strokeWidth = artwork.outlineWidth
-      ..strokeJoin = StrokeJoin.round
-      ..strokeCap = StrokeCap.round;
-    for (final region in artwork.regions.reversed) {
-      canvas.drawPath(region.path, outline);
+
+    if (artwork.lineworkPaths.isNotEmpty) {
+      final fill = Paint()
+        ..color = _outline
+        ..style = PaintingStyle.fill;
+      for (final path in artwork.lineworkPaths) {
+        canvas.drawPath(path, fill);
+      }
+    } else {
+      final outline = Paint()
+        ..color = _outline
+        ..style = PaintingStyle.stroke
+        ..strokeWidth = artwork.outlineWidth
+        ..strokeJoin = StrokeJoin.round
+        ..strokeCap = StrokeCap.round;
+      for (final region in artwork.regions.reversed) {
+        canvas.drawPath(region.path, outline);
+      }
+      outline.strokeWidth = artwork.detailWidth;
+      for (final line in artwork.detailLines) {
+        canvas.drawPath(line, outline);
+      }
     }
-    outline.strokeWidth = artwork.detailWidth;
-    for (final line in artwork.detailLines) {
-      canvas.drawPath(line, outline);
-    }
+
     return recorder.endRecording();
   }
 }

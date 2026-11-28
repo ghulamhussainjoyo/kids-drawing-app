@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:kids_drawing_flutter/app/parent_gate/utils/grown.up.math.challenge.dart';
 import 'package:kids_drawing_flutter/core/ui/theme/app.typography.dart';
-import 'package:kids_drawing_flutter/core/ui/widgets/circle.button.dart';
+import 'package:kids_drawing_flutter/core/ui/button/circle.button.dart';
 
 /// White card with the math equation and three answer circles.
 class GrownUpEquationCard extends StatelessWidget {

@@ -1,8 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:kids_drawing_flutter/app/setting/widgets/setting.colors.dart';
+import 'package:kids_drawing_flutter/core/ui/button/press.sound.dart';
 import 'package:kids_drawing_flutter/core/ui/theme/app.colors.dart';
 import 'package:kids_drawing_flutter/core/ui/theme/app.typography.dart';
-import 'package:kids_drawing_flutter/core/ui/widgets/circle.button.dart';
+import 'package:kids_drawing_flutter/core/ui/button/circle.button.dart';
 import 'package:kids_drawing_flutter/utils/responsive.dart';
 
 /// Fixed header (title + close) and scrollable or flex body for settings panels.
@@ -50,6 +51,7 @@ class SettingPanelScaffold extends StatelessWidget {
             size: 20,
             responsive: false,
             onPressed: onClose,
+            sound: PressSound.exit,
             color: AppColors.purple,
             image: const Icon(
               CupertinoIcons.xmark,

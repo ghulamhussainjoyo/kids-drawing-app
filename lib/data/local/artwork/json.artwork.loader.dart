@@ -16,7 +16,9 @@ class JsonArtworkLoader {
     final map = jsonDecode(templateJson) as Map<String, dynamic>;
     final id = map['id'] as String? ?? 'artwork';
     final viewBox = (map['viewBox'] as String?) ?? '0 0 512 512';
-    final size = _sizeFromViewBox(viewBox);
+    final vb = _parseViewBox(viewBox);
+    final size = vb.width > vb.height ? vb.width : vb.height;
+    final offset = Offset(-vb.left, -vb.top);
     final outline = map['outline'] as Map<String, dynamic>? ?? const {};
     final outlineWidth = (outline['strokeWidth'] as num?)?.toDouble() ?? 8;
 
@@ -31,7 +33,10 @@ class JsonArtworkLoader {
       final fill = region['fill'] as String? ?? '#FFFFFF';
       final colorable =
           region['colorable'] as bool? ?? fill.toLowerCase() != 'none';
-      final path = pathParser.parse(pathData);
+      var path = pathParser.parse(pathData);
+      if (offset != Offset.zero) {
+        path = _offsetPath(path, offset);
+      }
       if (!colorable) {
         detailLines.add(path);
         continue;
@@ -56,7 +61,28 @@ class JsonArtworkLoader {
     for (final raw in lineMaps) {
       final line = raw as Map<String, dynamic>;
       final pathData = line['path'] as String? ?? '';
-      detailLines.add(pathParser.parse(pathData));
+      var path = pathParser.parse(pathData);
+      if (offset != Offset.zero) {
+        path = _offsetPath(path, offset);
+      }
+      detailLines.add(path);
+    }
+
+    final lineworkPaths = <Path>[];
+    final linework = map['linework'];
+    if (linework is Map<String, dynamic>) {
+      final pathData = linework['path'] as String? ?? '';
+      if (pathData.isNotEmpty) {
+        var path = pathParser.parse(pathData);
+        if (offset != Offset.zero) {
+          path = _offsetPath(path, offset);
+        }
+        final fillRule = linework['fillRule'] as String?;
+        if (fillRule == 'evenodd') {
+          path.fillType = PathFillType.evenOdd;
+        }
+        lineworkPaths.add(path);
+      }
     }
 
     return ColoringArtwork(
@@ -64,17 +90,26 @@ class JsonArtworkLoader {
       size: size,
       regions: regions,
       detailLines: detailLines,
+      lineworkPaths: lineworkPaths,
       outlineWidth: outlineWidth,
     );
   }
 
-  double _sizeFromViewBox(String viewBox) {
+  Rect _parseViewBox(String viewBox) {
     final parts = viewBox.trim().split(RegExp(r'\s+'));
     if (parts.length < 4) {
-      return 512;
+      return const Rect.fromLTWH(0, 0, 512, 512);
     }
-    final width = double.tryParse(parts[2]) ?? 512;
-    final height = double.tryParse(parts[3]) ?? 512;
-    return width > height ? width : height;
+    final x = double.tryParse(parts[0]) ?? 0;
+    final y = double.tryParse(parts[1]) ?? 0;
+    final w = double.tryParse(parts[2]) ?? 512;
+    final h = double.tryParse(parts[3]) ?? 512;
+    return Rect.fromLTWH(x, y, w, h);
+  }
+
+  static Path _offsetPath(Path source, Offset offset) {
+    final shifted = Path();
+    shifted.addPath(source, offset);
+    return shifted;
   }
 }

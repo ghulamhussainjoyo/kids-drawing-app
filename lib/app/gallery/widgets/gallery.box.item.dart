@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
+import 'package:kids_drawing_flutter/core/ui/button/press.button.dart';
 import 'package:kids_drawing_flutter/data/local/floor/artwork.entity.dart';
 
 class GalleryBoxItem extends StatelessWidget {
@@ -31,8 +32,8 @@ class GalleryBoxItem extends StatelessWidget {
       child = Center(child: Text(artwork.title));
     }
 
-    return GestureDetector(
-      onTap: () => onPressed(artwork),
+    return PressButton(
+      onPressed: () => onPressed(artwork),
       child: Container(
         margin: const EdgeInsets.all(8),
         decoration: BoxDecoration(

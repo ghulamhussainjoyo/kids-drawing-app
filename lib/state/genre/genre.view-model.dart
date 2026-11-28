@@ -1,32 +1,40 @@
 import 'package:flutter/cupertino.dart';
 import 'package:kids_drawing_flutter/app/gallery/screen/gallery.screen.dart';
+import 'package:kids_drawing_flutter/core/audio/app.sound.dart';
 import 'package:kids_drawing_flutter/data/repositories/genre/genre.repository.dart';
 import 'package:kids_drawing_flutter/types/genre/genre.model.dart';
 
 class GenreViewModel extends ChangeNotifier {
-  GenreViewModel() {
-    genres = genreRepository.getGenreList();
-  }
+  final GenreRepository genreRepository;
+  final AppSound sound;
 
-  final GenreRepository genreRepository = GenreRepository();
+  GenreViewModel({required this.genreRepository, required this.sound});
+
   List<GenreModel> genres = [];
   GenreModel? selectedGenre;
+  bool _loaded = false;
+
+  bool get loaded => _loaded;
+
+  Future<void> loadGenres(String language) async {
+    genres = await genreRepository.getGenres(language);
+    _loaded = true;
+    notifyListeners();
+  }
 
   void selectGenre(GenreModel genre) {
     selectedGenre = genre;
     notifyListeners();
   }
 
-  List<GenreModel> getGenres() {
-    return genreRepository.getGenreList();
-  }
-
-  void openGenre(BuildContext context, GenreModel genre) {
+  Future<void> openGenre(BuildContext context, GenreModel genre) async {
     selectGenre(genre);
-    Navigator.of(context).push(
+    sound.genreOpened(genre);
+    await Navigator.of(context).push(
       CupertinoPageRoute<void>(
         builder: (_) => GalleryScreen(category: genre.id),
       ),
     );
+    await sound.playAppMusic();
   }
 }

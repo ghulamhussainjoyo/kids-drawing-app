@@ -8,6 +8,7 @@ class ColoringArtwork {
   final double size;
   final double outlineWidth;
   final List<Path> detailLines;
+  final List<Path> lineworkPaths;
   final List<DrawingRegion> regions;
   double get detailWidth => outlineWidth * 0.7;
   const ColoringArtwork({
@@ -15,6 +16,7 @@ class ColoringArtwork {
     required this.size,
     required this.regions,
     required this.detailLines,
+    this.lineworkPaths = const [],
     required this.outlineWidth,
   });
 }

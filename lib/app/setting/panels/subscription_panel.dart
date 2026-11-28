@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:kids_drawing_flutter/app/setting/widgets/setting.card.dart';
 import 'package:kids_drawing_flutter/app/setting/widgets/setting.panel.scaffold.dart';
+import 'package:kids_drawing_flutter/core/ui/button/press.button.dart';
 import 'package:kids_drawing_flutter/core/ui/theme/app.colors.dart';
 import 'package:kids_drawing_flutter/core/ui/theme/app.typography.dart';
 import 'package:kids_drawing_flutter/utils/responsive.dart';
@@ -29,9 +30,8 @@ class SubscriptionPanel extends StatelessWidget {
         children: [
           _PlanTicket(onTap: () => _openPaywall(context)),
           SizedBox(height: context.rs(4)),
-          GestureDetector(
-            behavior: HitTestBehavior.opaque,
-            onTap: () {},
+          PressButton(
+            onPressed: () {},
             child: SettingCard(
               child: Row(
                 children: [
@@ -94,9 +94,8 @@ class _LinkText extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
+    return PressButton(
+      onPressed: onTap,
       child: Padding(
         padding: EdgeInsets.symmetric(vertical: context.rs(6)),
         child: Text(
@@ -120,8 +119,8 @@ class _PlanTicket extends StatelessWidget {
   Widget build(BuildContext context) {
     return Padding(
       padding: EdgeInsets.only(bottom: context.rs(14)),
-      child: GestureDetector(
-        onTap: onTap,
+      child: PressButton(
+        onPressed: onTap,
         child: ConstrainedBox(
           constraints: BoxConstraints(minHeight: context.rs(110)),
           child: CustomPaint(

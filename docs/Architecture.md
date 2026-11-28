@@ -23,15 +23,17 @@ The UI sends normalized input and commands to the engine. It must not implement 
 
 ## 3. Codebase map (live tree)
 
-**Last updated:** 2026-11-22
+**Last updated:** 2026-11-23
 
-Single source of truth for file locations. Stack: Flutter `CupertinoApp`, Provider MVVM, Floor SQLite catalog, SharedPreferences settings via `LocalStorage` → `SettingsRepository`. User flow: **Splash → Genre → Gallery → Drawing**; settings from Genre via parent gate → `SettingDialog`.
+Single source of truth for file locations. Stack: Flutter `CupertinoApp`, Provider MVVM, Floor SQLite catalog (v2), SharedPreferences settings via `LocalStorage` → `SettingsRepository`, audio via `AppSound` (`flutter_soloud` effects, music and voice clips, `flutter_tts` as the voice fallback). User flow: **Splash → Genre → Gallery → Drawing**; settings from Genre via parent gate → `SettingDialog`.
 
 Create a folder only when the first file needs it. Forbidden folder names: `utils`, `helpers`, `common`, `misc`, `shared` (except existing `lib/utils/responsive.dart`). AI coding rules live in `.cursor/rules/`.
 
 ### 3.1 Placement and imports
 
 - `screen/` under each `lib/app/<feature>/` is the route widget only (`CupertinoPageScaffold`, `CupertinoPageRoute`).
+- Sound, voice and haptics: `core/audio/`, behind the one `AppSound` facade. `core/audio` may read `types/` but never `state/`, `app/` or `data/`, so preferences are pushed in from `SettingViewModel`.
+- Shared buttons: `core/ui/button/`. `PressButton` owns the press sound, haptic and timing; `CircleButton`, `RoundedButton` and `PillButton` compose it. Anything tappable goes through it — a raw `GestureDetector` with an `onTap` is a bug, because it makes no sound.
 - Shared drawing logic: `core/engine/`. Each paint engine: one `DrawingTool` in `core/tools/`. `StationaryTools` owns the stick catalogs (`PencilTools`, `GlitterTools`, …) and the live paint engines; `CategoryModel.brushType` picks a category's engine.
 - **Live composition root:** `lib/main.dart` — `MultiProvider` wires `CatalogRepository`, `SettingsRepository`, `DrawingViewModel`, `GalleryViewModel`, `GenreViewModel`, `SettingViewModel`.
 - Screen imports: its `state/`, own `widgets/`, `core/ui/`, `lib/types/`. Never `data/local` impls or repository impls from screens.
@@ -46,7 +48,7 @@ Presentation routes and widgets: `lib/app/`. Domain types: `lib/types/`. No `lib
 
 #### `lib/` root
 
-- `main.dart` — App entry: Floor DB, device id, catalog seed, MultiProvider (Setting, Genre, Drawing, Gallery), CupertinoApp → SplashScreen.
+- `main.dart` — App entry: Floor DB + v2 migration, device id, catalog seed, AppSound preload, MultiProvider (Setting, Genre, Drawing, Gallery), CupertinoApp with SoundRouteObserver → SplashScreen.
 
 #### `lib/app/drawing/`
 
@@ -128,6 +130,19 @@ Presentation routes and widgets: `lib/app/`. Domain types: `lib/types/`. No `lib
 
 - `app/splash/splash.screen.dart` — 3s splash → replace with GenreScreen.
 
+#### `lib/core/audio/`
+
+- `core/audio/ambience.player.dart` — AmbiencePlayer: a genre's short clips at random gaps, no clip twice in a row; one cancellable `Timer`.
+- `core/audio/app.sound.dart` — AppSound: the one facade screens and ViewModels call; owns the players, the preference flags and the app-lifecycle observer.
+- `core/audio/music.player.dart` — MusicPlayer: looping background track decoded in memory (gapless), with duck/unduck under voice and pause/resume.
+- `core/audio/sfx.player.dart` — SfxPlayer: short clips loaded once; one-shots plus the single stroke loop; a missing file is remembered and skipped.
+- `core/audio/sound.assets.dart` — SoundAssets: every audio path; the one place to swap a sound.
+- `core/audio/sound.route.observer.dart` — SoundRouteObserver: the going-in / coming-back sounds on `PageRoute` push/pop, which also catches the iOS edge-swipe.
+- `core/audio/touch.haptics.dart` — TouchHaptics: tap and select buzz; stroke ticks throttled by distance and time.
+- `core/audio/voice.clips.dart` — VoiceClips: plays a line's recording, bundled or downloaded; `fileNameFor` is the slug rule shared with the renderer and the admin dashboard.
+- `core/audio/voice.lines.dart` — VoiceLines: optional `assets/voice/<lang>.json` overrides; falls back to the English text on the model.
+- `core/audio/voice.player.dart` — VoicePlayer: flutter_tts, the fallback when a line has no clip; locale resolution with English fallback, prefers a female voice.
+
 #### `lib/core/engine/`
 
 - `core/engine/burst.engine.dart` — Finger-lift particle burst from the lift point, screen space, immutable particles; ephemeral not in undo.
@@ -181,30 +196,33 @@ Presentation routes and widgets: `lib/app/`. Domain types: `lib/types/`. No `lib
 - `core/ui/theme/app.colors.dart` — App-wide color palette tokens.
 - `core/ui/theme/app.theme.dart` — CupertinoThemeData with Nunito defaults.
 - `core/ui/theme/app.typography.dart` — boldStyle, semiBoldStyle, numericStyle tokens.
-- `core/ui/widgets/circle.button.dart` — Round filled tappable icon/digit button.
-- `core/ui/widgets/rounded.button.dart` — Rounded image tile button.
+- `core/ui/button/circle.button.dart` — Round filled tappable icon/digit button; built on PressButton.
+- `core/ui/button/pill.button.dart` — PillButton: the shared rounded text button ("CONTINUE", "YES"); built on PressButton.
+- `core/ui/button/press.button.dart` — PressButton: shared press sound, haptic and hold timing; takes a `child` or `builder(context, pressed)`.
+- `core/ui/button/press.sound.dart` — PressSound: `enter` for anything forward, `exit` for back / close / cancel.
+- `core/ui/button/rounded.button.dart` — Rounded image tile button; built on PressButton.
 
 #### `lib/data/`
 
-- `data/local/artwork/artwork.catalog.seeder.dart` — Seeds Floor DB from JSON seeds per device.
+- `data/local/artwork/artwork.catalog.seeder.dart` — Seeds Floor DB from JSON seeds per device; backfills a missing thumbnail or `voice` on existing rows.
 - `data/local/artwork/artwork.path.parser.dart` — Parses SVG/path strings into regions.
 - `data/local/artwork/artwork.thumbnail.baker.dart` — Renders artwork thumbnails for gallery.
 - `data/local/artwork/json.artwork.loader.dart` — Loads coloring JSON into ColoringArtwork.
 - `data/local/artwork/strokes.json.codec.dart` — Serialize/deserialize strokes for persistence.
 - `data/local/device.id.store.dart` — Stable per-install device id.
-- `data/local/floor/app.database.dart` — Floor @Database definition.
+- `data/local/floor/app.database.dart` — Floor @Database definition; v2 added the artwork `voice` column.
 - `data/local/floor/app.database.g.dart` — Floor codegen — do not hand-edit.
 - `data/local/floor/artwork.dao.dart` — Artwork Floor DAO queries.
-- `data/local/floor/artwork.entity.dart` — Artwork table entity.
+- `data/local/floor/artwork.entity.dart` — Artwork table entity; `voice` = line read when it opens.
 - `data/repositories/artwork/catalog.repository.dart` — CatalogRepository interface.
 - `data/repositories/artwork/catalog.repository.impl.dart` — Floor-backed catalog read/write.
 - `data/repositories/gallery/gallery.repository.dart` — Gallery section data (stub/light).
 - `data/repositories/genre/artwork/artwork.repository.dart` — Genre artwork placeholder.
-- `data/repositories/genre/genre.repository.dart` — Genre list repository.
+- `data/repositories/genre/genre.repository.dart` — Genre list repository; holds each genre's `voice` line and `ambience` clips.
 - `data/repositories/settings/settings.repository.dart` — SettingsRepository interface.
 - `data/repositories/settings/settings.repository.impl.dart` — Settings persisted via LocalStorage.
 - `data/seed/artwork.seed.catalog.dart` — List of bundled artwork seed entries.
-- `data/seed/artwork.seed.entry.dart` — One seed manifest entry.
+- `data/seed/artwork.seed.entry.dart` — One seed manifest entry; optional `voice` line.
 - `data/seed/school/school.bag.seed.dart` — School bag seed asset refs.
 - `data/seed/school/school.eraser.seed.dart` — Eraser seed refs.
 - `data/seed/school/school.pencil.seed.dart` — Pencil seed refs.
@@ -220,19 +238,26 @@ Presentation routes and widgets: `lib/app/`. Domain types: `lib/types/`. No `lib
 
 - `types/brush.config.dart` — BrushConfig snapshot on strokes; `texture` = pattern tile or sticker asset.
 - `types/brush.type.dart` — BrushType enum.
-- `types/category.model.dart` — CategoryModel for tool categories; `brushType` engine, `grid`/`tiled` layout.
+- `types/category.model.dart` — CategoryModel for tool categories; `brushType` engine, `grid`/`tiled` layout, `voice` line, `drawSound` + `loopSound`.
 - `types/coloring.artwork.dart` — Loaded artwork: regions, paths, metadata.
 - `types/drawing.region.dart` — Closed paintable region model.
 - `types/drawing.stroke.dart` — Stroke points, color, regionId, brush.
 - `types/gellery/gallery.model.dart` — Gallery section model (note folder spelling).
-- `types/genre/genre.model.dart` — Genre carousel item model.
+- `types/genre/genre.model.dart` — Genre carousel item model; `voice` line and `ambience` clip pool.
 - `types/paint.color.dart` — Paint colors as a list: one = solid, more = blend along the stroke (`colorAt`).
-- `types/tools/stationary.model.dart` — Stick model for all catalogs; `colors` list, `color` = first; optional `texture`.
+- `types/tools/stationary.model.dart` — Stick model for all catalogs; `colors` list, `color` = first; optional `texture`; `spokenName` = `voice` or the name read aloud.
 
 #### `lib/utils/`
 
 - `utils/responsive.dart` — context.rs() responsive scaling extension.
 
+
+### 3.2b `test/` and `tool/` (not shipped)
+
+- `test/press_button_test.dart` — PressButton taps fire the callback and survive having no `AppSound` above them.
+- `test/voice_clips_test.dart` — Pins `VoiceClips.fileNameFor`, the filename contract shared with the renderer and the admin dashboard.
+- `tool/voice_lines_export_test.dart` — Writes every line the app can speak to `tool/voice_lines.json`. Run by path (`flutter test tool/voice_lines_export_test.dart`); it is a test only because the catalogs import `dart:ui`.
+- `tool/voice_lines.json` — The exported list: text, the clip filename it must be saved as, and which keys use it. The clips themselves are made outside the repo and dropped into `assets/voice/en/`.
 
 ### 3.3 `assets/` (folders)
 
@@ -241,6 +266,12 @@ Presentation routes and widgets: `lib/app/`. Domain types: `lib/types/`. No `lib
 - `assets/gallery/` — Gallery section hero images.
 - `assets/genre/live_background/` — Parallax layers for animated genre hub background.
 - `assets/stationary/<category>/` — Item images used by catalogs: pencil, marker, glitter, brush, crayon, spray, watercolor, color-balls, tape, letters (PNG used; SVG kept as source). `assets/stationary/tape/patterns/` holds the seamless 512×512 pattern tiles.
+- `assets/sounds/ui/` — Press pair (forward / leaving), tool select, genre bell, burst.
+- `assets/sounds/draw/` — One stroke sound per tool category (`CategoryModel.drawSound`).
+- `assets/sounds/ambience/` — Short genre background clips, shared between genres.
+- `assets/sounds/music/` — Background tracks by the ids in `MusicPanel.tracks`.
+- `assets/voice/` — Optional `<lang>.json` spoken-line overrides; English needs none.
+- `assets/voice/en/` — The spoken lines themselves, one MP3 per line, named by `VoiceClips.fileNameFor`.
 - `assets/png/` — Shared PNGs (e.g. settings puppy).
 - `assets/svgs/` — SVG assets (paw, category backgrounds).
 
@@ -249,12 +280,14 @@ Presentation routes and widgets: `lib/app/`. Domain types: `lib/types/`. No `lib
 
 **`docs/`**
 
+- `Admin-Dashboard.md` — Remote catalog: the Supabase schema, the clip filename contract, dashboard screens and the daily sync.
 - `Architecture.md` — This file; **§3 is the live codebase map**.
 - `Design.md` — Visual design notes.
 - `Memory.md` — Product decisions; §3 points here for paths (not a duplicate tree).
 - `PRD.md`, `TRD.md` — Product and technical requirements.
 - `Roadmap-Stages.md` — Delivery stages.
 - `Rules.md` — Human + AI discipline; tree read/update obligations.
+- `Sound-Assets.md` — Audio file manifest: what ships, what is still to author, voice packs.
 - `UI-UX.md` — UX flows and patterns.
 
 **`.cursor/rules/`** (Cursor agents — follow alongside `Rules.md`)
@@ -276,8 +309,12 @@ Before creating a new class, search §3 and this table:
 
 | Need | Use |
 | --- | --- |
-| Round icon / digit button | `core/ui/widgets/circle.button.dart` |
-| Rounded image tile | `core/ui/widgets/rounded.button.dart` |
+| Round icon / digit button | `core/ui/button/circle.button.dart` |
+| Rounded image tile | `core/ui/button/rounded.button.dart` |
+| A rounded text button | `core/ui/button/pill.button.dart` |
+| A new kind of button (press sound, haptic, hold) | `core/ui/button/press.button.dart` |
+| Any sound, voice line or vibration | `core/audio/app.sound.dart` |
+| An audio file path | `core/audio/sound.assets.dart` |
 | Settings panel chrome (title, close, scroll) | `app/setting/widgets/setting.panel.scaffold.dart` |
 | Settings frosted row card | `app/setting/widgets/setting.card.dart` |
 | Toggle row in settings | `app/setting/widgets/setting_toggle_row.dart` |
@@ -298,6 +335,11 @@ Before creating a new class, search §3 and this table:
 flowchart TD
     Main["main.dart MultiProvider"] --> AppWidget
     Main --> VMs[Setting Genre Drawing Gallery VMs]
+    Main --> Sound["AppSound core/audio"]
+    AppWidget --> RouteObs["SoundRouteObserver"] --> Sound
+    VMs --> Sound
+    CoreUi --> Sound
+    Sound --> Players["Sfx Music Ambience Voice Haptics"]
     AppWidget --> AppRoutes["lib/app screens"]
     AppRoutes -->|"Provider select/read"| VMs
     DrawingVM["DrawingViewModel"] --> CatalogRepo["CatalogRepository"]
@@ -313,6 +355,8 @@ flowchart TD
 ```
 
 - `DrawingViewModel` owns session state, `CatalogRepository`, engines, and active `DrawingTool`.
+- Sound: every screen, ViewModel and `PressButton` calls `AppSound`; `SettingViewModel` pushes the preferences into it. `core/audio` never reads `state/`.
+- Voice: `AppSound` asks `VoiceClips` for a recording first and falls back to `VoicePlayer` (device TTS). Clips are rendered outside the app — see [`docs/Sound-Assets.md`](Sound-Assets.md).
 - Settings: `SettingViewModel` → `SettingsRepository` → `LocalStorage` (prefs); UI in `app/setting/`.
 - Gallery selects artwork via `GalleryViewModel` + `DrawingViewModel.selectArtwork`.
 

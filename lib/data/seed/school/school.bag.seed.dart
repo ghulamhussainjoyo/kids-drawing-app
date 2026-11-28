@@ -7,6 +7,7 @@ class SchoolBagSeed {
     artworkKey: 'school_bag',
     genre: 'school',
     title: 'School Bag',
+    voice: "A school bag, ready for books!",
     isPremium: false,
     templateJson: _templateJson,
   );

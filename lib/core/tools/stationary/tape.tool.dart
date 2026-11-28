@@ -9,6 +9,7 @@ class TapeTools {
       StationaryModel(
         id: '1',
         name: 'bears',
+        voice: 'Bear tape',
         imageSize: 48,
         color: const Color(0xFFAB8EE6),
         image: 'assets/stationary/tape/tape_bears.png',
@@ -17,6 +18,7 @@ class TapeTools {
       StationaryModel(
         id: '2',
         name: 'bunnies',
+        voice: 'Bunny tape',
         imageSize: 48,
         color: const Color(0xFF6CC28D),
         image: 'assets/stationary/tape/tape_bunnies.png',
@@ -25,6 +27,7 @@ class TapeTools {
       StationaryModel(
         id: '3',
         name: 'cats',
+        voice: 'Cat tape',
         imageSize: 48,
         color: const Color(0xFFFFCC4D),
         image: 'assets/stationary/tape/tape_cats.png',
@@ -33,6 +36,7 @@ class TapeTools {
       StationaryModel(
         id: '4',
         name: 'chicks',
+        voice: 'Chick tape',
         imageSize: 48,
         color: const Color(0xFF73C6F5),
         image: 'assets/stationary/tape/tape_chicks.png',
@@ -41,6 +45,7 @@ class TapeTools {
       StationaryModel(
         id: '5',
         name: 'dogs',
+        voice: 'Dog tape',
         imageSize: 48,
         color: const Color(0xFF4EC3DC),
         image: 'assets/stationary/tape/tape_dogs.png',
@@ -49,6 +54,7 @@ class TapeTools {
       StationaryModel(
         id: '6',
         name: 'leopard',
+        voice: 'Leopard tape',
         imageSize: 48,
         color: const Color(0xFFF5C463),
         image: 'assets/stationary/tape/tape_leopard.png',
@@ -57,6 +63,7 @@ class TapeTools {
       StationaryModel(
         id: '7',
         name: 'pandas',
+        voice: 'Panda tape',
         imageSize: 48,
         color: const Color(0xFFFF8C75),
         image: 'assets/stationary/tape/tape_pandas.png',
@@ -65,6 +72,7 @@ class TapeTools {
       StationaryModel(
         id: '8',
         name: 'paws',
+        voice: 'Paw tape',
         imageSize: 48,
         color: const Color(0xFFA991E6),
         image: 'assets/stationary/tape/tape_paws.png',
@@ -73,6 +81,7 @@ class TapeTools {
       StationaryModel(
         id: '9',
         name: 'penguins',
+        voice: 'Penguin tape',
         imageSize: 48,
         color: const Color(0xFFFFB84D),
         image: 'assets/stationary/tape/tape_penguins.png',
@@ -81,6 +90,7 @@ class TapeTools {
       StationaryModel(
         id: '10',
         name: 'rainbow',
+        voice: 'Rainbow tape',
         imageSize: 48,
         color: const Color(0xFF73C6F5),
         image: 'assets/stationary/tape/tape_rainbow.png',
@@ -89,6 +99,7 @@ class TapeTools {
       StationaryModel(
         id: '11',
         name: 'zebra',
+        voice: 'Zebra tape',
         imageSize: 48,
         color: const Color(0xFF8C8A80),
         image: 'assets/stationary/tape/tape_zebra.png',

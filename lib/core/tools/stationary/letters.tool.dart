@@ -9,6 +9,7 @@ class LetterTools {
       StationaryModel(
         id: '1',
         name: 'A',
+        voice: 'Letter A',
         imageSize: 48,
         color: const Color(0xFFFF8A00),
         image: 'assets/stationary/letters/letter_A.png',
@@ -17,6 +18,7 @@ class LetterTools {
       StationaryModel(
         id: '2',
         name: 'B',
+        voice: 'Letter B',
         imageSize: 48,
         color: const Color(0xFF1F6F5C),
         image: 'assets/stationary/letters/letter_B.png',
@@ -25,6 +27,7 @@ class LetterTools {
       StationaryModel(
         id: '3',
         name: 'C',
+        voice: 'Letter C',
         imageSize: 48,
         color: const Color(0xFF33B1E4),
         image: 'assets/stationary/letters/letter_C.png',
@@ -33,6 +36,7 @@ class LetterTools {
       StationaryModel(
         id: '4',
         name: 'D',
+        voice: 'Letter D',
         imageSize: 48,
         color: const Color(0xFFFFC82E),
         image: 'assets/stationary/letters/letter_D.png',
@@ -41,6 +45,7 @@ class LetterTools {
       StationaryModel(
         id: '5',
         name: 'E',
+        voice: 'Letter E',
         imageSize: 48,
         color: const Color(0xFF7A41AF),
         image: 'assets/stationary/letters/letter_E.png',
@@ -49,6 +54,7 @@ class LetterTools {
       StationaryModel(
         id: '6',
         name: 'F',
+        voice: 'Letter F',
         imageSize: 48,
         color: const Color(0xFFFF7BB0),
         image: 'assets/stationary/letters/letter_F.png',
@@ -57,6 +63,7 @@ class LetterTools {
       StationaryModel(
         id: '7',
         name: 'G',
+        voice: 'Letter G',
         imageSize: 48,
         color: const Color(0xFF3DAA4A),
         image: 'assets/stationary/letters/letter_G.png',
@@ -65,6 +72,7 @@ class LetterTools {
       StationaryModel(
         id: '8',
         name: 'H',
+        voice: 'Letter H',
         imageSize: 48,
         color: const Color(0xFFE2302A),
         image: 'assets/stationary/letters/letter_H.png',
@@ -73,6 +81,7 @@ class LetterTools {
       StationaryModel(
         id: '9',
         name: 'I',
+        voice: 'Letter I',
         imageSize: 48,
         color: const Color(0xFF2257D6),
         image: 'assets/stationary/letters/letter_I.png',
@@ -81,6 +90,7 @@ class LetterTools {
       StationaryModel(
         id: '10',
         name: 'J',
+        voice: 'Letter J',
         imageSize: 48,
         color: const Color(0xFF9B3FD6),
         image: 'assets/stationary/letters/letter_J.png',
@@ -89,6 +99,7 @@ class LetterTools {
       StationaryModel(
         id: '11',
         name: 'K',
+        voice: 'Letter K',
         imageSize: 48,
         color: const Color(0xFFFF8A00),
         image: 'assets/stationary/letters/letter_K.png',
@@ -97,6 +108,7 @@ class LetterTools {
       StationaryModel(
         id: '12',
         name: 'L',
+        voice: 'Letter L',
         imageSize: 48,
         color: const Color(0xFF1F6F5C),
         image: 'assets/stationary/letters/letter_L.png',
@@ -105,6 +117,7 @@ class LetterTools {
       StationaryModel(
         id: '13',
         name: 'M',
+        voice: 'Letter M',
         imageSize: 48,
         color: const Color(0xFF33B1E4),
         image: 'assets/stationary/letters/letter_M.png',
@@ -113,6 +126,7 @@ class LetterTools {
       StationaryModel(
         id: '14',
         name: 'N',
+        voice: 'Letter N',
         imageSize: 48,
         color: const Color(0xFFFFC82E),
         image: 'assets/stationary/letters/letter_N.png',
@@ -121,6 +135,7 @@ class LetterTools {
       StationaryModel(
         id: '15',
         name: 'O',
+        voice: 'Letter O',
         imageSize: 48,
         color: const Color(0xFF7A41AF),
         image: 'assets/stationary/letters/letter_O.png',
@@ -129,6 +144,7 @@ class LetterTools {
       StationaryModel(
         id: '16',
         name: 'P',
+        voice: 'Letter P',
         imageSize: 48,
         color: const Color(0xFFFF7BB0),
         image: 'assets/stationary/letters/letter_P.png',
@@ -137,6 +153,7 @@ class LetterTools {
       StationaryModel(
         id: '17',
         name: 'Q',
+        voice: 'Letter Q',
         imageSize: 48,
         color: const Color(0xFF3DAA4A),
         image: 'assets/stationary/letters/letter_Q.png',
@@ -145,6 +162,7 @@ class LetterTools {
       StationaryModel(
         id: '18',
         name: 'R',
+        voice: 'Letter R',
         imageSize: 48,
         color: const Color(0xFFE2302A),
         image: 'assets/stationary/letters/letter_R.png',
@@ -153,6 +171,7 @@ class LetterTools {
       StationaryModel(
         id: '19',
         name: 'S',
+        voice: 'Letter S',
         imageSize: 48,
         color: const Color(0xFF2257D6),
         image: 'assets/stationary/letters/letter_S.png',
@@ -161,6 +180,7 @@ class LetterTools {
       StationaryModel(
         id: '20',
         name: 'T',
+        voice: 'Letter T',
         imageSize: 48,
         color: const Color(0xFFAB5DDC),
         image: 'assets/stationary/letters/letter_T.png',
@@ -169,6 +189,7 @@ class LetterTools {
       StationaryModel(
         id: '21',
         name: 'U',
+        voice: 'Letter U',
         imageSize: 48,
         color: const Color(0xFFFF8A00),
         image: 'assets/stationary/letters/letter_U.png',
@@ -177,6 +198,7 @@ class LetterTools {
       StationaryModel(
         id: '22',
         name: 'V',
+        voice: 'Letter V',
         imageSize: 48,
         color: const Color(0xFF1F6F5C),
         image: 'assets/stationary/letters/letter_V.png',
@@ -185,6 +207,7 @@ class LetterTools {
       StationaryModel(
         id: '23',
         name: 'W',
+        voice: 'Letter W',
         imageSize: 48,
         color: const Color(0xFF33B1E4),
         image: 'assets/stationary/letters/letter_W.png',
@@ -193,6 +216,7 @@ class LetterTools {
       StationaryModel(
         id: '24',
         name: 'X',
+        voice: 'Letter X',
         imageSize: 48,
         color: const Color(0xFFFFC82E),
         image: 'assets/stationary/letters/letter_X.png',
@@ -201,6 +225,7 @@ class LetterTools {
       StationaryModel(
         id: '25',
         name: 'Y',
+        voice: 'Letter Y',
         imageSize: 48,
         color: const Color(0xFF7A41AF),
         image: 'assets/stationary/letters/letter_Y.png',
@@ -209,6 +234,7 @@ class LetterTools {
       StationaryModel(
         id: '26',
         name: 'Z',
+        voice: 'Letter Z',
         imageSize: 48,
         color: const Color(0xFFFF7BB0),
         image: 'assets/stationary/letters/letter_Z.png',

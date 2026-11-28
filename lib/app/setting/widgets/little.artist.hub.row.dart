@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:kids_drawing_flutter/app/setting/widgets/setting.card.dart';
+import 'package:kids_drawing_flutter/core/ui/button/press.button.dart';
 import 'package:kids_drawing_flutter/core/ui/theme/app.typography.dart';
 import 'package:kids_drawing_flutter/utils/responsive.dart';
 
@@ -17,9 +18,8 @@ class LittleArtistHubRow extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
+    return PressButton(
+      onPressed: onTap,
       child: SettingCard(
         padding: EdgeInsets.symmetric(
           horizontal: context.rs(14),

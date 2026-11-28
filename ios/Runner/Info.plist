@@ -57,6 +57,16 @@
 	<string>Save your coloring artwork to the Photos library.</string>
 	<key>NSPhotoLibraryUsageDescription</key>
 	<string>Access Photos to save and share your coloring artwork.</string>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>fetch</string>
+		<string>processing</string>
+	</array>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>com.transistorsoft.fetch</string>
+		<string>catalogSync</string>
+	</array>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationLandscapeLeft</string>

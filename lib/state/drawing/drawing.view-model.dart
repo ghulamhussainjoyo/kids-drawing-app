@@ -4,6 +4,7 @@ import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
 
+import '../../core/audio/app.sound.dart';
 import '../../core/engine/layer.manager.dart';
 import '../../core/engine/region.engine.dart';
 import '../../core/engine/stroke.dabber.dart';
@@ -25,7 +26,9 @@ class DrawingViewModel extends ChangeNotifier {
   late ArtworkThumbnailBaker thumbnailBaker;
   final StationaryTools stationaryTools = StationaryTools();
 
-  DrawingViewModel({required this.catalogRepository}) {
+  final AppSound sound;
+
+  DrawingViewModel({required this.catalogRepository, required this.sound}) {
     thumbnailBaker = ArtworkThumbnailBaker();
   }
 
@@ -116,6 +119,11 @@ class DrawingViewModel extends ChangeNotifier {
     hasOpenedArtwork = true;
   }
 
+  /// The category whose voice line and stroke sound are in play.
+  CategoryModel get activeCategory {
+    return stationaryTools.getCategory(selectedCategory);
+  }
+
   /// Loads the tool's image first, so its first stroke can paint it.
   Future<void> selectTool(StationaryModel tool) async {
     await stationaryTools.preload(tool.texture);
@@ -124,6 +132,7 @@ class DrawingViewModel extends ChangeNotifier {
       paintColor: PaintColor(id: tool.id, colors: tool.colors),
       texture: tool.texture,
     );
+    sound.toolSelected(activeCategory, tool);
     notifyListeners();
   }
 
@@ -136,6 +145,7 @@ class DrawingViewModel extends ChangeNotifier {
     if (!_sameToolIds(previous, next)) {
       selectedTool = null;
     }
+    sound.categorySelected(activeCategory);
     notifyListeners();
   }
 
@@ -186,6 +196,7 @@ class DrawingViewModel extends ChangeNotifier {
       ..updateTail();
     nextStrokeId++;
     activeStrokeTicks.value++;
+    sound.strokeBegan(activeCategory, point);
     return true;
   }
 
@@ -228,6 +239,7 @@ class DrawingViewModel extends ChangeNotifier {
     }
     activeDabberField?.updateTail(point);
     activeStrokeTicks.value++;
+    sound.strokeMoved(point);
   }
 
   DrawingStroke? endStroke() {
@@ -240,6 +252,7 @@ class DrawingViewModel extends ChangeNotifier {
     revisionValue++;
     completedStroke = true;
     activeStrokeTicks.value++;
+    sound.strokeEnded(committed: true);
     notifyListeners();
     _scheduleSave();
     return current;
@@ -250,6 +263,7 @@ class DrawingViewModel extends ChangeNotifier {
     active = null;
     activeDabberField = null;
     activeStrokeTicks.value++;
+    sound.strokeCancelled();
   }
 
   void undo() {

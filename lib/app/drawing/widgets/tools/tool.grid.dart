@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:kids_drawing_flutter/app/drawing/metrics/tools.panel.metrics.dart';
-import 'package:kids_drawing_flutter/core/ui/widgets/rounded.button.dart';
+import 'package:kids_drawing_flutter/core/ui/button/press.button.dart';
+import 'package:kids_drawing_flutter/core/ui/button/rounded.button.dart';
 import 'package:kids_drawing_flutter/types/category.model.dart';
 import 'package:kids_drawing_flutter/types/tools/stationary.model.dart';
 
@@ -39,8 +40,8 @@ class ToolGrid extends StatelessWidget {
       itemBuilder: (context, index) {
         final tool = tools[index];
         final image = Image.asset(tool.image, filterQuality: FilterQuality.high);
-        Widget cell = GestureDetector(
-          onTap: () => onSelect(tool),
+        Widget cell = PressButton(
+          onPressed: () => onSelect(tool),
           child: image,
         );
         if (category.tiled) {

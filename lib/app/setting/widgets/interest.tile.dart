@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:kids_drawing_flutter/core/ui/button/press.button.dart';
 import 'package:kids_drawing_flutter/core/ui/theme/app.colors.dart';
 import 'package:kids_drawing_flutter/core/ui/theme/app.typography.dart';
 import 'package:kids_drawing_flutter/utils/responsive.dart';
@@ -119,8 +120,8 @@ class _InterestTileState extends State<InterestTile>
 
     return Padding(
       padding: EdgeInsets.only(right: context.rs(12)),
-      child: GestureDetector(
-        onTap: widget.onTap,
+      child: PressButton(
+        onPressed: widget.onTap,
         child: Column(
           children: [
             AnimatedBuilder(

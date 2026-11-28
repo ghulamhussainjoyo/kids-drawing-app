@@ -42,10 +42,13 @@ class _GenreCarouselState extends State<GenreCarousel> {
 
   @override
   Widget build(BuildContext context) {
-    final viewModel = Provider.of<GenreViewModel>(context, listen: false);
+    final genres = context.watch<GenreViewModel>().genres;
+    if (genres.isEmpty) {
+      return const Center(child: CupertinoActivityIndicator());
+    }
     return PageView.builder(
       controller: controller,
-      itemCount: viewModel.getGenres().length,
+      itemCount: genres.length,
       itemBuilder: (context, index) {
         final howFarFromCenter = (page - index).abs();
         var closeness = 1.0 - howFarFromCenter;
@@ -54,14 +57,15 @@ class _GenreCarouselState extends State<GenreCarousel> {
         }
         final scale = smallScale + (largeScale - smallScale) * closeness;
         final focused = howFarFromCenter < 0.5;
-        final genres = viewModel.getGenres();
         final genre = genres[index];
         return GenreCircleItem(
           genre: genre,
           scale: scale,
           focused: focused,
           closeness: closeness,
-          onPressed: (selected) => viewModel.openGenre(context, selected),
+          onPressed: (selected) {
+            context.read<GenreViewModel>().openGenre(context, selected);
+          },
         );
       },
     );

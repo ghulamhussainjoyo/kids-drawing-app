@@ -7,6 +7,8 @@ abstract class CatalogRepository {
 
   Future<ArtworkEntity?> getByKey(String artworkKey);
 
+  Future<String> resolveVoiceText(String artworkSlug, String language);
+
   ColoringArtwork loadTemplate(ArtworkEntity row);
 
   List<DrawingStroke> loadStrokes(ArtworkEntity row);
