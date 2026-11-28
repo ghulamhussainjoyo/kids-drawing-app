@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:kids_drawing_flutter/core/ui/theme/app.colors.dart';
+import 'package:kids_drawing_flutter/state/setting/setting.view-model.dart';
+import 'package:provider/provider.dart';
 
 class SizeSliderDisplay extends StatelessWidget {
   const SizeSliderDisplay({
@@ -31,7 +33,7 @@ class SizeSliderDisplay extends StatelessWidget {
         onChanged(next.clamp(0.0, 1.0));
       },
       child: Semantics(
-        label: 'Brush size',
+        label: context.read<SettingViewModel>().t('drawing.brush_size'),
         excludeSemantics: true,
         child: CustomPaint(
           size: Size(width, height),

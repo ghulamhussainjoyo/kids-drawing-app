@@ -1,3 +1,4 @@
+import 'package:flutter/material.dart';
 import 'package:kids_drawing_flutter/core/engine/layer.manager.dart';
 import 'package:kids_drawing_flutter/core/engine/region.engine.dart';
 import 'package:kids_drawing_flutter/core/tools/stationary.tools.dart';
@@ -25,6 +26,26 @@ class ArtworkCatalogSeeder {
     required this.genreDao,
     this.catalog = const ArtworkSeedCatalog(),
   });
+
+  /// Bakes outline thumbnails for any artwork that is missing one.
+  Future<void> bakeMissingThumbnails(String deviceId) async {
+    final all = await artworkDao.listForDevice(deviceId);
+    for (final row in all) {
+      if (row.thumbnailPath != null && row.thumbnailPath!.isNotEmpty) continue;
+      if (row.templateJson.isEmpty || row.templateJson == '{}') continue;
+      try {
+        final path = await _bakeOutlineThumb(
+          templateJson: row.templateJson,
+          genre: row.genre,
+          artworkKey: row.artworkKey,
+        );
+        await artworkDao.updateArtwork(row.copyWith(thumbnailPath: path));
+      } catch (_) {
+        debugPrint('Failed to bake thumbnail for ${row.title} — skipping.');
+        // Template may have invalid path data — skip this artwork.
+      }
+    }
+  }
 
   /// Seeds if Floor has no genres yet. Skips entirely when remote data exists.
   Future<void> seedIfEmpty(String deviceId) async {

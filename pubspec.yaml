@@ -78,3 +78,6 @@ flutter:
           weight: 600
         - asset: assets/fonts/Nunito-Variable.ttf
           weight: 700
+    - family: GoogleSans
+      fonts:
+        - asset: assets/fonts/google_sans/GoogleSans-VariableFont_GRAD,opsz,wght.ttf

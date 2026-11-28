@@ -18,7 +18,9 @@ class JsonArtworkLoader {
     final viewBox = (map['viewBox'] as String?) ?? '0 0 512 512';
     final vb = _parseViewBox(viewBox);
     final size = vb.width > vb.height ? vb.width : vb.height;
-    final offset = Offset(-vb.left, -vb.top);
+    final dx = -vb.left + (size - vb.width) / 2;
+    final dy = -vb.top + (size - vb.height) / 2;
+    final offset = Offset(dx, dy);
     final outline = map['outline'] as Map<String, dynamic>? ?? const {};
     final outlineWidth = (outline['strokeWidth'] as num?)?.toDouble() ?? 8;
 
@@ -52,9 +54,7 @@ class JsonArtworkLoader {
       for (var j = i + 1; j < rawPaths.length; j++) {
         path = Path.combine(PathOperation.difference, path, rawPaths[j]);
       }
-      regions.add(
-        DrawingRegion(id: rawIds[i], name: rawIds[i], path: path),
-      );
+      regions.add(DrawingRegion(id: rawIds[i], name: rawIds[i], path: path));
     }
 
     final lineMaps = map['lines'] as List<dynamic>? ?? const [];

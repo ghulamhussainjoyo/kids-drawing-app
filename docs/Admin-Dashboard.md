@@ -109,6 +109,14 @@ create table translations (
   constraint one_owner check (num_nonnulls(genre_id, artwork_id) = 1)
 );
 
+create table app_locals (
+  key            text not null,
+  language_code  text not null references languages(code),
+  value          text not null,
+  updated_at     timestamptz not null default now(),
+  primary key (key, language_code)
+);
+
 create unique index translations_genre_key
   on translations (genre_id, language_code, field, position)
   where genre_id is not null;
@@ -121,6 +129,7 @@ create index artworks_browse   on artworks (genre_id, status, sort_order);
 create index translations_sync on translations (language_code, updated_at);
 create index genres_sync       on genres (updated_at);
 create index artworks_sync     on artworks (updated_at);
+create index app_locals_sync   on app_locals (language_code, updated_at);
 
 -- `default now()` only fires on insert, and the sync reads
 -- `updated_at > last_sync`. Without this trigger on every table, an edit
@@ -364,6 +373,116 @@ List by genre, add, edit, publish, archive. Per artwork:
 - Editing the text clears the audio, because the filename is derived from the
   words — otherwise the row would point at a clip of the old wording.
 
+### App Locals (UI translations)
+
+The `app_locals` table stores every user-facing string the app shows outside of
+artwork and genre content. The app ships with English defaults hardcoded; the
+dashboard provides translated values per language.
+
+Machine-readable English defaults (all keys, sources, and gap flags):
+[`docs/app-locals.en.json`](app-locals.en.json).
+
+List all keys, grouped by screen. Each key has a value per active language.
+Fields: `key` (read-only, defined by the app), `language_code`, `value`.
+
+- **No audio** — these are button labels, headings and short copy, not voice
+  lines.
+- **Placeholders** use `{name}` syntax. The app calls
+  `String.replaceAll('{name}', value)`. The dashboard should show the
+  placeholder names next to the input so the translator knows which tokens
+  to keep.
+- A missing value is not an error — the app falls back to English, then to its
+  hardcoded default.
+- The key is immutable. Adding a new key means a new app release that knows
+  about it; the dashboard does not invent keys.
+
+**82 keys.** The complete list with English defaults:
+
+| Key | English default |
+| --- | --- |
+| `connectivity.headline` | Connect to load artworks! |
+| `connectivity.subtitle` | Turn on WiFi so we can download your coloring pages. |
+| `connectivity.connect` | Let's Connect! |
+| `connectivity.play_offline` | Play without internet |
+| `connectivity.loading` | Loading artworks… |
+| `genre.try_free` | Try free for 7 days |
+| `genre.bottom_left_placeholder` | Bottom left |
+| `drawing.erase_no` | NO |
+| `drawing.erase_yes` | YES |
+| `drawing.brush_size` | Brush size |
+| `drawing.share_text` | Check out my drawing! 🎨 |
+| `drawing.saved` | Saved! |
+| `drawing.keep` | Keep |
+| `drawing.let_go` | Let go |
+| `drawing.complete_date_pattern` | MMM d, y |
+| `parent_gate.title` | Ask a Grown-Up |
+| `settings.title` | Settings |
+| `settings.little_artist` | Little Artist |
+| `settings.music` | Music |
+| `settings.sounds_voice` | Sounds & Voice |
+| `settings.language` | Language |
+| `settings.subscription` | Subscription |
+| `settings.help` | Help |
+| `settings.about` | About |
+| `little_artist.title` | Little Artist |
+| `little_artist.who` | Who's the little artist? |
+| `little_artist.girl` | Girl |
+| `little_artist.boy` | Boy |
+| `little_artist.siblings` | Siblings |
+| `little_artist.how_old` | How old is {pronoun}? |
+| `little_artist.what_loves` | What does {pronoun} love? |
+| `little_artist.tap_to_choose` | Tap to choose |
+| `little_artist.selected_count` | {count} selected |
+| `little_artist.continue` | CONTINUE |
+| `little_artist.pronoun_she` | she |
+| `little_artist.pronoun_he` | he |
+| `little_artist.pronoun_they` | they |
+| `little_artist.age_0_2` | 0–2 |
+| `little_artist.age_3_4` | 3–4 |
+| `little_artist.age_5_6` | 5–6 |
+| `little_artist.age_7_8` | 7–8 |
+| `little_artist.age_9_11` | 9–11 |
+| `little_artist.age_12_plus` | 12+ |
+| `interest.animals` | Animals |
+| `interest.music` | Music |
+| `interest.seasons` | Seasons |
+| `interest.school` | School |
+| `interest.transport` | Transport |
+| `interest.princesses` | Princesses |
+| `interest.fruit_garden` | Fruit Garden |
+| `music.title` | Music |
+| `music.toggle` | Music |
+| `music.puppy_playtime` | Puppy Playtime |
+| `music.sunshine_skip` | Sunshine Skip |
+| `music.bubble_pop` | Bubble Pop Parade |
+| `music.rainbow_carousel` | Rainbow Carousel |
+| `music.confetti_party` | Confetti Party |
+| `sounds_voice.title` | Sounds & Voice |
+| `sounds_voice.voice` | Voice |
+| `sounds_voice.sfx` | Sound Effects |
+| `sounds_voice.vibrations` | Vibrations |
+| `language.title` | Language |
+| `language.english_fallback` | English |
+| `language.narrator_learning` | The narrator is learning {language} |
+| `language.learning_description` | What it says on every page is on its way. Keep coloring — it'll join in when ready. |
+| `language.got_it` | Got it |
+| `subscription.title` | Subscription |
+| `subscription.restore` | Restore Purchases |
+| `subscription.privacy` | Privacy Policy |
+| `subscription.terms` | Terms of Use |
+| `subscription.no_plan` | No plan yet |
+| `subscription.try_free_long` | Try Free for 7 days |
+| `subscription.try_free_short` | Try Free |
+| `subscription.paywall_soon` | Paywall coming soon |
+| `help.title` | Help |
+| `help.placeholder` | Contact us / FAQ links (coming soon) |
+| `about.title` | About |
+| `about.app_name` | Kids Drawing |
+| `about.version_loading` | Version … |
+| `about.version_format` | Version {version} (Build {build}) |
+| `about.description` | Designed with love for young creative minds. Unleash imagination with puppies, colors, and art! |
+| `splash.title` | Splash |
+
 ---
 
 ## 6. The sync contract
@@ -395,6 +514,8 @@ returns jsonb language sql stable as $$
       left join artworks a on a.id = t.artwork_id
       where t.updated_at > since and t.language_code = any(langs)
     ),
+    'app_locals',   (select coalesce(jsonb_agg(l), '[]') from app_locals l
+                      where l.updated_at > since and l.language_code = any(langs)),
     'server_time',  now()
   );
 $$;
@@ -652,8 +773,9 @@ MP3. Re-run the export after writing any new line; it only ever adds.
    artwork's title and voice line.
 3. Generate the audio, upload each clip to `voice/<code>/` under the name the
    rule in §3 produces.
-4. Set `is_active = true`.
-5. A child who picks that language gets the new rows and clips at the next
+4. Translate the 82 `app_locals` keys (see §5). Keep placeholders intact.
+5. Set `is_active = true`.
+6. A child who picks that language gets the new rows and clips at the next
    sync. Until then they hear the device voice reading translated text, and
    English text where a translation is missing.
 
@@ -686,4 +808,18 @@ MP3. Re-run the export after writing any new line; it only ever adds.
 Set `status = 'archived'`. It leaves the gallery at the next sync. Rows and any
 child's colouring stay where they are. **Never delete**, and never rename a
 published slug — that is the one change the app cannot recover from.
+
+### Translate UI strings (app locals)
+
+1. The 82 keys are defined by the app — the dashboard does not create new ones.
+   See the full list in §5 "App Locals (UI translations)" and
+   [`app-locals.en.json`](app-locals.en.json).
+2. For each active language, insert a row per key into `app_locals` with the
+   translated `value`. English rows are optional (the app has hardcoded English
+   defaults).
+3. Placeholders like `{pronoun}`, `{count}`, `{language}`, `{version}`,
+   `{build}` must appear verbatim in the translation — the app replaces them
+   at runtime.
+4. After the next sync the translated strings appear in the app. Missing keys
+   fall back: current language → English → hardcoded default.
 

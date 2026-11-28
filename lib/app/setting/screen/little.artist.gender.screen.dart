@@ -17,9 +17,9 @@ class LittleArtistGenderScreen extends StatelessWidget {
 
     return CupertinoPageScaffold(
       backgroundColor: const Color(0xFFFFF5E8),
-      navigationBar: const CupertinoNavigationBar(
-        middle: Text('Who\'s the little artist?'),
-        backgroundColor: Color(0xFFFFF5E8),
+      navigationBar: CupertinoNavigationBar(
+        middle: Text(settings.t('little_artist.who')),
+        backgroundColor: const Color(0xFFFFF5E8),
       ),
       child: SafeArea(
         child: Padding(
@@ -31,21 +31,21 @@ class LittleArtistGenderScreen extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   _GenderChoice(
-                    label: 'Girl',
+                    label: settings.t('little_artist.girl'),
                     isSelected: settings.gender == 'girl',
                     icon: CupertinoIcons.person_solid,
                     accentColor: const Color(0xFFF59E0B),
                     onTap: () => settings.setGender('girl'),
                   ),
                   _GenderChoice(
-                    label: 'Boy',
+                    label: settings.t('little_artist.boy'),
                     isSelected: settings.gender == 'boy',
                     icon: CupertinoIcons.person_solid,
                     accentColor: const Color(0xFF3B82F6),
                     onTap: () => settings.setGender('boy'),
                   ),
                   _GenderChoice(
-                    label: 'Siblings',
+                    label: settings.t('little_artist.siblings'),
                     isSelected: settings.gender == 'siblings',
                     icon: CupertinoIcons.person_2_fill,
                     accentColor: const Color(0xFF10B981),
@@ -57,7 +57,7 @@ class LittleArtistGenderScreen extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: PillButton(
-                  label: 'CONTINUE',
+                  label: settings.t('little_artist.continue'),
                   color: AppColors.purple,
                   fontSize: context.rs(16),
                   radius: context.rs(28),
@@ -108,10 +108,26 @@ class _GenderChoice extends StatelessWidget {
     if (!isSelected) {
       avatar = ColorFiltered(
         colorFilter: const ColorFilter.matrix(<double>[
-          0.2126, 0.7152, 0.0722, 0, 0,
-          0.2126, 0.7152, 0.0722, 0, 0,
-          0.2126, 0.7152, 0.0722, 0, 0,
-          0, 0, 0, 1, 0,
+          0.2126,
+          0.7152,
+          0.0722,
+          0,
+          0,
+          0.2126,
+          0.7152,
+          0.0722,
+          0,
+          0,
+          0.2126,
+          0.7152,
+          0.0722,
+          0,
+          0,
+          0,
+          0,
+          0,
+          1,
+          0,
         ]),
         child: avatar,
       );

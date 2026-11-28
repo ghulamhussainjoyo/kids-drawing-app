@@ -73,7 +73,10 @@ class ArtworkPathParser {
   List<String> _tokenize(String data) {
     final cleaned = data
         .replaceAll(',', ' ')
-        .replaceAllMapped(RegExp(r'([MmLlHhVvCcQqZz])'), (match) => ' ${match[1]} ')
+        .replaceAllMapped(
+          RegExp(r'([MmLlHhVvCcQqZz])'),
+          (match) => ' ${match[1]} ',
+        )
         .replaceAllMapped(RegExp(r'-'), (match) => ' -');
     return cleaned
         .split(RegExp(r'\s+'))

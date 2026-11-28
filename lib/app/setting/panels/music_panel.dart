@@ -15,27 +15,23 @@ class MusicPanel extends StatelessWidget {
   const MusicPanel({super.key});
 
   static const tracks = [
-    (id: 'puppy_playtime', label: 'Puppy Playtime', color: Color(0xFF8B5CF6)),
-    (id: 'sunshine_skip', label: 'Sunshine Skip', color: Color(0xFFF59E0B)),
-    (id: 'bubble_pop', label: 'Bubble Pop Parade', color: Color(0xFFEF4444)),
-    (
-      id: 'rainbow_carousel',
-      label: 'Rainbow Carousel',
-      color: Color(0xFFEC4899),
-    ),
-    (id: 'confetti_party', label: 'Confetti Party', color: Color(0xFF3B82F6)),
+    (id: 'puppy_playtime', color: Color(0xFF8B5CF6)),
+    (id: 'sunshine_skip', color: Color(0xFFF59E0B)),
+    (id: 'bubble_pop', color: Color(0xFFEF4444)),
+    (id: 'rainbow_carousel', color: Color(0xFFEC4899)),
+    (id: 'confetti_party', color: Color(0xFF3B82F6)),
   ];
 
   @override
   Widget build(BuildContext context) {
-    final (musicOn, volume, selectedTrack) =
-        context.select<SettingViewModel, (bool, double, String)>(
-      (s) => (s.musicOn, s.volume, s.selectedTrack),
-    );
+    final (musicOn, volume, selectedTrack) = context
+        .select<SettingViewModel, (bool, double, String)>(
+          (s) => (s.musicOn, s.volume, s.selectedTrack),
+        );
     final viewModel = context.read<SettingViewModel>();
 
     return SettingPanelScaffold(
-      title: 'Music',
+      title: viewModel.t('music.title'),
       onClose: () => Navigator.of(context).pop(),
       child: Column(
         children: [
@@ -45,7 +41,7 @@ class MusicPanel extends StatelessWidget {
               color: AppColors.purple,
               size: context.rs(22),
             ),
-            title: 'Music',
+            title: viewModel.t('music.toggle'),
             value: musicOn,
             onChanged: viewModel.setMusicOn,
           ),
@@ -60,7 +56,7 @@ class MusicPanel extends StatelessWidget {
                 ),
                 for (final track in tracks)
                   _TrackRow(
-                    label: track.label,
+                    label: viewModel.t('music.${track.id}'),
                     color: track.color,
                     selected: selectedTrack == track.id,
                     showEqualizer: musicOn && selectedTrack == track.id,

@@ -62,10 +62,10 @@ class LanguagePanel extends StatelessWidget {
 
     final flagSize = context.rs(48);
     final labelHeight =
-        MediaQuery.textScalerOf(context).scale(context.rs(11)) * 1.4;
+        MediaQuery.textScalerOf(context).scale(context.rs(11)) * 2.0;
 
     return SettingPanelScaffold(
-      title: 'Language',
+      title: viewModel.t('language.title'),
       onClose: () => Navigator.of(context).pop(),
       scrollable: false,
       child: syncProgress != null
@@ -77,11 +77,21 @@ class LanguagePanel extends StatelessWidget {
               ),
             )
           : languages.isEmpty
-              ? _buildFallbackGrid(
-                  context, selected, viewModel, flagSize, labelHeight)
-              : _buildGrid(
-                  context, languages, selected, viewModel, flagSize,
-                  labelHeight),
+          ? _buildFallbackGrid(
+              context,
+              selected,
+              viewModel,
+              flagSize,
+              labelHeight,
+            )
+          : _buildGrid(
+              context,
+              languages,
+              selected,
+              viewModel,
+              flagSize,
+              labelHeight,
+            ),
     );
   }
 
@@ -105,8 +115,7 @@ class LanguagePanel extends StatelessWidget {
       itemBuilder: (context, index) {
         final lang = languages[index];
         final base = lang.code.toLowerCase().split(RegExp('[-_]')).first;
-        final selectedBase =
-            selected.toLowerCase().split(RegExp('[-_]')).first;
+        final selectedBase = selected.toLowerCase().split(RegExp('[-_]')).first;
         return _LanguageTile(
           code: lang.code,
           name: lang.nativeName,
@@ -130,7 +139,7 @@ class LanguagePanel extends StatelessWidget {
     return Center(
       child: _LanguageTile(
         code: 'en',
-        name: 'English',
+        name: viewModel.t('language.english_fallback'),
         flagEmoji: '🇺🇸',
         selected: true,
         flagSize: flagSize,

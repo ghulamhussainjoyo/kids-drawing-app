@@ -6,8 +6,11 @@ import '../../../core/engine/canvas.engine.dart';
 import '../../../core/ui/theme/app.colors.dart';
 import '../../../state/drawing/drawing.view-model.dart';
 import '../widgets/canva/workspace.painter.dart';
+
 import 'package:kids_drawing_flutter/core/ui/button/pill.button.dart';
 import 'package:kids_drawing_flutter/core/ui/button/press.sound.dart';
+import 'package:kids_drawing_flutter/state/setting/setting.view-model.dart';
+import 'package:provider/provider.dart';
 
 class EraseConfirmScreen extends StatelessWidget {
   const EraseConfirmScreen({super.key, required this.viewModel});
@@ -69,21 +72,31 @@ class EraseConfirmScreen extends StatelessWidget {
                     Row(
                       children: [
                         Expanded(
-                          child: PillButton(
-                            label: 'NO',
-                            textColor: AppColors.purple,
-                            sound: PressSound.exit,
-                            onPressed: () => Navigator.of(context).pop(),
+                          child: Builder(
+                            builder: (context) {
+                              final vm = context.read<SettingViewModel>();
+                              return PillButton(
+                                label: vm.t('drawing.erase_no'),
+                                textColor: AppColors.purple,
+                                sound: PressSound.exit,
+                                onPressed: () => Navigator.of(context).pop(),
+                              );
+                            },
                           ),
                         ),
                         Expanded(
-                          child: PillButton(
-                            label: 'YES',
-                            color: AppColors.done,
-                            sound: PressSound.exit,
-                            onPressed: () {
-                              viewModel.clearAll();
-                              Navigator.of(context).pop();
+                          child: Builder(
+                            builder: (context) {
+                              final vm = context.read<SettingViewModel>();
+                              return PillButton(
+                                label: vm.t('drawing.erase_yes'),
+                                color: AppColors.done,
+                                sound: PressSound.exit,
+                                onPressed: () {
+                                  viewModel.clearAll();
+                                  Navigator.of(context).pop();
+                                },
+                              );
                             },
                           ),
                         ),

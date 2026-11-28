@@ -12,10 +12,7 @@ class GallerySectionBackground {
     required this.sectionWidth,
   });
 
-  Color colorAt({
-    required double scrollOffset,
-    required double screenWidth,
-  }) {
+  Color colorAt({required double scrollOffset, required double screenWidth}) {
     if (sectionIds.isEmpty) {
       return const Color(0xFF7EC8E3);
     }

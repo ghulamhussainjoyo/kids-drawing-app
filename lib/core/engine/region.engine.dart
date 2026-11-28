@@ -95,8 +95,7 @@ class RegionEngine {
   }
 
   static DrawingRegion _buildBackground(ColoringArtwork artwork) {
-    var page = Path()
-      ..addRect(Rect.fromLTWH(0, 0, artwork.size, artwork.size));
+    var page = Path()..addRect(Rect.fromLTWH(0, 0, artwork.size, artwork.size));
     for (final region in artwork.regions) {
       page = Path.combine(PathOperation.difference, page, region.path);
     }

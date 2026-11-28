@@ -1,5 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:kids_drawing_flutter/core/ui/theme/app.typography.dart';
+import 'package:kids_drawing_flutter/state/setting/setting.view-model.dart';
+import 'package:provider/provider.dart';
 
 /// Brief "Saved!" feedback after a successful gallery download.
 class CompleteSavedBubble extends StatelessWidget {
@@ -20,12 +22,17 @@ class CompleteSavedBubble extends StatelessWidget {
           ),
         ],
       ),
-      child: Text(
-        'Saved!',
-        style: AppTypography.boldStyle(
-          color: const Color(0xFF3A3A3A),
-          fontSize: 18,
-        ),
+      child: Builder(
+        builder: (context) {
+          final vm = context.read<SettingViewModel>();
+          return Text(
+            vm.t('drawing.saved'),
+            style: AppTypography.boldStyle(
+              color: const Color(0xFF3A3A3A),
+              fontSize: 18,
+            ),
+          );
+        },
       ),
     );
   }

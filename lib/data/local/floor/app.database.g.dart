@@ -80,13 +80,15 @@ class _$AppDatabase extends AppDatabase {
 
   TranslationDao? _translationDaoInstance;
 
+  AppLocalDao? _appLocalDaoInstance;
+
   Future<sqflite.Database> open(
     String path,
     List<Migration> migrations, [
     Callback? callback,
   ]) async {
     final databaseOptions = sqflite.OpenDatabaseOptions(
-      version: 3,
+      version: 4,
       onConfigure: (database) async {
         await database.execute('PRAGMA foreign_keys = ON');
         await callback?.onConfigure?.call(database);
@@ -109,6 +111,8 @@ class _$AppDatabase extends AppDatabase {
             'CREATE TABLE IF NOT EXISTS `catalog_genres` (`slug` TEXT NOT NULL, `localImagePath` TEXT, `remoteImagePath` TEXT, `titleFillColors` TEXT NOT NULL, `titleOutlineColor` TEXT, `ambience` TEXT NOT NULL, `sortOrder` INTEGER NOT NULL, `status` TEXT NOT NULL, `source` TEXT NOT NULL, `remoteUpdatedAt` INTEGER NOT NULL, PRIMARY KEY (`slug`))');
         await database.execute(
             'CREATE TABLE IF NOT EXISTS `catalog_translations` (`id` TEXT NOT NULL, `genreSlug` TEXT, `artworkSlug` TEXT, `languageCode` TEXT NOT NULL, `field` TEXT NOT NULL, `position` INTEGER NOT NULL, `text` TEXT NOT NULL, `audioPath` TEXT, `audioSha256` TEXT, `remoteUpdatedAt` INTEGER NOT NULL, PRIMARY KEY (`id`))');
+        await database.execute(
+            'CREATE TABLE IF NOT EXISTS `app_locals` (`key` TEXT NOT NULL, `value` TEXT NOT NULL, `languageCode` TEXT NOT NULL, `remoteUpdatedAt` INTEGER NOT NULL, PRIMARY KEY (`key`, `languageCode`))');
         await database.execute(
             'CREATE UNIQUE INDEX `index_artworks_deviceId_artworkKey` ON `artworks` (`deviceId`, `artworkKey`)');
         await database.execute(
@@ -141,6 +145,11 @@ class _$AppDatabase extends AppDatabase {
   TranslationDao get translationDao {
     return _translationDaoInstance ??=
         _$TranslationDao(database, changeListener);
+  }
+
+  @override
+  AppLocalDao get appLocalDao {
+    return _appLocalDaoInstance ??= _$AppLocalDao(database, changeListener);
   }
 }
 
@@ -540,5 +549,62 @@ class _$TranslationDao extends TranslationDao {
   Future<void> upsertAll(List<TranslationEntity> translations) async {
     await _translationEntityInsertionAdapter.insertList(
         translations, OnConflictStrategy.replace);
+  }
+}
+
+class _$AppLocalDao extends AppLocalDao {
+  _$AppLocalDao(
+    this.database,
+    this.changeListener,
+  )   : _queryAdapter = QueryAdapter(database),
+        _appLocalEntityInsertionAdapter = InsertionAdapter(
+            database,
+            'app_locals',
+            (AppLocalEntity item) => <String, Object?>{
+                  'key': item.key,
+                  'value': item.value,
+                  'languageCode': item.languageCode,
+                  'remoteUpdatedAt': item.remoteUpdatedAt
+                });
+
+  final sqflite.DatabaseExecutor database;
+
+  final StreamController<String> changeListener;
+
+  final QueryAdapter _queryAdapter;
+
+  final InsertionAdapter<AppLocalEntity> _appLocalEntityInsertionAdapter;
+
+  @override
+  Future<AppLocalEntity?> find(
+    String key,
+    String lang,
+  ) async {
+    return _queryAdapter.query(
+        'SELECT * FROM app_locals WHERE key = ?1 AND languageCode = ?2 LIMIT 1',
+        mapper: (Map<String, Object?> row) => AppLocalEntity(
+            key: row['key'] as String,
+            languageCode: row['languageCode'] as String,
+            value: row['value'] as String,
+            remoteUpdatedAt: row['remoteUpdatedAt'] as int),
+        arguments: [key, lang]);
+  }
+
+  @override
+  Future<List<AppLocalEntity>> allForLanguage(String lang) async {
+    return _queryAdapter.queryList(
+        'SELECT * FROM app_locals WHERE languageCode = ?1',
+        mapper: (Map<String, Object?> row) => AppLocalEntity(
+            key: row['key'] as String,
+            languageCode: row['languageCode'] as String,
+            value: row['value'] as String,
+            remoteUpdatedAt: row['remoteUpdatedAt'] as int),
+        arguments: [lang]);
+  }
+
+  @override
+  Future<void> upsertAll(List<AppLocalEntity> rows) async {
+    await _appLocalEntityInsertionAdapter.insertList(
+        rows, OnConflictStrategy.replace);
   }
 }

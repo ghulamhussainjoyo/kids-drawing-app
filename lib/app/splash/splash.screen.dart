@@ -40,9 +40,9 @@ class _SplashScreenState extends State<SplashScreen> {
   void _openGenres() {
     final lang = context.read<SettingViewModel>().language;
     context.read<GenreViewModel>().loadGenres(lang);
-    Navigator.of(context).pushReplacement(
-      CupertinoPageRoute(builder: (_) => const GenreScreen()),
-    );
+    Navigator.of(
+      context,
+    ).pushReplacement(CupertinoPageRoute(builder: (_) => const GenreScreen()));
   }
 
   void _openConnectivity() {
@@ -60,19 +60,25 @@ class _SplashScreenState extends State<SplashScreen> {
   void _backgroundSyncIfStale(CatalogSyncService syncService) {
     if (!syncService.isSyncStale()) return;
     final lang = context.read<SettingViewModel>().language;
-    syncService.sync(language: lang).then((_) {
+    final seeder = context.read<ArtworkCatalogSeeder>();
+    final deviceId = context.read<String>();
+    syncService.sync(language: lang).then((_) async {
+      await seeder.bakeMissingThumbnails(deviceId);
       if (!mounted) return;
+      context.read<SettingViewModel>()
+        ..reloadLocals()
+        ..refreshLanguages();
       context.read<GenreViewModel>().loadGenres(lang);
-      context.read<SettingViewModel>().refreshLanguages();
     });
   }
 
   @override
   Widget build(BuildContext context) {
+    final vm = context.read<SettingViewModel>();
     return CupertinoPageScaffold(
       child: Center(
         child: Text(
-          'Splash',
+          vm.t('splash.title'),
           style: AppTypography.boldStyle(color: const Color(0xFF000000)),
         ),
       ),

@@ -1,0 +1,330 @@
+[
+  {
+    "key": "connectivity.headline",
+    "value": "Connect to load artworks!"
+  },
+  {
+    "key": "connectivity.subtitle",
+    "value": "Turn on WiFi so we can download your coloring pages."
+  },
+  {
+    "key": "connectivity.connect",
+    "value": "Let's Connect!"
+  },
+  {
+    "key": "connectivity.play_offline",
+    "value": "Play without internet"
+  },
+  {
+    "key": "connectivity.loading",
+    "value": "Loading artworks…"
+  },
+  {
+    "key": "genre.try_free",
+    "value": "Try free for 7 days"
+  },
+  {
+    "key": "drawing.erase_no",
+    "value": "NO"
+  },
+  {
+    "key": "drawing.erase_yes",
+    "value": "YES"
+  },
+  {
+    "key": "drawing.brush_size",
+    "value": "Brush size"
+  },
+  {
+    "key": "drawing.share_text",
+    "value": "Check out my drawing! 🎨"
+  },
+  {
+    "key": "drawing.saved",
+    "value": "Saved!"
+  },
+  {
+    "key": "drawing.keep",
+    "value": "Keep"
+  },
+  {
+    "key": "drawing.let_go",
+    "value": "Let go"
+  },
+  {
+    "key": "parent_gate.title",
+    "value": "Ask a Grown-Up"
+  },
+  {
+    "key": "settings.title",
+    "value": "Settings"
+  },
+  {
+    "key": "settings.little_artist",
+    "value": "Little Artist"
+  },
+  {
+    "key": "settings.music",
+    "value": "Music"
+  },
+  {
+    "key": "settings.sounds_voice",
+    "value": "Sounds & Voice"
+  },
+  {
+    "key": "settings.language",
+    "value": "Language"
+  },
+  {
+    "key": "settings.subscription",
+    "value": "Subscription"
+  },
+  {
+    "key": "settings.help",
+    "value": "Help"
+  },
+  {
+    "key": "settings.about",
+    "value": "About"
+  },
+  {
+    "key": "little_artist.title",
+    "value": "Little Artist"
+  },
+  {
+    "key": "little_artist.who",
+    "value": "Who's the little artist?"
+  },
+  {
+    "key": "little_artist.girl",
+    "value": "Girl"
+  },
+  {
+    "key": "little_artist.boy",
+    "value": "Boy"
+  },
+  {
+    "key": "little_artist.siblings",
+    "value": "Siblings"
+  },
+  {
+    "key": "little_artist.how_old",
+    "value": "How old is {pronoun}?"
+  },
+  {
+    "key": "little_artist.what_loves",
+    "value": "What does {pronoun} love?"
+  },
+  {
+    "key": "little_artist.tap_to_choose",
+    "value": "Tap to choose"
+  },
+  {
+    "key": "little_artist.selected_count",
+    "value": "{count} selected"
+  },
+  {
+    "key": "little_artist.continue",
+    "value": "CONTINUE"
+  },
+  {
+    "key": "little_artist.pronoun_she",
+    "value": "she"
+  },
+  {
+    "key": "little_artist.pronoun_he",
+    "value": "he"
+  },
+  {
+    "key": "little_artist.pronoun_they",
+    "value": "they"
+  },
+  {
+    "key": "interest.animals",
+    "value": "Animals"
+  },
+  {
+    "key": "interest.music",
+    "value": "Music"
+  },
+  {
+    "key": "interest.seasons",
+    "value": "Seasons"
+  },
+  {
+    "key": "interest.school",
+    "value": "School"
+  },
+  {
+    "key": "interest.transport",
+    "value": "Transport"
+  },
+  {
+    "key": "interest.princesses",
+    "value": "Princesses"
+  },
+  {
+    "key": "interest.fruit_garden",
+    "value": "Fruit Garden"
+  },
+  {
+    "key": "music.title",
+    "value": "Music"
+  },
+  {
+    "key": "music.toggle",
+    "value": "Music"
+  },
+  {
+    "key": "music.puppy_playtime",
+    "value": "Puppy Playtime"
+  },
+  {
+    "key": "music.sunshine_skip",
+    "value": "Sunshine Skip"
+  },
+  {
+    "key": "music.bubble_pop",
+    "value": "Bubble Pop Parade"
+  },
+  {
+    "key": "music.rainbow_carousel",
+    "value": "Rainbow Carousel"
+  },
+  {
+    "key": "music.confetti_party",
+    "value": "Confetti Party"
+  },
+  {
+    "key": "sounds_voice.title",
+    "value": "Sounds & Voice"
+  },
+  {
+    "key": "sounds_voice.voice",
+    "value": "Voice"
+  },
+  {
+    "key": "sounds_voice.sfx",
+    "value": "Sound Effects"
+  },
+  {
+    "key": "sounds_voice.vibrations",
+    "value": "Vibrations"
+  },
+  {
+    "key": "language.title",
+    "value": "Language"
+  },
+  {
+    "key": "language.english_fallback",
+    "value": "English"
+  },
+  {
+    "key": "language.narrator_learning",
+    "value": "The narrator is learning {language}"
+  },
+  {
+    "key": "language.learning_description",
+    "value": "What it says on every page is on its way. Keep coloring — it'll join in when ready."
+  },
+  {
+    "key": "language.got_it",
+    "value": "Got it"
+  },
+  {
+    "key": "subscription.title",
+    "value": "Subscription"
+  },
+  {
+    "key": "subscription.restore",
+    "value": "Restore Purchases"
+  },
+  {
+    "key": "subscription.privacy",
+    "value": "Privacy Policy"
+  },
+  {
+    "key": "subscription.terms",
+    "value": "Terms of Use"
+  },
+  {
+    "key": "subscription.no_plan",
+    "value": "No plan yet"
+  },
+  {
+    "key": "subscription.try_free_long",
+    "value": "Try Free for 7 days"
+  },
+  {
+    "key": "subscription.try_free_short",
+    "value": "Try Free"
+  },
+  {
+    "key": "subscription.paywall_soon",
+    "value": "Paywall coming soon"
+  },
+  {
+    "key": "help.title",
+    "value": "Help"
+  },
+  {
+    "key": "help.placeholder",
+    "value": "Contact us / FAQ links (coming soon)"
+  },
+  {
+    "key": "about.title",
+    "value": "About"
+  },
+  {
+    "key": "about.app_name",
+    "value": "Kids Drawing"
+  },
+  {
+    "key": "about.version_loading",
+    "value": "Version …"
+  },
+  {
+    "key": "about.version_format",
+    "value": "Version {version} (Build {build})"
+  },
+  {
+    "key": "about.description",
+    "value": "Designed with love for young creative minds. Unleash imagination with puppies, colors, and art!"
+  },
+  {
+    "key": "splash.title",
+    "value": "Splash"
+  },
+  {
+    "key": "little_artist.age_0_2",
+    "value": "0–2"
+  },
+  {
+    "key": "little_artist.age_3_4",
+    "value": "3–4"
+  },
+  {
+    "key": "little_artist.age_5_6",
+    "value": "5–6"
+  },
+  {
+    "key": "little_artist.age_7_8",
+    "value": "7–8"
+  },
+  {
+    "key": "little_artist.age_9_11",
+    "value": "9–11"
+  },
+  {
+    "key": "little_artist.age_12_plus",
+    "value": "12+"
+  },
+  {
+    "key": "genre.bottom_left_placeholder",
+    "value": "Bottom left"
+  },
+  {
+    "key": "drawing.complete_date_pattern",
+    "value": "MMM d, y"
+  }
+]

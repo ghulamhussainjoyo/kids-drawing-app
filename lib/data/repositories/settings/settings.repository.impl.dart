@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:kids_drawing_flutter/core/storage/local.storage.dart';
 import 'package:kids_drawing_flutter/data/repositories/settings/settings.repository.dart';
 
@@ -110,7 +112,11 @@ class SettingsRepositoryImpl implements SettingsRepository {
 
   @override
   Future<String> language() async {
-    return _localStorage.getString(_kLanguage) ?? 'en_US';
+    final saved = _localStorage.getString(_kLanguage);
+    if (saved != null) return saved;
+    final detected = PlatformDispatcher.instance.locale.languageCode;
+    await setLanguage(detected);
+    return detected;
   }
 
   @override

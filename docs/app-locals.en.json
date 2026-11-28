@@ -1,0 +1,773 @@
+{
+  "schema_version": 1,
+  "language_code": "en",
+  "key_count": 82,
+  "admin_table_row_count": 82,
+  "gap_count": 0,
+  "placeholder_syntax": "{token}",
+  "entries": [
+    {
+      "key": "connectivity.headline",
+      "group": "connectivity",
+      "value_en": "Connect to load artworks!",
+      "placeholders": [],
+      "source": "lib/app/sync/connectivity.screen.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "connectivity.subtitle",
+      "group": "connectivity",
+      "value_en": "Turn on WiFi so we can download your coloring pages.",
+      "placeholders": [],
+      "source": "lib/app/sync/connectivity.screen.dart",
+      "in_admin_dashboard": true,
+      "status": "documented",
+      "notes": "Code uses embedded newline after download."
+    },
+    {
+      "key": "connectivity.connect",
+      "group": "connectivity",
+      "value_en": "Let's Connect!",
+      "placeholders": [],
+      "source": "lib/app/sync/connectivity.screen.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "connectivity.play_offline",
+      "group": "connectivity",
+      "value_en": "Play without internet",
+      "placeholders": [],
+      "source": "lib/app/sync/connectivity.screen.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "connectivity.loading",
+      "group": "connectivity",
+      "value_en": "Loading artworks…",
+      "placeholders": [],
+      "source": "lib/app/sync/connectivity.screen.dart",
+      "in_admin_dashboard": true,
+      "status": "documented",
+      "notes": "Code uses ASCII ellipsis: Loading artworks..."
+    },
+    {
+      "key": "genre.try_free",
+      "group": "genre",
+      "value_en": "Try free for 7 days",
+      "placeholders": [],
+      "source": "lib/app/genre/screen/genre.screen.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "drawing.erase_no",
+      "group": "drawing",
+      "value_en": "NO",
+      "placeholders": [],
+      "source": "lib/app/drawing/screen/erase.confirm.screen.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "drawing.erase_yes",
+      "group": "drawing",
+      "value_en": "YES",
+      "placeholders": [],
+      "source": "lib/app/drawing/screen/erase.confirm.screen.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "drawing.brush_size",
+      "group": "drawing",
+      "value_en": "Brush size",
+      "placeholders": [],
+      "source": "lib/app/drawing/widgets/tools/size.slider.display.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "drawing.share_text",
+      "group": "drawing",
+      "value_en": "Check out my drawing! 🎨",
+      "placeholders": [],
+      "source": "lib/app/drawing/screen/complete.screen.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "drawing.saved",
+      "group": "drawing",
+      "value_en": "Saved!",
+      "placeholders": [],
+      "source": "lib/app/drawing/widgets/complete/complete.saved.bubble.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "drawing.keep",
+      "group": "drawing",
+      "value_en": "Keep",
+      "placeholders": [],
+      "source": "lib/app/drawing/widgets/complete/complete.keep.let.go.bar.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "drawing.let_go",
+      "group": "drawing",
+      "value_en": "Let go",
+      "placeholders": [],
+      "source": "lib/app/drawing/widgets/complete/complete.keep.let.go.bar.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "parent_gate.title",
+      "group": "parent_gate",
+      "value_en": "Ask a Grown-Up",
+      "placeholders": [],
+      "source": "lib/app/parent_gate/screen/ask.grown.up.screen.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "settings.title",
+      "group": "settings",
+      "value_en": "Settings",
+      "placeholders": [],
+      "source": "lib/app/setting/widgets/setting.nav.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "settings.little_artist",
+      "group": "settings",
+      "value_en": "Little Artist",
+      "placeholders": [],
+      "source": "lib/app/setting/model/setting.section.x.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "settings.music",
+      "group": "settings",
+      "value_en": "Music",
+      "placeholders": [],
+      "source": "lib/app/setting/model/setting.section.x.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "settings.sounds_voice",
+      "group": "settings",
+      "value_en": "Sounds & Voice",
+      "placeholders": [],
+      "source": "lib/app/setting/model/setting.section.x.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "settings.language",
+      "group": "settings",
+      "value_en": "Language",
+      "placeholders": [],
+      "source": "lib/app/setting/model/setting.section.x.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "settings.subscription",
+      "group": "settings",
+      "value_en": "Subscription",
+      "placeholders": [],
+      "source": "lib/app/setting/model/setting.section.x.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "settings.help",
+      "group": "settings",
+      "value_en": "Help",
+      "placeholders": [],
+      "source": "lib/app/setting/model/setting.section.x.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "settings.about",
+      "group": "settings",
+      "value_en": "About",
+      "placeholders": [],
+      "source": "lib/app/setting/model/setting.section.x.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "little_artist.title",
+      "group": "little_artist",
+      "value_en": "Little Artist",
+      "placeholders": [],
+      "source": "lib/app/setting/panels/little_artist_panel.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "little_artist.who",
+      "group": "little_artist",
+      "value_en": "Who's the little artist?",
+      "placeholders": [],
+      "source": "lib/app/setting/screen/little.artist.gender.screen.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "little_artist.girl",
+      "group": "little_artist",
+      "value_en": "Girl",
+      "placeholders": [],
+      "source": "lib/app/setting/screen/little.artist.gender.screen.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "little_artist.boy",
+      "group": "little_artist",
+      "value_en": "Boy",
+      "placeholders": [],
+      "source": "lib/app/setting/screen/little.artist.gender.screen.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "little_artist.siblings",
+      "group": "little_artist",
+      "value_en": "Siblings",
+      "placeholders": [],
+      "source": "lib/app/setting/screen/little.artist.gender.screen.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "little_artist.how_old",
+      "group": "little_artist",
+      "value_en": "How old is {pronoun}?",
+      "placeholders": [
+        "pronoun"
+      ],
+      "source": "lib/app/setting/panels/little_artist_panel.dart",
+      "in_admin_dashboard": true,
+      "status": "documented",
+      "notes": "Runtime interpolates SettingViewModel.pronoun (she/he/they)."
+    },
+    {
+      "key": "little_artist.what_loves",
+      "group": "little_artist",
+      "value_en": "What does {pronoun} love?",
+      "placeholders": [
+        "pronoun"
+      ],
+      "source": "lib/app/setting/panels/little_artist_panel.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "little_artist.tap_to_choose",
+      "group": "little_artist",
+      "value_en": "Tap to choose",
+      "placeholders": [],
+      "source": "lib/app/setting/panels/little_artist_panel.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "little_artist.selected_count",
+      "group": "little_artist",
+      "value_en": "{count} selected",
+      "placeholders": [
+        "count"
+      ],
+      "source": "lib/app/setting/panels/little_artist_panel.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "little_artist.continue",
+      "group": "little_artist",
+      "value_en": "CONTINUE",
+      "placeholders": [],
+      "source": "lib/app/setting/screen/little.artist.gender.screen.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "little_artist.pronoun_she",
+      "group": "little_artist",
+      "value_en": "she",
+      "placeholders": [],
+      "source": "lib/state/setting/setting.view-model.dart",
+      "in_admin_dashboard": true,
+      "status": "documented",
+      "notes": "Literal in pronoun getter; used when gender is girl."
+    },
+    {
+      "key": "little_artist.pronoun_he",
+      "group": "little_artist",
+      "value_en": "he",
+      "placeholders": [],
+      "source": "lib/state/setting/setting.view-model.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "little_artist.pronoun_they",
+      "group": "little_artist",
+      "value_en": "they",
+      "placeholders": [],
+      "source": "lib/state/setting/setting.view-model.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "interest.animals",
+      "group": "interest",
+      "value_en": "Animals",
+      "placeholders": [],
+      "source": "lib/app/setting/model/interest.option.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "interest.music",
+      "group": "interest",
+      "value_en": "Music",
+      "placeholders": [],
+      "source": "lib/app/setting/model/interest.option.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "interest.seasons",
+      "group": "interest",
+      "value_en": "Seasons",
+      "placeholders": [],
+      "source": "lib/app/setting/model/interest.option.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "interest.school",
+      "group": "interest",
+      "value_en": "School",
+      "placeholders": [],
+      "source": "lib/app/setting/model/interest.option.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "interest.transport",
+      "group": "interest",
+      "value_en": "Transport",
+      "placeholders": [],
+      "source": "lib/app/setting/model/interest.option.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "interest.princesses",
+      "group": "interest",
+      "value_en": "Princesses",
+      "placeholders": [],
+      "source": "lib/app/setting/model/interest.option.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "interest.fruit_garden",
+      "group": "interest",
+      "value_en": "Fruit Garden",
+      "placeholders": [],
+      "source": "lib/app/setting/model/interest.option.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "music.title",
+      "group": "music",
+      "value_en": "Music",
+      "placeholders": [],
+      "source": "lib/app/setting/panels/music_panel.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "music.toggle",
+      "group": "music",
+      "value_en": "Music",
+      "placeholders": [],
+      "source": "lib/app/setting/panels/music_panel.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "music.puppy_playtime",
+      "group": "music",
+      "value_en": "Puppy Playtime",
+      "placeholders": [],
+      "source": "lib/app/setting/panels/music_panel.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "music.sunshine_skip",
+      "group": "music",
+      "value_en": "Sunshine Skip",
+      "placeholders": [],
+      "source": "lib/app/setting/panels/music_panel.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "music.bubble_pop",
+      "group": "music",
+      "value_en": "Bubble Pop Parade",
+      "placeholders": [],
+      "source": "lib/app/setting/panels/music_panel.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "music.rainbow_carousel",
+      "group": "music",
+      "value_en": "Rainbow Carousel",
+      "placeholders": [],
+      "source": "lib/app/setting/panels/music_panel.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "music.confetti_party",
+      "group": "music",
+      "value_en": "Confetti Party",
+      "placeholders": [],
+      "source": "lib/app/setting/panels/music_panel.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "sounds_voice.title",
+      "group": "sounds_voice",
+      "value_en": "Sounds & Voice",
+      "placeholders": [],
+      "source": "lib/app/setting/panels/sounds_voice_panel.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "sounds_voice.voice",
+      "group": "sounds_voice",
+      "value_en": "Voice",
+      "placeholders": [],
+      "source": "lib/app/setting/panels/sounds_voice_panel.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "sounds_voice.sfx",
+      "group": "sounds_voice",
+      "value_en": "Sound Effects",
+      "placeholders": [],
+      "source": "lib/app/setting/panels/sounds_voice_panel.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "sounds_voice.vibrations",
+      "group": "sounds_voice",
+      "value_en": "Vibrations",
+      "placeholders": [],
+      "source": "lib/app/setting/panels/sounds_voice_panel.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "language.title",
+      "group": "language",
+      "value_en": "Language",
+      "placeholders": [],
+      "source": "lib/app/setting/panels/language_panel.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "language.english_fallback",
+      "group": "language",
+      "value_en": "English",
+      "placeholders": [],
+      "source": "lib/app/setting/panels/language_panel.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "language.narrator_learning",
+      "group": "language",
+      "value_en": "The narrator is learning {language}",
+      "placeholders": [
+        "language"
+      ],
+      "source": "lib/app/setting/widgets/language.learning.card.dart",
+      "in_admin_dashboard": true,
+      "status": "documented",
+      "notes": "Code interpolates language display name, not literal {language}."
+    },
+    {
+      "key": "language.learning_description",
+      "group": "language",
+      "value_en": "What it says on every page is on its way. Keep coloring — it'll join in when ready.",
+      "placeholders": [],
+      "source": "lib/app/setting/widgets/language.learning.card.dart",
+      "in_admin_dashboard": true,
+      "status": "documented",
+      "notes": "Code inserts newline after first sentence."
+    },
+    {
+      "key": "language.got_it",
+      "group": "language",
+      "value_en": "Got it",
+      "placeholders": [],
+      "source": "lib/app/setting/widgets/language.learning.card.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "subscription.title",
+      "group": "subscription",
+      "value_en": "Subscription",
+      "placeholders": [],
+      "source": "lib/app/setting/panels/subscription_panel.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "subscription.restore",
+      "group": "subscription",
+      "value_en": "Restore Purchases",
+      "placeholders": [],
+      "source": "lib/app/setting/panels/subscription_panel.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "subscription.privacy",
+      "group": "subscription",
+      "value_en": "Privacy Policy",
+      "placeholders": [],
+      "source": "lib/app/setting/panels/subscription_panel.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "subscription.terms",
+      "group": "subscription",
+      "value_en": "Terms of Use",
+      "placeholders": [],
+      "source": "lib/app/setting/panels/subscription_panel.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "subscription.no_plan",
+      "group": "subscription",
+      "value_en": "No plan yet",
+      "placeholders": [],
+      "source": "lib/app/setting/panels/subscription_panel.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "subscription.try_free_long",
+      "group": "subscription",
+      "value_en": "Try Free for 7 days",
+      "placeholders": [],
+      "source": "lib/app/setting/panels/subscription_panel.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "subscription.try_free_short",
+      "group": "subscription",
+      "value_en": "Try Free",
+      "placeholders": [],
+      "source": "lib/app/setting/panels/subscription_panel.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "subscription.paywall_soon",
+      "group": "subscription",
+      "value_en": "Paywall coming soon",
+      "placeholders": [],
+      "source": "lib/app/setting/panels/subscription_panel.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "help.title",
+      "group": "help",
+      "value_en": "Help",
+      "placeholders": [],
+      "source": "lib/app/setting/panels/help_panel.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "help.placeholder",
+      "group": "help",
+      "value_en": "Contact us / FAQ links (coming soon)",
+      "placeholders": [],
+      "source": "lib/app/setting/panels/help_panel.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "about.title",
+      "group": "about",
+      "value_en": "About",
+      "placeholders": [],
+      "source": "lib/app/setting/panels/about_panel.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "about.app_name",
+      "group": "about",
+      "value_en": "Kids Drawing",
+      "placeholders": [],
+      "source": "lib/app/setting/panels/about_panel.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "about.version_loading",
+      "group": "about",
+      "value_en": "Version …",
+      "placeholders": [],
+      "source": "lib/app/setting/panels/about_panel.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "about.version_format",
+      "group": "about",
+      "value_en": "Version {version} (Build {build})",
+      "placeholders": [
+        "version",
+        "build"
+      ],
+      "source": "lib/app/setting/panels/about_panel.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "about.description",
+      "group": "about",
+      "value_en": "Designed with love for young creative minds. Unleash imagination with puppies, colors, and art!",
+      "placeholders": [],
+      "source": "lib/app/setting/panels/about_panel.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "splash.title",
+      "group": "splash",
+      "value_en": "Splash",
+      "placeholders": [],
+      "source": "lib/app/splash/splash.screen.dart",
+      "in_admin_dashboard": true,
+      "status": "documented"
+    },
+    {
+      "key": "little_artist.age_0_2",
+      "group": "little_artist",
+      "value_en": "0–2",
+      "placeholders": [],
+      "source": "lib/app/setting/screen/little.artist.age.screen.dart",
+      "in_admin_dashboard": true,
+      "status": "documented",
+      "notes": "Added from lib/app audit; now in Admin-Dashboard §5."
+    },
+    {
+      "key": "little_artist.age_3_4",
+      "group": "little_artist",
+      "value_en": "3–4",
+      "placeholders": [],
+      "source": "lib/app/setting/screen/little.artist.age.screen.dart",
+      "in_admin_dashboard": true,
+      "status": "documented",
+      "notes": "Added from lib/app audit; now in Admin-Dashboard §5."
+    },
+    {
+      "key": "little_artist.age_5_6",
+      "group": "little_artist",
+      "value_en": "5–6",
+      "placeholders": [],
+      "source": "lib/app/setting/screen/little.artist.age.screen.dart",
+      "in_admin_dashboard": true,
+      "status": "documented",
+      "notes": "Added from lib/app audit; now in Admin-Dashboard §5."
+    },
+    {
+      "key": "little_artist.age_7_8",
+      "group": "little_artist",
+      "value_en": "7–8",
+      "placeholders": [],
+      "source": "lib/app/setting/screen/little.artist.age.screen.dart",
+      "in_admin_dashboard": true,
+      "status": "documented",
+      "notes": "Added from lib/app audit; now in Admin-Dashboard §5."
+    },
+    {
+      "key": "little_artist.age_9_11",
+      "group": "little_artist",
+      "value_en": "9–11",
+      "placeholders": [],
+      "source": "lib/app/setting/screen/little.artist.age.screen.dart",
+      "in_admin_dashboard": true,
+      "status": "documented",
+      "notes": "Added from lib/app audit; now in Admin-Dashboard §5."
+    },
+    {
+      "key": "little_artist.age_12_plus",
+      "group": "little_artist",
+      "value_en": "12+",
+      "placeholders": [],
+      "source": "lib/app/setting/screen/little.artist.age.screen.dart",
+      "in_admin_dashboard": true,
+      "status": "documented",
+      "notes": "Added from lib/app audit; now in Admin-Dashboard §5."
+    },
+    {
+      "key": "genre.bottom_left_placeholder",
+      "group": "genre",
+      "value_en": "Bottom left",
+      "placeholders": [],
+      "source": "lib/app/genre/screen/genre.screen.dart",
+      "in_admin_dashboard": true,
+      "status": "documented",
+      "notes": "Added from lib/app audit; now in Admin-Dashboard §5."
+    },
+    {
+      "key": "drawing.complete_date_pattern",
+      "group": "drawing",
+      "value_en": "MMM d, y",
+      "placeholders": [],
+      "source": "lib/app/drawing/screen/complete.screen.dart",
+      "in_admin_dashboard": true,
+      "status": "documented",
+      "notes": "Intl DateFormat pattern for complete-screen polaroid date, not a fixed English sentence. Added from lib/app audit; now in Admin-Dashboard §5."
+    }
+  ]
+}

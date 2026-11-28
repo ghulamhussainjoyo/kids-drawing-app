@@ -14,11 +14,14 @@ class LittleArtistInterestsScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final settings = context.watch<SettingViewModel>();
+    final pronoun = settings.t('little_artist.pronoun_${settings.pronoun}');
 
     return CupertinoPageScaffold(
       backgroundColor: const Color(0xFFFFF5E8),
       navigationBar: CupertinoNavigationBar(
-        middle: Text('What does ${settings.pronoun} love?'),
+        middle: Text(
+          settings.tf('little_artist.what_loves', {'pronoun': pronoun}),
+        ),
         backgroundColor: const Color(0xFFFFF5E8),
       ),
       child: SafeArea(
@@ -35,7 +38,7 @@ class LittleArtistInterestsScreen extends StatelessWidget {
                     for (final option in InterestOption.catalog)
                       InterestTile(
                         id: option.id,
-                        label: option.label,
+                        label: settings.t(option.labelKey),
                         svgPath: option.svgPath,
                         imagePath: option.imagePath,
                         isSelected: settings.interests.contains(option.id),
@@ -48,7 +51,7 @@ class LittleArtistInterestsScreen extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: PillButton(
-                  label: 'CONTINUE',
+                  label: settings.t('little_artist.continue'),
                   color: AppColors.purple,
                   fontSize: context.rs(16),
                   radius: context.rs(28),

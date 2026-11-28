@@ -5,9 +5,7 @@ import 'texture.canvas.dart';
 
 /// Tip atlas and paper grain images for the pencil.
 class PencilTextures {
-  PencilTextures()
-      : tips = buildTips(),
-        paper = buildPaper();
+  PencilTextures() : tips = buildTips(), paper = buildPaper();
 
   final ui.Image tips;
   final ui.Image paper;
@@ -142,7 +140,12 @@ class PencilTextures {
       ..strokeCap = ui.StrokeCap.round;
     for (var i = 0; i < 24; i++) {
       streak.strokeWidth = 0.8 + random.nextDouble() * 1.4;
-      streak.color = ui.Color.fromRGBO(0, 0, 0, 0.2 + random.nextDouble() * 0.4);
+      streak.color = ui.Color.fromRGBO(
+        0,
+        0,
+        0,
+        0.2 + random.nextDouble() * 0.4,
+      );
       final y = center.dy + (random.nextDouble() - 0.5) * size * 0.9;
       final x = center.dx + (random.nextDouble() - 0.5) * size * 0.8;
       final length = 8 + random.nextDouble() * 30;
@@ -171,11 +174,7 @@ class PencilTextures {
 }
 
 class _TipLane {
-  const _TipLane({
-    required this.y,
-    required this.width,
-    required this.alpha,
-  });
+  const _TipLane({required this.y, required this.width, required this.alpha});
 
   final double y;
   final double width;

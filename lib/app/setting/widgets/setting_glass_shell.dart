@@ -14,10 +14,7 @@ class SettingGlassShell extends StatelessWidget {
   static const Color foldWarm = Color(0x33C4A882);
   static const Color pawWarm = Color(0xFF8B7355);
 
-  const SettingGlassShell({
-    super.key,
-    required this.child,
-  });
+  const SettingGlassShell({super.key, required this.child});
 
   @override
   Widget build(BuildContext context) {

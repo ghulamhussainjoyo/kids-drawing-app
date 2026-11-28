@@ -4,17 +4,22 @@ import 'package:kids_drawing_flutter/app/setting/widgets/setting.panel.scaffold.
 import 'package:kids_drawing_flutter/core/ui/button/press.button.dart';
 import 'package:kids_drawing_flutter/core/ui/theme/app.colors.dart';
 import 'package:kids_drawing_flutter/core/ui/theme/app.typography.dart';
+import 'package:kids_drawing_flutter/state/setting/setting.view-model.dart';
 import 'package:kids_drawing_flutter/utils/responsive.dart';
+import 'package:provider/provider.dart';
 
 class SubscriptionPanel extends StatelessWidget {
   const SubscriptionPanel({super.key});
 
   void _openPaywall(BuildContext context) {
+    final vm = context.read<SettingViewModel>();
     Navigator.of(context).push(
       CupertinoPageRoute<void>(
-        builder: (_) => const CupertinoPageScaffold(
-          navigationBar: CupertinoNavigationBar(middle: Text('Try Free')),
-          child: Center(child: Text('Paywall coming soon')),
+        builder: (_) => CupertinoPageScaffold(
+          navigationBar: CupertinoNavigationBar(
+            middle: Text(vm.t('subscription.try_free_short')),
+          ),
+          child: Center(child: Text(vm.t('subscription.paywall_soon'))),
         ),
       ),
     );
@@ -22,13 +27,14 @@ class SubscriptionPanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final vm = context.watch<SettingViewModel>();
     return SettingPanelScaffold(
-      title: 'Subscription',
+      title: vm.t('subscription.title'),
       onClose: () => Navigator.of(context).pop(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _PlanTicket(onTap: () => _openPaywall(context)),
+          _PlanTicket(vm: vm, onTap: () => _openPaywall(context)),
           SizedBox(height: context.rs(4)),
           PressButton(
             onPressed: () {},
@@ -50,7 +56,7 @@ class SubscriptionPanel extends StatelessWidget {
                   ),
                   SizedBox(width: context.rs(12)),
                   Text(
-                    'Restore Purchases',
+                    vm.t('subscription.restore'),
                     style: AppTypography.boldStyle(
                       fontSize: context.rs(15),
                       color: const Color(0xFF261D32),
@@ -65,7 +71,7 @@ class SubscriptionPanel extends StatelessWidget {
             child: Row(
               mainAxisSize: MainAxisSize.min,
               children: [
-                _LinkText('Privacy Policy', onTap: () {}),
+                _LinkText(vm.t('subscription.privacy'), onTap: () {}),
                 Padding(
                   padding: EdgeInsets.symmetric(horizontal: context.rs(8)),
                   child: Text(
@@ -76,7 +82,7 @@ class SubscriptionPanel extends StatelessWidget {
                     ),
                   ),
                 ),
-                _LinkText('Terms of Use', onTap: () {}),
+                _LinkText(vm.t('subscription.terms'), onTap: () {}),
               ],
             ),
           ),
@@ -111,9 +117,10 @@ class _LinkText extends StatelessWidget {
 }
 
 class _PlanTicket extends StatelessWidget {
+  final SettingViewModel vm;
   final VoidCallback onTap;
 
-  const _PlanTicket({required this.onTap});
+  const _PlanTicket({required this.vm, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -154,7 +161,7 @@ class _PlanTicket extends StatelessWidget {
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              'No plan yet',
+                              vm.t('subscription.no_plan'),
                               style: AppTypography.semiBoldStyle(
                                 fontSize: context.rs(12),
                                 color: const Color(0xFFFFD464),
@@ -165,7 +172,7 @@ class _PlanTicket extends StatelessWidget {
                               children: [
                                 Expanded(
                                   child: Text(
-                                    'Try Free for 7 days',
+                                    vm.t('subscription.try_free_long'),
                                     maxLines: 2,
                                     overflow: TextOverflow.ellipsis,
                                     style: AppTypography.boldStyle(

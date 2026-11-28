@@ -31,13 +31,28 @@ class SyncApi {
     List<String> langs,
   ) async {
     try {
-      final result = await _client.rpc('catalog_delta', params: {
-        'since': since.toUtc().toIso8601String(),
-        'langs': langs,
-      });
+      final result = await _client.rpc(
+        'catalog_delta',
+        params: {'since': since.toUtc().toIso8601String(), 'langs': langs},
+      );
       return result as Map<String, dynamic>;
     } catch (e) {
       debugPrint('SyncApi.fetchDelta failed: $e');
+      return null;
+    }
+  }
+
+  /// App-local strings for the requested languages — direct table query,
+  /// not part of the catalog_delta RPC.
+  Future<List<Map<String, dynamic>>?> fetchAppLocals(List<String> langs) async {
+    try {
+      final result = await _client
+          .from('app_locals')
+          .select()
+          .inFilter('language_code', langs);
+      return List<Map<String, dynamic>>.from(result);
+    } catch (e) {
+      debugPrint('SyncApi.fetchAppLocals failed: $e');
       return null;
     }
   }

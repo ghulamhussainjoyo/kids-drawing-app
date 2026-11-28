@@ -46,9 +46,7 @@ class _ConnectivityScreenState extends State<ConnectivityScreen> {
   }
 
   void _listenForConnection() {
-    _connectivitySub = Connectivity()
-        .onConnectivityChanged
-        .listen((results) {
+    _connectivitySub = Connectivity().onConnectivityChanged.listen((results) {
       final online = results.any((r) => r != ConnectivityResult.none);
       if (online && !_syncing) {
         _startSync();
@@ -65,8 +63,12 @@ class _ConnectivityScreenState extends State<ConnectivityScreen> {
       await widget.seeder.seedIfEmpty(widget.deviceId);
     }
 
+    await widget.seeder.bakeMissingThumbnails(widget.deviceId);
+
     if (!mounted) return;
-    context.read<SettingViewModel>().refreshLanguages();
+    context.read<SettingViewModel>()
+      ..reloadLocals()
+      ..refreshLanguages();
     _navigateToGenres();
   }
 
@@ -80,9 +82,9 @@ class _ConnectivityScreenState extends State<ConnectivityScreen> {
   void _navigateToGenres() {
     final lang = context.read<SettingViewModel>().language;
     context.read<GenreViewModel>().loadGenres(lang);
-    Navigator.of(context).pushReplacement(
-      CupertinoPageRoute(builder: (_) => const GenreScreen()),
-    );
+    Navigator.of(
+      context,
+    ).pushReplacement(CupertinoPageRoute(builder: (_) => const GenreScreen()));
   }
 
   @override
@@ -104,19 +106,20 @@ class _ConnectivityScreenState extends State<ConnectivityScreen> {
   }
 
   Widget _buildPrompt() {
+    final vm = context.read<SettingViewModel>();
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         const Text('🎨', style: TextStyle(fontSize: 64)),
         const SizedBox(height: 24),
         Text(
-          'Connect to load artworks!',
+          vm.t('connectivity.headline'),
           textAlign: TextAlign.center,
           style: AppTypography.boldStyle(fontSize: 22),
         ),
         const SizedBox(height: 12),
         Text(
-          'Turn on WiFi so we can download\nyour coloring pages.',
+          vm.t('connectivity.subtitle'),
           textAlign: TextAlign.center,
           style: AppTypography.semiBoldStyle(
             fontSize: 15,
@@ -136,7 +139,7 @@ class _ConnectivityScreenState extends State<ConnectivityScreen> {
                 borderRadius: BorderRadius.circular(24),
               ),
               child: Text(
-                "Let's Connect!",
+                vm.t('connectivity.connect'),
                 style: AppTypography.boldStyle(
                   fontSize: 16,
                   color: const Color(0xFFFFFFFF),
@@ -150,7 +153,7 @@ class _ConnectivityScreenState extends State<ConnectivityScreen> {
           padding: EdgeInsets.zero,
           onPressed: _playOffline,
           child: Text(
-            'Play without internet',
+            vm.t('connectivity.play_offline'),
             style: AppTypography.semiBoldStyle(
               fontSize: 14,
               color: const Color(0xFF999999),
@@ -162,13 +165,14 @@ class _ConnectivityScreenState extends State<ConnectivityScreen> {
   }
 
   Widget _buildSyncing() {
+    final vm = context.read<SettingViewModel>();
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         const CupertinoActivityIndicator(radius: 16),
         const SizedBox(height: 16),
         Text(
-          'Loading artworks...',
+          vm.t('connectivity.loading'),
           style: AppTypography.semiBoldStyle(fontSize: 16),
         ),
       ],

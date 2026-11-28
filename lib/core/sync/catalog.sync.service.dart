@@ -2,9 +2,12 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/foundation.dart';
+import 'package:kids_drawing_flutter/core/i18n/language_code.dart';
 import 'package:kids_drawing_flutter/core/storage/local.storage.dart';
 import 'package:kids_drawing_flutter/data/local/floor/artwork.dao.dart';
 import 'package:kids_drawing_flutter/data/local/floor/artwork.entity.dart';
+import 'package:kids_drawing_flutter/data/local/floor/dao/app_local.dao.dart';
+import 'package:kids_drawing_flutter/data/local/floor/entity/app_local.entity.dart';
 import 'package:kids_drawing_flutter/data/local/floor/genre.dao.dart';
 import 'package:kids_drawing_flutter/data/local/floor/genre.entity.dart';
 import 'package:kids_drawing_flutter/data/local/floor/language.dao.dart';
@@ -24,6 +27,7 @@ class CatalogSyncService {
   final GenreDao genreDao;
   final LocalStorage storage;
   final ArtworkDao artworkDao;
+  final AppLocalDao appLocalDao;
   final LanguageDao languageDao;
   final TranslationDao translationDao;
 
@@ -33,6 +37,7 @@ class CatalogSyncService {
     required this.genreDao,
     required this.artworkDao,
     required this.translationDao,
+    required this.appLocalDao,
     required this.storage,
     required this.deviceId,
   });
@@ -55,7 +60,7 @@ class CatalogSyncService {
   /// True when [code] is fully on the device (translations + voice clips),
   /// so switching to it needs no download. English is always ready.
   bool isLanguageReady(String code) {
-    final base = _baseCode(code);
+    final base = LanguageCode.base(code);
     return base == 'en' || storage.getString('$_langReadyPrefix$base') != null;
   }
 
@@ -70,7 +75,7 @@ class CatalogSyncService {
 
   /// One RPC call + one languages query. Returns true on success.
   Future<bool> sync({required String language}) async {
-    final langBase = _baseCode(language);
+    final langBase = LanguageCode.base(language);
     final langs = _uniqueLangs(langBase);
 
     final synced = await _syncLanguages();
@@ -82,12 +87,14 @@ class CatalogSyncService {
     final since = ready ? _lastSyncTime() : DateTime.utc(2000);
     final delta = await api.fetchDelta(since, langs);
     if (delta == null) return false;
+    debugPrint('[SYNC] delta keys: ${delta.keys.toList()}');
 
     await _upsertGenres(delta['genres']);
     await _upsertArtworks(delta['artworks']);
     await _upsertTranslations(delta['translations']);
-
+    await _syncAppLocals(langs);
     await _downloadGenreImages();
+
     final clipsComplete = await _downloadVoiceClips(langBase);
     if (clipsComplete && !ready) {
       await _markLanguageReady(langBase);
@@ -113,13 +120,14 @@ class CatalogSyncService {
     required String language,
     void Function(double progress)? onProgress,
   }) async {
-    final langBase = _baseCode(language);
+    final langBase = LanguageCode.base(language);
     onProgress?.call(0.0);
 
     final delta = await api.fetchDelta(DateTime.utc(2000), [langBase]);
     if (delta == null) return false;
 
     await _upsertTranslations(delta['translations']);
+    await _syncAppLocals([langBase, LanguageCode.fallback]);
     onProgress?.call(0.3);
 
     final clipsComplete = await _downloadVoiceClips(
@@ -278,6 +286,48 @@ class CatalogSyncService {
     }
   }
 
+  // ── App locals (settings chrome, not catalog voice) ───────────────────
+
+  Future<void> _syncAppLocals(List<String> langs) async {
+    final rows = await api.fetchAppLocals(langs);
+    debugPrint(
+      '[SYNC] fetchAppLocals(${langs.join(",")}) → ${rows?.length ?? "null"} rows',
+    );
+    if (rows == null) return;
+    await _upsertAppLocals(rows);
+  }
+
+  Future<void> _upsertAppLocals(dynamic raw) async {
+    if (raw is! List || raw.isEmpty) return;
+
+    final entities = <AppLocalEntity>[];
+    for (final item in raw) {
+      if (item is! Map<String, dynamic>) continue;
+      final entity = _mapAppLocalRow(item);
+      if (entity != null) entities.add(entity);
+    }
+    if (entities.isEmpty) return;
+
+    await appLocalDao.upsertAll(entities);
+  }
+
+  AppLocalEntity? _mapAppLocalRow(Map<String, dynamic> row) {
+    final key = row['key'];
+    final languageCode = row['language_code'];
+    final value = row['value'];
+    if (key is! String || languageCode is! String || value is! String) {
+      return null;
+    }
+    if (key.isEmpty || value.isEmpty) return null;
+
+    return AppLocalEntity(
+      key: key,
+      languageCode: languageCode,
+      value: value,
+      remoteUpdatedAt: _epochMillis(row['updated_at']),
+    );
+  }
+
   /// Returns true when every clip of [language] is on the device.
   Future<bool> _downloadVoiceClips(
     String language, {
@@ -343,13 +393,9 @@ class CatalogSyncService {
     return DateTime.tryParse(raw) ?? DateTime.utc(2000);
   }
 
-  static String _baseCode(String code) {
-    return code.toLowerCase().split(RegExp('[-_]')).first;
-  }
-
   static List<String> _uniqueLangs(String base) {
-    if (base == 'en') return ['en'];
-    return [base, 'en'];
+    if (base == LanguageCode.fallback) return [LanguageCode.fallback];
+    return [base, LanguageCode.fallback];
   }
 
   static String _stripBucket(String bucket, String storedPath) {

@@ -10,14 +10,14 @@ class SoundsVoicePanel extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (voice, sfx, vibration) =
-        context.select<SettingViewModel, (bool, bool, bool)>(
-      (s) => (s.voiceOn, s.sfxOn, s.vibrationOn),
-    );
+    final (voice, sfx, vibration) = context
+        .select<SettingViewModel, (bool, bool, bool)>(
+          (s) => (s.voiceOn, s.sfxOn, s.vibrationOn),
+        );
     final viewModel = context.read<SettingViewModel>();
 
     return SettingPanelScaffold(
-      title: 'Sounds & Voice',
+      title: viewModel.t('sounds_voice.title'),
       onClose: () => Navigator.of(context).pop(),
       child: Column(
         children: [
@@ -27,7 +27,7 @@ class SoundsVoicePanel extends StatelessWidget {
               color: const Color(0xFFEC4899),
               size: context.rs(22),
             ),
-            title: 'Voice',
+            title: viewModel.t('sounds_voice.voice'),
             value: voice,
             onChanged: viewModel.setVoiceOn,
           ),
@@ -37,7 +37,7 @@ class SoundsVoicePanel extends StatelessWidget {
               color: const Color(0xFF3B82F6),
               size: context.rs(22),
             ),
-            title: 'Sound Effects',
+            title: viewModel.t('sounds_voice.sfx'),
             value: sfx,
             onChanged: viewModel.setSfxOn,
           ),
@@ -47,7 +47,7 @@ class SoundsVoicePanel extends StatelessWidget {
               color: const Color(0xFFF43F5E),
               size: context.rs(22),
             ),
-            title: 'Vibrations',
+            title: viewModel.t('sounds_voice.vibrations'),
             value: vibration,
             onChanged: viewModel.setVibrationOn,
           ),

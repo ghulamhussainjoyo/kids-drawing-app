@@ -39,7 +39,10 @@ class ToolGrid extends StatelessWidget {
       ),
       itemBuilder: (context, index) {
         final tool = tools[index];
-        final image = Image.asset(tool.image, filterQuality: FilterQuality.high);
+        final image = Image.asset(
+          tool.image,
+          filterQuality: FilterQuality.high,
+        );
         Widget cell = PressButton(
           onPressed: () => onSelect(tool),
           child: image,

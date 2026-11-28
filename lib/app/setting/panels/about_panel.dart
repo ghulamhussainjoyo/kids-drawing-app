@@ -4,18 +4,30 @@ import 'package:kids_drawing_flutter/app/setting/widgets/setting.colors.dart';
 import 'package:kids_drawing_flutter/app/setting/widgets/setting.panel.scaffold.dart';
 import 'package:kids_drawing_flutter/core/ui/theme/app.colors.dart';
 import 'package:kids_drawing_flutter/core/ui/theme/app.typography.dart';
+import 'package:kids_drawing_flutter/state/setting/setting.view-model.dart';
 import 'package:kids_drawing_flutter/utils/responsive.dart';
 import 'package:package_info_plus/package_info_plus.dart';
+import 'package:provider/provider.dart';
 
 class AboutPanel extends StatelessWidget {
   const AboutPanel({super.key});
 
-  static final Future<PackageInfo> _info = PackageInfo.fromPlatform();
+  static final Future<PackageInfo> _packageInfo = PackageInfo.fromPlatform();
+
+  static String _versionLine(SettingViewModel settings, PackageInfo? info) {
+    if (info == null) return settings.t('about.version_loading');
+    return settings.tf('about.version_format', {
+      'version': info.version,
+      'build': info.buildNumber,
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
+    final settings = context.watch<SettingViewModel>();
+
     return SettingPanelScaffold(
-      title: 'About',
+      title: settings.t('about.title'),
       onClose: () => Navigator.of(context).pop(),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -45,7 +57,7 @@ class AboutPanel extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Kids Drawing',
+                        settings.t('about.app_name'),
                         style: AppTypography.boldStyle(
                           fontSize: context.rs(16),
                           color: SettingColors.title,
@@ -53,13 +65,10 @@ class AboutPanel extends StatelessWidget {
                       ),
                       SizedBox(height: context.rs(2)),
                       FutureBuilder<PackageInfo>(
-                        future: _info,
+                        future: _packageInfo,
                         builder: (context, snap) {
-                          final info = snap.data;
                           return Text(
-                            info == null
-                                ? 'Version …'
-                                : 'Version ${info.version} (Build ${info.buildNumber})',
+                            _versionLine(settings, snap.data),
                             style: AppTypography.numericStyle(
                               fontSize: context.rs(12),
                               fontWeight: FontWeight.w600,
@@ -82,7 +91,7 @@ class AboutPanel extends StatelessWidget {
               borderRadius: BorderRadius.circular(context.rs(16)),
             ),
             child: Text(
-              'Designed with love for young creative minds. Unleash imagination with puppies, colors, and art!',
+              settings.t('about.description'),
               style: AppTypography.semiBoldStyle(
                 fontSize: context.rs(13),
                 color: const Color(0xFF5D5466),

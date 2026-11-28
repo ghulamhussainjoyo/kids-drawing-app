@@ -25,7 +25,8 @@ class SettingCard extends StatelessWidget {
     return AnimatedContainer(
       duration: const Duration(milliseconds: 160),
       margin: margin ?? EdgeInsets.only(bottom: context.rs(10)),
-      padding: padding ??
+      padding:
+          padding ??
           EdgeInsets.symmetric(
             horizontal: context.rs(14),
             vertical: context.rs(12),

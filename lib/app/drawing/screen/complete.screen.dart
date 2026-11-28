@@ -16,6 +16,8 @@ import 'package:kids_drawing_flutter/core/ui/button/circle.button.dart';
 import 'package:kids_drawing_flutter/state/drawing/drawing.view-model.dart';
 import 'package:path/path.dart' as p;
 import 'package:path_provider/path_provider.dart';
+import 'package:kids_drawing_flutter/state/setting/setting.view-model.dart';
+import 'package:provider/provider.dart';
 import 'package:share_plus/share_plus.dart';
 
 /// Polaroid-style finish screen after the green complete check.
@@ -162,6 +164,7 @@ class _CompleteScreenState extends State<CompleteScreen> {
     if (busy) {
       return;
     }
+    final shareText = context.read<SettingViewModel>().t('drawing.share_text');
     final ok = await ParentGate.request(context);
     if (!ok || !mounted) {
       return;
@@ -178,10 +181,7 @@ class _CompleteScreenState extends State<CompleteScreen> {
       final file = File(p.join(temp.path, '${_fileBaseName()}.png'));
       await file.writeAsBytes(bytes, flush: true);
       await SharePlus.instance.share(
-        ShareParams(
-          files: [XFile(file.path)],
-          text: 'Check out my drawing! 🎨',
-        ),
+        ShareParams(files: [XFile(file.path)], text: shareText),
       );
     } finally {
       if (mounted) {

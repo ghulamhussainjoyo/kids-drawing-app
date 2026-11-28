@@ -16,11 +16,23 @@ class LittleArtistAgeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final settings = context.watch<SettingViewModel>();
+    final pronoun = settings.t('little_artist.pronoun_${settings.pronoun}');
+
+    const ageKeys = {
+      '0–2': 'little_artist.age_0_2',
+      '3–4': 'little_artist.age_3_4',
+      '5–6': 'little_artist.age_5_6',
+      '7–8': 'little_artist.age_7_8',
+      '9–11': 'little_artist.age_9_11',
+      '12+': 'little_artist.age_12_plus',
+    };
 
     return CupertinoPageScaffold(
       backgroundColor: const Color(0xFFFFF5E8),
       navigationBar: CupertinoNavigationBar(
-        middle: Text('How old is ${settings.pronoun}?'),
+        middle: Text(
+          settings.tf('little_artist.how_old', {'pronoun': pronoun}),
+        ),
         backgroundColor: const Color(0xFFFFF5E8),
       ),
       child: SafeArea(
@@ -43,7 +55,7 @@ class LittleArtistAgeScreen extends StatelessWidget {
                           : const Color(0xFFFFFFFF),
                       onPressed: () => settings.setAgeRange(age),
                       image: Text(
-                        age,
+                        settings.t(ageKeys[age] ?? age),
                         style: AppTypography.numericStyle(
                           fontSize: context.rs(13),
                           color: settings.ageRange == age
@@ -58,7 +70,7 @@ class LittleArtistAgeScreen extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: PillButton(
-                  label: 'CONTINUE',
+                  label: settings.t('little_artist.continue'),
                   color: AppColors.purple,
                   fontSize: context.rs(16),
                   radius: context.rs(28),

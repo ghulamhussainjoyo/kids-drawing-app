@@ -10,7 +10,8 @@ class DabBuffer {
 
   int get count => _count;
 
-  Float32List get transforms => Float32List.sublistView(_transforms, 0, _count * 4);
+  Float32List get transforms =>
+      Float32List.sublistView(_transforms, 0, _count * 4);
   Float32List get rects => Float32List.sublistView(_rects, 0, _count * 4);
   Int32List get colors => Int32List.sublistView(_colors, 0, _count);
 

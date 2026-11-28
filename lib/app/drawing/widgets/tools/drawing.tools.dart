@@ -116,7 +116,6 @@ class _DrawingToolsState extends State<DrawingTools> {
             width: metrics.railWidth,
             child: ColoredBox(
               color: Colors.red,
-              // Rail hamesha fixed width, notch sirf extra red jagah banata hai
               child: Align(
                 alignment: Alignment.centerLeft,
                 child: SizedBox(

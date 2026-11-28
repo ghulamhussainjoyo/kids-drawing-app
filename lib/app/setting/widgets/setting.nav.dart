@@ -5,7 +5,9 @@ import 'package:kids_drawing_flutter/app/setting/model/setting.section.x.dart';
 import 'package:kids_drawing_flutter/app/setting/model/setting_section.dart';
 import 'package:kids_drawing_flutter/app/setting/widgets/setting_nav_item.dart';
 import 'package:kids_drawing_flutter/core/ui/theme/app.typography.dart';
+import 'package:kids_drawing_flutter/state/setting/setting.view-model.dart';
 import 'package:kids_drawing_flutter/utils/responsive.dart';
+import 'package:provider/provider.dart';
 
 /// Left glass nav column for the settings dialog.
 class SettingNav extends StatelessWidget {
@@ -41,44 +43,47 @@ class SettingNav extends StatelessWidget {
                   context.rs(8),
                   context.rs(12),
                 ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Padding(
-                      padding: EdgeInsets.only(
-                        left: context.rs(8),
-                        bottom: context.rs(8),
-                      ),
-                      child: Text(
-                        'Settings',
-                        style: AppTypography.boldStyle(
-                          fontSize: context.rs(21),
-                          color: const Color(0xFF221A30),
-                          letterSpacing: -0.3,
+                child: Builder(builder: (context) {
+                  final vm = context.watch<SettingViewModel>();
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Padding(
+                        padding: EdgeInsets.only(
+                          left: context.rs(8),
+                          bottom: context.rs(8),
+                        ),
+                        child: Text(
+                          vm.t('settings.title'),
+                          style: AppTypography.boldStyle(
+                            fontSize: context.rs(21),
+                            color: const Color(0xFF221A30),
+                            letterSpacing: -0.3,
+                          ),
                         ),
                       ),
-                    ),
-                    Expanded(
-                      child: SingleChildScrollView(
-                        child: Column(
-                          children: [
-                            for (final section in SettingSection.values)
-                              SettingNavItem(
-                                icon: Icon(
-                                  section.icon,
-                                  color: section.color,
-                                  size: context.rs(19),
+                      Expanded(
+                        child: SingleChildScrollView(
+                          child: Column(
+                            children: [
+                              for (final section in SettingSection.values)
+                                SettingNavItem(
+                                  icon: Icon(
+                                    section.icon,
+                                    color: section.color,
+                                    size: context.rs(19),
+                                  ),
+                                  label: vm.t(section.labelKey),
+                                  isSelected: active == section,
+                                  onTap: () => onSelect(section),
                                 ),
-                                label: section.label,
-                                isSelected: active == section,
-                                onTap: () => onSelect(section),
-                              ),
-                          ],
+                            ],
+                          ),
                         ),
                       ),
-                    ),
-                  ],
-                ),
+                    ],
+                  );
+                }),
               ),
             ),
           ),

@@ -3,6 +3,7 @@ import 'package:flutter/cupertino.dart';
 /// Central typography tokens. Prefer these over inline `fontFamily` strings.
 abstract final class AppTypography {
   static const String family = 'Nunito';
+  static const List<String> fallbackFamilies = ['GoogleSans'];
 
   static const FontWeight semiBold = FontWeight.w600;
   static const FontWeight bold = FontWeight.w700;
@@ -16,6 +17,7 @@ abstract final class AppTypography {
   }) {
     return TextStyle(
       fontFamily: family,
+      fontFamilyFallback: fallbackFamilies,
       fontWeight: semiBold,
       fontSize: fontSize,
       color: color,
@@ -33,6 +35,7 @@ abstract final class AppTypography {
   }) {
     return TextStyle(
       fontFamily: family,
+      fontFamilyFallback: fallbackFamilies,
       fontWeight: bold,
       fontSize: fontSize,
       color: color,

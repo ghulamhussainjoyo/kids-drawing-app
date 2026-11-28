@@ -114,7 +114,10 @@ class StrokeDabber {
   }
 
   void _grow(Offset point) {
-    final r = Rect.fromCircle(center: point, radius: width * tip.tipScale * 0.6);
+    final r = Rect.fromCircle(
+      center: point,
+      radius: width * tip.tipScale * 0.6,
+    );
     _bounds = _bounds?.expandToInclude(r) ?? r;
   }
 
@@ -125,11 +128,15 @@ class StrokeDabber {
     double distance,
     int index,
   ) {
-    final scale = width * tip.tipScale / tip.pixels * (0.92 + _hash(index, 1) * 0.16);
+    final scale =
+        width * tip.tipScale / tip.pixels * (0.92 + _hash(index, 1) * 0.16);
     final rotation = angle + (_hash(index, 2) - 0.5) * tip.rotationJitter;
     final x = position.dx + (_hash(index, 3) - 0.5) * width * 0.03;
     final y = position.dy + (_hash(index, 4) - 0.5) * width * 0.03;
-    final variant = (_hash(index, 5) * tip.variants).floor().clamp(0, tip.variants - 1);
+    final variant = (_hash(index, 5) * tip.variants).floor().clamp(
+      0,
+      tip.variants - 1,
+    );
     final color = colorAt(distance).withValues(alpha: tip.alpha);
     into.add(
       scale: scale,

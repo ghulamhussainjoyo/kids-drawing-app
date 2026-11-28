@@ -18,6 +18,10 @@ class GalleryBoxItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final thumbPath = artwork.thumbnailPath;
     final hasThumb = thumbPath != null && File(thumbPath).existsSync();
+    const borderWidth = 3.0;
+    const outerRadius = 16.0;
+    const innerRadius = outerRadius - borderWidth;
+
     Widget child;
     if (hasThumb) {
       final file = File(thumbPath);
@@ -29,7 +33,7 @@ class GalleryBoxItem extends StatelessWidget {
         fit: BoxFit.cover,
       );
     } else {
-      child = Center(child: Text(artwork.title));
+      child = const SizedBox.shrink();
     }
 
     return PressButton(
@@ -38,11 +42,13 @@ class GalleryBoxItem extends StatelessWidget {
         margin: const EdgeInsets.all(8),
         decoration: BoxDecoration(
           color: CupertinoColors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: CupertinoColors.black, width: 3),
+          borderRadius: BorderRadius.circular(outerRadius),
+          border: Border.all(color: CupertinoColors.black, width: borderWidth),
         ),
-        clipBehavior: Clip.antiAlias,
-        child: child,
+        child: ClipRRect(
+          borderRadius: BorderRadius.circular(innerRadius),
+          child: child,
+        ),
       ),
     );
   }

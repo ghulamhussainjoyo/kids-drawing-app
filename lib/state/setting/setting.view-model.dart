@@ -1,23 +1,30 @@
 import 'package:flutter/foundation.dart';
 import 'package:kids_drawing_flutter/core/audio/app.sound.dart';
+import 'package:kids_drawing_flutter/core/i18n/language_code.dart';
 import 'package:kids_drawing_flutter/core/sync/catalog.sync.service.dart';
 import 'package:kids_drawing_flutter/data/local/floor/language.dao.dart';
 import 'package:kids_drawing_flutter/data/local/floor/language.entity.dart';
+import 'package:kids_drawing_flutter/data/repositories/locals/app_locals.repository.dart';
 import 'package:kids_drawing_flutter/data/repositories/settings/settings.repository.dart';
 
 class SettingViewModel extends ChangeNotifier {
   final SettingsRepository _repository;
   final AppSound _sound;
-  final CatalogSyncService? _syncService;
-  final LanguageDao? _languageDao;
+  final AppLocalsRepository _appLocals;
+
+  CatalogSyncService? _syncService;
+  LanguageDao? _languageDao;
 
   SettingViewModel(
     this._repository,
-    this._sound, {
-    LanguageDao? languageDao,
+    this._sound,
+    this._appLocals, {
     CatalogSyncService? syncService,
-  }) : _syncService = syncService,
-       _languageDao = languageDao;
+    LanguageDao? languageDao,
+  }) {
+    _syncService = syncService;
+    _languageDao = languageDao;
+  }
 
   String _gender = 'girl';
   String _ageRange = '3–4';
@@ -31,13 +38,8 @@ class SettingViewModel extends ChangeNotifier {
   bool _liveBackgroundOn = true;
   String _language = 'en_US';
 
-  /// Null means no language sync in progress. 0.0–1.0 while downloading.
   double? _languageSyncProgress;
-
-  /// The name of the language being synced (for the UI card heading).
   String? _syncingLanguageName;
-
-  /// Available languages loaded from Floor.
   List<LanguageEntity> _availableLanguages = [];
 
   String get gender => _gender;
@@ -56,11 +58,25 @@ class SettingViewModel extends ChangeNotifier {
   List<LanguageEntity> get availableLanguages =>
       List.unmodifiable(_availableLanguages);
 
+  String get languageDirection {
+    final base = LanguageCode.base(_language);
+    return _availableLanguages
+            .where((l) => l.code == base)
+            .firstOrNull
+            ?.direction ??
+        'ltr';
+  }
+
   String get pronoun {
     if (_gender == 'girl') return 'she';
     if (_gender == 'boy') return 'he';
     return 'they';
   }
+
+  String t(String key) => _appLocals.resolve(key, _language);
+
+  String tf(String key, Map<String, String> tokens) =>
+      _appLocals.resolveFormatted(key, _language, tokens);
 
   Future<void> load() async {
     _gender = await _repository.gender();
@@ -74,14 +90,16 @@ class SettingViewModel extends ChangeNotifier {
     _vibrationOn = await _repository.vibrationOn();
     _liveBackgroundOn = await _repository.liveBackgroundOn();
     _language = await _repository.language();
+    await _appLocals.warmForLanguage(_language);
     await _loadLanguages();
     notifyListeners();
     await _applySound();
   }
 
   Future<void> _loadLanguages() async {
-    if (_languageDao == null) return;
-    _availableLanguages = await _languageDao.listActive();
+    final dao = _languageDao;
+    if (dao == null) return;
+    _availableLanguages = await dao.listActive();
   }
 
   Future<void> refreshLanguages() async {
@@ -158,24 +176,28 @@ class SettingViewModel extends ChangeNotifier {
   Future<void> setLanguage(String value) async {
     final previousLang = _language;
     _language = value;
+    debugPrint('[LANG] setLanguage: $previousLang → $value');
+    await _appLocals.warmForLanguage(value);
+    debugPrint('[LANG] warm done, resolve test: ${_appLocals.resolve("settings.title", value)}');
     notifyListeners();
     await _repository.setLanguage(value);
     await _applySound();
 
     final syncService = _syncService;
-    if (syncService == null || value == previousLang) return;
+    if (syncService == null || value == previousLang) {
+      debugPrint('[LANG] skipping sync: service=${syncService != null}, same=${value == previousLang}');
+      return;
+    }
 
-    // Already on the device: it plays offline right now, no card. The daily
-    // sync keeps it fresh.
     if (syncService.isLanguageReady(value)) {
+      debugPrint('[LANG] language already ready, dismissing');
       dismissLanguageSync();
       return;
     }
+    debugPrint('[LANG] starting _downloadLanguage');
     _downloadLanguage(syncService, value);
   }
 
-  /// Bumped on every switch so a slow download for an earlier choice cannot
-  /// clear or update the card of the language picked after it.
   int _syncToken = 0;
 
   Future<void> _downloadLanguage(
@@ -198,13 +220,21 @@ class SettingViewModel extends ChangeNotifier {
         },
       );
     } catch (_) {
-      // Offline or server error: the language is not marked ready, so the
-      // next switch or the daily sync retries. The card must still close.
+      // Voice clips may fail — app_locals were still upserted.
     }
 
     if (token != _syncToken) return;
+
+    await _appLocals.warmForLanguage(code);
+    debugPrint('[LANG] _downloadLanguage warm done, resolve test: ${_appLocals.resolve("settings.title", code)}');
+
     _languageSyncProgress = null;
     _syncingLanguageName = null;
+    notifyListeners();
+  }
+
+  Future<void> reloadLocals() async {
+    await _appLocals.warmForLanguage(_language);
     notifyListeners();
   }
 

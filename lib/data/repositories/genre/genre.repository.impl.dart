@@ -3,6 +3,7 @@ import 'dart:io';
 import 'dart:ui';
 
 import 'package:flutter/foundation.dart';
+import 'package:kids_drawing_flutter/core/i18n/language_code.dart';
 import 'package:kids_drawing_flutter/data/local/floor/genre.dao.dart';
 import 'package:kids_drawing_flutter/data/local/floor/genre.entity.dart';
 import 'package:kids_drawing_flutter/data/local/floor/translation.dao.dart';
@@ -13,14 +14,11 @@ class FloorGenreRepository implements GenreRepository {
   final GenreDao genreDao;
   final TranslationDao translationDao;
 
-  FloorGenreRepository({
-    required this.genreDao,
-    required this.translationDao,
-  });
+  FloorGenreRepository({required this.genreDao, required this.translationDao});
 
   @override
   Future<List<GenreModel>> getGenres(String language) async {
-    final lang = _baseCode(language);
+    final lang = LanguageCode.base(language);
     final entities = await genreDao.listPublished();
     final models = <GenreModel>[];
     for (final entity in entities) {
@@ -31,7 +29,7 @@ class FloorGenreRepository implements GenreRepository {
 
   @override
   Future<GenreModel?> getBySlug(String slug, String language) async {
-    final lang = _baseCode(language);
+    final lang = LanguageCode.base(language);
     final entity = await genreDao.findBySlug(slug);
     if (entity == null) return null;
     return _assemble(entity, lang);
@@ -62,8 +60,11 @@ class FloorGenreRepository implements GenreRepository {
     final row = await translationDao.genreTitle(slug, lang);
     if (row != null) return row.text;
 
-    if (lang != 'en') {
-      final fallback = await translationDao.genreTitle(slug, 'en');
+    if (lang != LanguageCode.fallback) {
+      final fallback = await translationDao.genreTitle(
+        slug,
+        LanguageCode.fallback,
+      );
       if (fallback != null) return fallback.text;
     }
 
@@ -75,8 +76,11 @@ class FloorGenreRepository implements GenreRepository {
     debugPrint('[Voice] genre=$slug lang=$lang found=${rows.length}');
     if (rows.isNotEmpty) return rows.map((r) => r.text).toList();
 
-    if (lang != 'en') {
-      final fallback = await translationDao.genreVoicePool(slug, 'en');
+    if (lang != LanguageCode.fallback) {
+      final fallback = await translationDao.genreVoicePool(
+        slug,
+        LanguageCode.fallback,
+      );
       debugPrint('[Voice] genre=$slug fallback=en found=${fallback.length}');
       if (fallback.isNotEmpty) return fallback.map((r) => r.text).toList();
     }
@@ -141,14 +145,8 @@ class FloorGenreRepository implements GenreRepository {
   static String _slugToTitle(String slug) {
     return slug
         .split('-')
-        .map(
-          (w) => w.isEmpty ? '' : '${w[0].toUpperCase()}${w.substring(1)}',
-        )
+        .map((w) => w.isEmpty ? '' : '${w[0].toUpperCase()}${w.substring(1)}')
         .join(' ');
-  }
-
-  static String _baseCode(String code) {
-    return code.toLowerCase().split(RegExp('[-_]')).first;
   }
 }
 

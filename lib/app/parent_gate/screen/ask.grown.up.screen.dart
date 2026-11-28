@@ -5,6 +5,8 @@ import 'package:kids_drawing_flutter/core/ui/button/press.sound.dart';
 import 'package:kids_drawing_flutter/core/ui/theme/app.colors.dart';
 import 'package:kids_drawing_flutter/core/ui/theme/app.typography.dart';
 import 'package:kids_drawing_flutter/core/ui/button/circle.button.dart';
+import 'package:kids_drawing_flutter/state/setting/setting.view-model.dart';
+import 'package:provider/provider.dart';
 
 /// Full-screen parental gate. Pops `true` on correct answer, `false` on X.
 class AskGrownUpScreen extends StatefulWidget {
@@ -67,13 +69,18 @@ class _AskGrownUpScreenState extends State<AskGrownUpScreen> {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      'Ask a Grown-Up',
-                      textAlign: TextAlign.center,
-                      style: AppTypography.boldStyle(
-                        color: CupertinoColors.white,
-                        fontSize: 32,
-                      ),
+                    Builder(
+                      builder: (context) {
+                        final vm = context.read<SettingViewModel>();
+                        return Text(
+                          vm.t('parent_gate.title'),
+                          textAlign: TextAlign.center,
+                          style: AppTypography.boldStyle(
+                            color: CupertinoColors.white,
+                            fontSize: 32,
+                          ),
+                        );
+                      },
                     ),
                     const SizedBox(height: 28),
                     GrownUpEquationCard(

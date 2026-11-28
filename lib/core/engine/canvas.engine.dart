@@ -46,11 +46,11 @@ class CanvasViewTransform {
       CanvasViewTransform(pageRect: pageRect, artworkSize: artworkSize);
 
   CanvasViewTransform withPageRect(Rect rect) => CanvasViewTransform(
-        pageRect: rect,
-        artworkSize: artworkSize,
-        zoom: zoom,
-        translation: translation * (rect.width / pageRect.width),
-      );
+    pageRect: rect,
+    artworkSize: artworkSize,
+    zoom: zoom,
+    translation: translation * (rect.width / pageRect.width),
+  );
 
   /// Zooms so the artwork point that was under [anchorArtwork] lands at
   /// [focalScreen].

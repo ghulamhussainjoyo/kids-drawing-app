@@ -1,13 +1,4 @@
-import 'package:flutter_dotenv/flutter_dotenv.dart';
-import 'package:kids_drawing_flutter/core/storage/local.storage.dart'
-    as app_storage;
-import 'package:kids_drawing_flutter/core/sync/catalog.sync.service.dart';
-import 'package:kids_drawing_flutter/data/local/device.id.store.dart';
-import 'package:kids_drawing_flutter/data/local/floor/app.database.dart';
-import 'package:kids_drawing_flutter/data/remote/sync.api.dart';
-import 'package:kids_drawing_flutter/main.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:kids_drawing_flutter/core/di/app.dependencies.dart';
 import 'package:workmanager/workmanager.dart';
 
 const _taskName = 'catalogSync';
@@ -17,34 +8,15 @@ void callbackDispatcher() {
   Workmanager().executeTask((taskName, inputData) async {
     if (taskName != _taskName) return true;
 
-    await dotenv.load(fileName: '.env');
-    await Supabase.initialize(
-      url: dotenv.env['SUPABASE_URL']!,
-      publishableKey: dotenv.env['SUPABASE_PUBLISHABLE_KEY']!,
-    );
-
-    final database = await $FloorAppDatabase
-        .databaseBuilder(dbName)
-        .addMigrations(allMigrations)
-        .build();
-
-    final prefs = await SharedPreferences.getInstance();
-    final localStorage = app_storage.LocalStorage(prefs);
-    final deviceId = await DeviceIdStore().getOrCreate();
-
-    final syncService = CatalogSyncService(
-      api: SyncApi(),
-      languageDao: database.languageDao,
-      genreDao: database.genreDao,
-      artworkDao: database.artworkDao,
-      translationDao: database.translationDao,
-      storage: localStorage,
-      deviceId: deviceId,
-    );
-
-    final lang = prefs.getString('language') ?? 'en';
-    await syncService.sync(language: lang);
-    return true;
+    try {
+      final deps = await AppDependencies.createSyncDeps();
+      final lang = await deps.settings.language();
+      await deps.syncService.sync(language: lang);
+      return true;
+    } on Exception catch (_) {
+      // Return false so WorkManager retries with backoff.
+      return false;
+    }
   });
 }
 
@@ -58,7 +30,7 @@ Future<void> registerBackgroundSync() async {
       constraints: Constraints(networkType: NetworkType.connected),
       existingWorkPolicy: ExistingWorkPolicy.keep,
     );
-  } catch (_) {
+  } on Exception catch (_) {
     // Silently degrade — foreground sync covers the same purpose.
   }
 }

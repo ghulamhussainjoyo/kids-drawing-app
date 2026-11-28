@@ -86,7 +86,9 @@ void main() {
           },
         )
         .toList();
-    exported.sort((a, b) => (a['file']! as String).compareTo(b['file']! as String));
+    exported.sort(
+      (a, b) => (a['file']! as String).compareTo(b['file']! as String),
+    );
 
     const encoder = JsonEncoder.withIndent('  ');
     File('tool/voice_lines.json').writeAsStringSync(

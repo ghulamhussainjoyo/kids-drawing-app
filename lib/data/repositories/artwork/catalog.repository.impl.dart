@@ -1,3 +1,4 @@
+import 'package:kids_drawing_flutter/core/i18n/language_code.dart';
 import 'package:kids_drawing_flutter/data/local/artwork/json.artwork.loader.dart';
 import 'package:kids_drawing_flutter/data/local/artwork/strokes.json.codec.dart';
 import 'package:kids_drawing_flutter/data/local/floor/artwork.dao.dart';
@@ -32,20 +33,19 @@ class CatalogRepositoryImpl implements CatalogRepository {
 
   @override
   Future<String> resolveVoiceText(String artworkSlug, String language) async {
-    final lang = _baseCode(language);
+    final lang = LanguageCode.base(language);
     final rows = await translationDao.artworkVoicePool(artworkSlug, lang);
     if (rows.isNotEmpty) return rows.first.text;
 
-    if (lang != 'en') {
-      final fallback = await translationDao.artworkVoicePool(artworkSlug, 'en');
+    if (lang != LanguageCode.fallback) {
+      final fallback = await translationDao.artworkVoicePool(
+        artworkSlug,
+        LanguageCode.fallback,
+      );
       if (fallback.isNotEmpty) return fallback.first.text;
     }
 
     return '';
-  }
-
-  static String _baseCode(String code) {
-    return code.toLowerCase().split(RegExp('[-_]')).first;
   }
 
   @override

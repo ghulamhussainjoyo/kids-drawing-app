@@ -79,14 +79,7 @@ class _GenreLiveBackgroundState extends State<GenreLiveBackground>
     return Positioned(left: x, top: y, child: _img(n, w));
   }
 
-  Widget _balloon(
-    double t,
-    String n,
-    double x,
-    double y,
-    double ph,
-    double w,
-  ) {
+  Widget _balloon(double t, String n, double x, double y, double ph, double w) {
     final dy = 16 * math.sin(t * 1.1 + ph);
     final dx = 8 * math.sin(t * 0.7 + ph * 2);
     return Positioned(

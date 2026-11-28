@@ -79,8 +79,7 @@ class _GenreScreenState extends State<GenreScreen> {
                         children: [
                           PressButton(
                             onPressed: () async {
-                              final granted =
-                                  await ParentGate.request(context);
+                              final granted = await ParentGate.request(context);
                               if (!context.mounted || !granted) return;
                               showDialog<void>(
                                 context: context,
@@ -105,9 +104,12 @@ class _GenreScreenState extends State<GenreScreen> {
                               horizontal: 16,
                               vertical: 8,
                             ),
-                            child: Text(
-                              'Try free for 7 days',
-                              style: AppTypography.semiBoldStyle(),
+                            child: Selector<SettingViewModel, String>(
+                              selector: (_, vm) => vm.t('genre.try_free'),
+                              builder: (_, text, __) => Text(
+                                text,
+                                style: AppTypography.semiBoldStyle(),
+                              ),
                             ),
                           ),
                         ],
@@ -123,9 +125,13 @@ class _GenreScreenState extends State<GenreScreen> {
                           CupertinoButton(
                             padding: EdgeInsets.zero,
                             onPressed: null,
-                            child: Text(
-                              'Bottom left',
-                              style: AppTypography.semiBoldStyle(),
+                            child: Selector<SettingViewModel, String>(
+                              selector: (_, vm) =>
+                                  vm.t('genre.bottom_left_placeholder'),
+                              builder: (_, text, __) => Text(
+                                text,
+                                style: AppTypography.semiBoldStyle(),
+                              ),
                             ),
                           ),
                         ],

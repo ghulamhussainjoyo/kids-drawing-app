@@ -10,41 +10,47 @@ import 'package:provider/provider.dart';
 class LittleArtistPanel extends StatelessWidget {
   const LittleArtistPanel({super.key});
 
-  static const _genderLabels = {'girl': 'Girl', 'boy': 'Boy'};
-
   void _open(BuildContext context, Widget screen) {
-    Navigator.of(context, rootNavigator: true).push(
-      CupertinoPageRoute<void>(builder: (_) => screen),
-    );
+    Navigator.of(
+      context,
+      rootNavigator: true,
+    ).push(CupertinoPageRoute<void>(builder: (_) => screen));
   }
 
   @override
   Widget build(BuildContext context) {
-    final (gender, ageRange, pronoun, interestCount) =
-        context.select<SettingViewModel, (String, String, String, int)>(
-      (s) => (s.gender, s.ageRange, s.pronoun, s.interests.length),
-    );
+    final vm = context.watch<SettingViewModel>();
+    final pronoun = vm.t('little_artist.pronoun_${vm.pronoun}');
+    final interestCount = vm.interests.length;
+
+    String genderLabel(String g) => switch (g) {
+      'girl' => vm.t('little_artist.girl'),
+      'boy' => vm.t('little_artist.boy'),
+      _ => vm.t('little_artist.siblings'),
+    };
 
     return SettingPanelScaffold(
-      title: 'Little Artist',
+      title: vm.t('little_artist.title'),
       onClose: () => Navigator.of(context).pop(),
       child: Column(
         children: [
           LittleArtistHubRow(
-            title: "Who's the little artist?",
-            subtitle: _genderLabels[gender] ?? 'Siblings',
+            title: vm.t('little_artist.who'),
+            subtitle: genderLabel(vm.gender),
             onTap: () => _open(context, const LittleArtistGenderScreen()),
           ),
           LittleArtistHubRow(
-            title: 'How old is $pronoun?',
-            subtitle: ageRange,
+            title: vm.tf('little_artist.how_old', {'pronoun': pronoun}),
+            subtitle: vm.ageRange,
             onTap: () => _open(context, const LittleArtistAgeScreen()),
           ),
           LittleArtistHubRow(
-            title: 'What does $pronoun love?',
+            title: vm.tf('little_artist.what_loves', {'pronoun': pronoun}),
             subtitle: interestCount == 0
-                ? 'Tap to choose'
-                : '$interestCount selected',
+                ? vm.t('little_artist.tap_to_choose')
+                : vm.tf('little_artist.selected_count', {
+                    'count': '$interestCount',
+                  }),
             onTap: () => _open(context, const LittleArtistInterestsScreen()),
           ),
         ],

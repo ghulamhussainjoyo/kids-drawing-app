@@ -29,15 +29,40 @@ class GenreTitle extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final name = genre.name.toUpperCase();
+    final name = genre.name;
     if (name.isEmpty) {
       return const SizedBox.shrink();
     }
 
+    final isRtl = Directionality.of(context) == TextDirection.rtl;
+    if (isRtl) {
+      return SizedBox(
+        width: circleSize,
+        height: circleSize,
+        child: Stack(
+          clipBehavior: Clip.none,
+          children: [
+            Positioned(
+              left: 0,
+              right: 0,
+              top: -gap - fontSize,
+              child: _GenreLabel(
+                text: name,
+                fontSize: fontSize,
+                fillColors: genre.titleFillColors,
+                outlineColor: genre.titleOutlineColor,
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final upper = name.toUpperCase();
     return SizedBox(
       width: circleSize,
       height: circleSize,
-      child: Stack(clipBehavior: Clip.none, children: buildLetterWidgets(name)),
+      child: Stack(clipBehavior: Clip.none, children: buildLetterWidgets(upper)),
     );
   }
 
@@ -77,10 +102,7 @@ class GenreTitle extends StatelessWidget {
 
   /// Real glyph width so I and W take the space they need.
   List<double> letterWidths(String name) {
-    final style = AppTypography.boldStyle(
-      fontSize: fontSize,
-      height: 1,
-    );
+    final style = AppTypography.boldStyle(fontSize: fontSize, height: 1);
     final widths = <double>[];
     for (var index = 0; index < name.length; index++) {
       final painter = TextPainter(
@@ -165,6 +187,90 @@ class _GenreLetter extends StatelessWidget {
         ).createShader(bounds);
       },
       child: Text(char, style: heavyStyle(color: const Color(0xFFFFFFFF))),
+    );
+  }
+}
+
+/// Full text rendered as one piece — keeps Arabic ligatures connected.
+class _GenreLabel extends StatelessWidget {
+  final String text;
+  final double fontSize;
+  final List<Color> fillColors;
+  final Color outlineColor;
+
+  const _GenreLabel({
+    required this.text,
+    required this.fontSize,
+    required this.fillColors,
+    required this.outlineColor,
+  });
+
+  TextStyle _style({Color? color, Paint? foreground}) {
+    return AppTypography.boldStyle(
+      fontSize: fontSize,
+      height: 1,
+      color: color,
+    ).copyWith(foreground: foreground);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Stack(
+      alignment: Alignment.center,
+      children: [_shadow(), _outline(), _fill()],
+    );
+  }
+
+  Widget _shadow() {
+    return Transform.translate(
+      offset: const Offset(1.5, 2),
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: _style(color: const Color(0x66000000)),
+      ),
+    );
+  }
+
+  Widget _outline() {
+    final paint = Paint()
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = fontSize * 0.18
+      ..strokeJoin = StrokeJoin.round
+      ..color = outlineColor;
+
+    return Text(
+      text,
+      textAlign: TextAlign.center,
+      style: _style(foreground: paint),
+    );
+  }
+
+  Widget _fill() {
+    if (fillColors.length <= 1) {
+      final color =
+          fillColors.isEmpty ? const Color(0xFFFFFFFF) : fillColors.first;
+      return Text(
+        text,
+        textAlign: TextAlign.center,
+        style: _style(color: color),
+      );
+    }
+
+    return ShaderMask(
+      blendMode: BlendMode.srcIn,
+      shaderCallback: (bounds) {
+        return LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: fillColors,
+        ).createShader(bounds);
+      },
+      child: Text(
+        text,
+        textAlign: TextAlign.center,
+        style: _style(color: const Color(0xFFFFFFFF)),
+      ),
     );
   }
 }
